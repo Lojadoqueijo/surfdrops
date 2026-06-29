@@ -3538,6 +3538,104 @@
   }
 </style>
 
+<!-- === POP-UP DEFI SURFERS (pré-lançamento) === -->
+<div class="ds-overlay" id="dsModal" role="dialog" aria-modal="true" aria-labelledby="dsTitle" aria-hidden="true">
+  <div class="ds-card">
+    <button class="ds-close" id="dsClose" type="button" aria-label="Fechar">×</button>
+    <span class="ds-badge"><span class="ds-dot"></span><span data-i18n="ds.badge">Pré-lançamento · Vagas limitadas</span></span>
+    <h2 class="ds-title" id="dsTitle" data-i18n="ds.title">DeFi Surfers</h2>
+    <p class="ds-tagline" data-i18n="ds.tagline">Entra antes de todos.</p>
+    <ul class="ds-list">
+      <li><span class="ds-ic">🏄</span><span data-i18n-html="ds.b1"><b>Pass vitalício</b> — pagas uma vez, acesso para sempre.</span></li>
+      <li><span class="ds-ic">🔥</span><span data-i18n-html="ds.b2"><b>-20%</b> só nesta janela de pré-lançamento.</span></li>
+      <li><span class="ds-ic">⏳</span><span data-i18n-html="ds.b3"><b>Vagas limitadas</b> nesta primeira leva.</span></li>
+    </ul>
+    <a class="ds-cta" id="dsCta" href="https://t.me/surfistacrypto" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71l-4.14-3.05-1.99 1.93c-.23.23-.42.42-.86.42z"/></svg>
+      <span data-i18n="ds.cta">Falar comigo no Telegram</span>
+    </a>
+    <p class="ds-note" data-i18n="ds.note">Falas diretamente comigo, o Surfista — sem bots.</p>
+    <button class="ds-dismiss" id="dsDismiss" type="button" data-i18n="ds.dismiss">Agora não</button>
+  </div>
+</div>
+
+<style>
+  /* === POP-UP DEFI SURFERS === */
+  .ds-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(4,8,16,0.82); backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .ds-overlay.is-open { opacity: 1; pointer-events: auto; }
+  .ds-card {
+    position: relative; width: 100%; max-width: 440px;
+    background: var(--bg-card); border-radius: 14px; padding: 30px 28px 24px;
+    border: 1px solid var(--border-bright);
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 44px rgba(0,255,157,0.08);
+    transform: translateY(16px) scale(0.98); transition: transform 0.3s; overflow: hidden;
+  }
+  .ds-overlay.is-open .ds-card { transform: translateY(0) scale(1); }
+  .ds-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-blue), var(--accent));
+    background-size: 200% 100%; animation: ds-shimmer 3s linear infinite;
+  }
+  @keyframes ds-shimmer { to { background-position: 200% 0; } }
+  .ds-close {
+    position:absolute; top:12px; right:14px; width:32px; height:32px; border:none;
+    background:transparent; color:var(--text-faint); font-size:24px; line-height:1;
+    cursor:pointer; border-radius:6px; transition:.15s;
+  }
+  .ds-close:hover { color:var(--text); background:var(--bg-elev); }
+  .ds-badge {
+    display:inline-flex; align-items:center; gap:7px; margin-bottom:16px;
+    font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700;
+    letter-spacing:1.5px; text-transform:uppercase; color:var(--accent);
+    background:rgba(0,255,157,0.08); border:1px solid rgba(0,255,157,0.25);
+    padding:5px 10px; border-radius:999px;
+  }
+  .ds-badge .ds-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); animation:ds-pulse 1.4s ease-in-out infinite; }
+  @keyframes ds-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+  .ds-title { font-family:'Orbitron',sans-serif; font-size:26px; font-weight:900; letter-spacing:.02em; color:var(--text); margin:0 0 4px; }
+  .ds-tagline { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-dim); margin:0 0 20px; }
+  .ds-list { list-style:none; margin:0 0 22px; padding:0; display:flex; flex-direction:column; gap:12px; }
+  .ds-list li { display:flex; align-items:flex-start; gap:11px; font-size:13.5px; line-height:1.45; color:var(--text); }
+  .ds-list .ds-ic { flex:0 0 auto; font-size:16px; line-height:1.3; }
+  .ds-list b { color:var(--accent); font-weight:700; }
+  .ds-cta {
+    display:flex; align-items:center; justify-content:center; gap:9px; width:100%;
+    text-decoration:none; cursor:pointer; background:var(--gradient-1); color:#04140c;
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:14px; letter-spacing:.02em;
+    padding:14px 18px; border-radius:10px; border:none;
+    box-shadow:0 8px 28px rgba(0,255,157,0.25); transition:transform .15s, box-shadow .15s;
+  }
+  .ds-cta:hover { transform:translateY(-2px); box-shadow:0 12px 34px rgba(0,255,157,0.38); }
+  .ds-cta svg { width:18px; height:18px; }
+  .ds-note { text-align:center; font-size:11.5px; color:var(--text-faint); margin:12px 0 0; }
+  .ds-dismiss { display:block; margin:14px auto 0; background:none; border:none; color:var(--text-faint); font-family:'JetBrains Mono',monospace; font-size:11px; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
+  .ds-dismiss:hover { color:var(--text-dim); }
+  @media (max-width:480px){ .ds-card{padding:26px 20px 20px} .ds-title{font-size:22px} }
+  @media (prefers-reduced-motion: reduce){ .ds-overlay,.ds-card,.ds-cta{transition:none} .ds-card::before,.ds-badge .ds-dot{animation:none} }
+</style>
+
+<script>
+  (function(){
+    'use strict';
+    var overlay = document.getElementById('dsModal');
+    if (!overlay) return;
+    var SHOW_DELAY = 3000; // 3s após carregar
+    function openModal(){ overlay.classList.add('is-open'); overlay.setAttribute('aria-hidden','false'); document.body.classList.add('modal-open'); }
+    function closeModal(){ overlay.classList.remove('is-open'); overlay.setAttribute('aria-hidden','true'); document.body.classList.remove('modal-open'); }
+    var x = document.getElementById('dsClose'); if (x) x.addEventListener('click', closeModal);
+    var dd = document.getElementById('dsDismiss'); if (dd) dd.addEventListener('click', closeModal);
+    overlay.addEventListener('click', function(e){ if (e.target === overlay) closeModal(); });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && overlay.classList.contains('is-open')) closeModal(); });
+    var cta = document.getElementById('dsCta'); if (cta) cta.addEventListener('click', function(){ setTimeout(closeModal, 120); });
+    setTimeout(openModal, SHOW_DELAY); // sempre (todos os carregamentos)
+  })();
+</script>
+
 <script>
   (function() {
     'use strict';
@@ -3766,6 +3864,15 @@
         'card.yieldseeker.desc': 'Agente AI que faz farming de yield em stablecoins automaticamente. 7-15% APY médio em USDC, custódia via Coinbase TEE. Sistema de pontos activo.',
         'card.kast.desc': 'Cartão Visa global powered by stablecoins. Earn vaults até 10% APY (via Gauntlet) + cashback. Aceite em 150M+ comerciantes em 170+ países. Equipa ex-Circle, Phantom, Revolut.',
         'card.saturn.desc': 'Yield stablecoin nativo em Ethereum com exposição a RWA. Alocação automática a T-bills e crédito privado. Token $STRN com emissões para LPs.',
+        'ds.badge': 'Pré-lançamento · Vagas limitadas',
+        'ds.title': 'DeFi Surfers',
+        'ds.tagline': 'Entra antes de todos.',
+        'ds.b1': '<b>Pass vitalício</b> — pagas uma vez, acesso para sempre.',
+        'ds.b2': '<b>-20%</b> só nesta janela de pré-lançamento.',
+        'ds.b3': '<b>Vagas limitadas</b> nesta primeira leva.',
+        'ds.cta': 'Falar comigo no Telegram',
+        'ds.note': 'Falas diretamente comigo, o Surfista — sem bots.',
+        'ds.dismiss': 'Agora não',
       },
 
       en: {
@@ -3847,6 +3954,15 @@
         'card.yieldseeker.desc': 'AI agent that automatically farms yield on stablecoins. 7-15% average APY in USDC, custody via Coinbase TEE. Active points system.',
         'card.kast.desc': 'Global Visa card powered by stablecoins. Earn vaults up to 10% APY (via Gauntlet) + cashback. Accepted at 150M+ merchants in 170+ countries. Team ex-Circle, Phantom, Revolut.',
         'card.saturn.desc': 'Native yield stablecoin on Ethereum with RWA exposure. Automatic allocation to T-bills and private credit. $STRN token with emissions for LPs.',
+        'ds.badge': 'Pre-launch · Limited spots',
+        'ds.title': 'DeFi Surfers',
+        'ds.tagline': 'Get in before everyone else.',
+        'ds.b1': '<b>Lifetime pass</b> — pay once, access forever.',
+        'ds.b2': '<b>-20%</b> during this pre-launch window only.',
+        'ds.b3': '<b>Limited spots</b> in this first batch.',
+        'ds.cta': 'Talk to me on Telegram',
+        'ds.note': 'You talk directly to me, the Surfista — no bots.',
+        'ds.dismiss': 'Not now',
       },
 
       es: {
@@ -3928,6 +4044,15 @@
         'card.yieldseeker.desc': 'Agente AI que hace farming de yield en stablecoins automáticamente. 7-15% APY promedio en USDC, custodia vía Coinbase TEE. Sistema de puntos activo.',
         'card.kast.desc': 'Tarjeta Visa global con stablecoins. Earn vaults hasta 10% APY (vía Gauntlet) + cashback. Aceptada en 150M+ comercios en 170+ países. Equipo ex-Circle, Phantom, Revolut.',
         'card.saturn.desc': 'Yield stablecoin nativo en Ethereum con exposición a RWA. Asignación automática a T-bills y crédito privado. Token $STRN con emisiones para LPs.',
+        'ds.badge': 'Pre-lanzamiento · Plazas limitadas',
+        'ds.title': 'DeFi Surfers',
+        'ds.tagline': 'Entra antes que nadie.',
+        'ds.b1': '<b>Pase vitalicio</b> — pagas una vez, acceso para siempre.',
+        'ds.b2': '<b>-20%</b> solo en esta ventana de pre-lanzamiento.',
+        'ds.b3': '<b>Plazas limitadas</b> en esta primera tanda.',
+        'ds.cta': 'Hablar conmigo en Telegram',
+        'ds.note': 'Hablas directamente conmigo, el Surfista — sin bots.',
+        'ds.dismiss': 'Ahora no',
       }
     };
 
