@@ -3574,20 +3574,19 @@
     opacity: 0; pointer-events: none; transition: opacity 0.3s;
   }
   .ds-overlay.is-open { opacity: 1; pointer-events: auto; }
+  @property --ds-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+  @keyframes ds-rotate { to { --ds-angle: 360deg; } }
   .ds-card {
     position: relative; width: 100%; max-width: 440px;
-    background: var(--bg-card); border-radius: 14px; padding: 30px 28px 24px;
-    border: 1px solid var(--border-bright);
-    box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 44px rgba(0,255,157,0.08);
-    transform: translateY(16px) scale(0.98); transition: transform 0.3s; overflow: hidden;
+    border: 2px solid transparent; border-radius: 16px; padding: 30px 28px 24px;
+    background:
+      linear-gradient(var(--bg-card), var(--bg-card)) padding-box,
+      conic-gradient(from var(--ds-angle), #8a6508, #c8960a, #f5d56a, #ffeaa0, #f5d56a, #c8960a, #8a6508) border-box;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 50px rgba(245,213,106,0.16);
+    animation: ds-rotate 6s linear infinite;
+    transform: translateY(16px) scale(0.98); transition: transform 0.3s;
   }
   .ds-overlay.is-open .ds-card { transform: translateY(0) scale(1); }
-  .ds-card::before {
-    content:''; position:absolute; top:0; left:0; right:0; height:3px;
-    background: linear-gradient(90deg, var(--accent), var(--accent-blue), var(--accent));
-    background-size: 200% 100%; animation: ds-shimmer 3s linear infinite;
-  }
-  @keyframes ds-shimmer { to { background-position: 200% 0; } }
   .ds-close {
     position:absolute; top:12px; right:14px; width:32px; height:32px; border:none;
     background:transparent; color:var(--text-faint); font-size:24px; line-height:1;
@@ -3627,7 +3626,7 @@
   .ds-dismiss { display:block; margin:14px auto 0; background:none; border:none; color:var(--text-faint); font-family:'JetBrains Mono',monospace; font-size:11px; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
   .ds-dismiss:hover { color:var(--text-dim); }
   @media (max-width:480px){ .ds-card{padding:26px 20px 20px} .ds-title{font-size:22px} }
-  @media (prefers-reduced-motion: reduce){ .ds-overlay,.ds-card,.ds-cta{transition:none} .ds-card::before,.ds-badge .ds-dot{animation:none} }
+  @media (prefers-reduced-motion: reduce){ .ds-overlay,.ds-card,.ds-cta{transition:none} .ds-card,.ds-badge .ds-dot{animation:none} }
 </style>
 
 <script>
@@ -3636,8 +3635,16 @@
     var overlay = document.getElementById('dsModal');
     if (!overlay) return;
     var SHOW_DELAY = 3000; // 3s após carregar
+    var exitUsed = false, exitArmed = false;
     function openModal(){ overlay.classList.add('is-open'); overlay.setAttribute('aria-hidden','false'); document.body.classList.add('modal-open'); }
-    function closeModal(){ overlay.classList.remove('is-open'); overlay.setAttribute('aria-hidden','true'); document.body.classList.remove('modal-open'); }
+    function onExitIntent(e){
+      if (exitUsed) return;
+      if (e.clientY <= 0 && !e.relatedTarget) { exitUsed = true; document.removeEventListener('mouseout', onExitIntent); openModal(); }
+    }
+    function closeModal(){
+      overlay.classList.remove('is-open'); overlay.setAttribute('aria-hidden','true'); document.body.classList.remove('modal-open');
+      if (!exitArmed && !exitUsed) { exitArmed = true; document.addEventListener('mouseout', onExitIntent); } // 2ª oportunidade: reabre quando o rato sai da página
+    }
     var x = document.getElementById('dsClose'); if (x) x.addEventListener('click', closeModal);
     var dd = document.getElementById('dsDismiss'); if (dd) dd.addEventListener('click', closeModal);
     overlay.addEventListener('click', function(e){ if (e.target === overlay) closeModal(); });
