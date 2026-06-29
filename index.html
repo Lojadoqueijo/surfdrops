@@ -3560,7 +3560,7 @@
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71l-4.14-3.05-1.99 1.93c-.23.23-.42.42-.86.42z"/></svg>
       <span data-i18n="ds.cta">Falar comigo no Telegram</span>
     </a>
-    <p class="ds-note" data-i18n="ds.note">Falas diretamente comigo, o Surfista — sem bots.</p>
+    <p class="ds-note" data-i18n="ds.note">A mensagem já vai copiada — é só colar e enviar. Falas comigo, sem bots.</p>
     <button class="ds-dismiss" id="dsDismiss" type="button" data-i18n="ds.dismiss">Agora não</button>
   </div>
 </div>
@@ -3649,7 +3649,23 @@
     var dd = document.getElementById('dsDismiss'); if (dd) dd.addEventListener('click', closeModal);
     overlay.addEventListener('click', function(e){ if (e.target === overlay) closeModal(); });
     document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && overlay.classList.contains('is-open')) closeModal(); });
-    var cta = document.getElementById('dsCta'); if (cta) cta.addEventListener('click', function(){ setTimeout(closeModal, 120); });
+    var MSG = {
+      pt: 'Olá Surfista! 🏄 Quero entrar nos DeFi Surfers no pré-lançamento (-20% · pass vitalício). Quais são os próximos passos?',
+      en: 'Hi Surfista! 🏄 I want to join DeFi Surfers in the pre-launch (-20% · lifetime pass). What are the next steps?',
+      es: '¡Hola Surfista! 🏄 Quiero entrar en DeFi Surfers en el pre-lanzamiento (-20% · pase vitalicio). ¿Cuáles son los próximos pasos?'
+    };
+    function copyText(t){
+      try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t); return; } } catch(e){}
+      try { var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); } catch(e){}
+    }
+    var cta = document.getElementById('dsCta');
+    if (cta) cta.addEventListener('click', function(){
+      var lang = localStorage.getItem('surf_lang') || 'pt';
+      copyText(MSG[lang] || MSG.pt); // mensagem fica na área de transferência → colar e enviar
+      var lbl = cta.querySelector('span');
+      if (lbl) { var orig = lbl.textContent; lbl.textContent = '✓ Copiado — cola no Telegram'; setTimeout(function(){ lbl.textContent = orig; }, 2500); }
+      setTimeout(closeModal, 400);
+    });
     setTimeout(openModal, SHOW_DELAY); // sempre (todos os carregamentos)
   })();
 </script>
@@ -3892,7 +3908,7 @@
         'ds.priceNew': '795,07 €',
         'ds.priceSave': '-20% · poupas 198,77 €',
         'ds.cta': 'Falar comigo no Telegram',
-        'ds.note': 'Falas diretamente comigo, o Surfista — sem bots.',
+        'ds.note': 'A mensagem já vai copiada — é só colar e enviar. Falas comigo, sem bots.',
         'ds.dismiss': 'Agora não',
       },
 
@@ -3985,7 +4001,7 @@
         'ds.priceNew': '€795.07',
         'ds.priceSave': '-20% · save €198.77',
         'ds.cta': 'Talk to me on Telegram',
-        'ds.note': 'You talk directly to me, the Surfista — no bots.',
+        'ds.note': 'The message is copied — just paste & send. You talk to me, no bots.',
         'ds.dismiss': 'Not now',
       },
 
@@ -4078,7 +4094,7 @@
         'ds.priceNew': '795,07 €',
         'ds.priceSave': '-20% · ahorras 198,77 €',
         'ds.cta': 'Hablar conmigo en Telegram',
-        'ds.note': 'Hablas directamente conmigo, el Surfista — sin bots.',
+        'ds.note': 'El mensaje ya va copiado — solo pega y envía. Hablas conmigo, sin bots.',
         'ds.dismiss': 'Ahora no',
       }
     };
