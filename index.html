@@ -3550,6 +3550,12 @@
       <li><span class="ds-ic">🔥</span><span data-i18n-html="ds.b2"><b>-20%</b> só nesta janela de pré-lançamento.</span></li>
       <li><span class="ds-ic">⏳</span><span data-i18n-html="ds.b3"><b>Vagas limitadas</b> e condições exclusivas nesta janela.</span></li>
     </ul>
+    <div class="ds-price">
+      <span class="ds-price-old" data-i18n="ds.priceOld">993,84 €</span>
+      <span class="ds-price-arrow" aria-hidden="true">→</span>
+      <span class="ds-price-new" data-i18n="ds.priceNew">795,07 €</span>
+      <span class="ds-price-save" data-i18n="ds.priceSave">-20% · poupas 198,77 €</span>
+    </div>
     <a class="ds-cta" id="dsCta" href="https://t.me/surfistacrypto" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71l-4.14-3.05-1.99 1.93c-.23.23-.42.42-.86.42z"/></svg>
       <span data-i18n="ds.cta">Falar comigo no Telegram</span>
@@ -3603,6 +3609,11 @@
   .ds-list li { display:flex; align-items:flex-start; gap:11px; font-size:13.5px; line-height:1.45; color:var(--text); }
   .ds-list .ds-ic { flex:0 0 auto; font-size:16px; line-height:1.3; }
   .ds-list b { color:var(--accent); font-weight:700; }
+  .ds-price { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:6px 12px; background:var(--bg-elev); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin:0 0 18px; }
+  .ds-price-old { font-family:'JetBrains Mono',monospace; font-size:15px; color:var(--text-faint); text-decoration:line-through; }
+  .ds-price-arrow { color:var(--text-faint); font-size:15px; }
+  .ds-price-new { font-family:'Orbitron',sans-serif; font-size:24px; font-weight:900; color:var(--accent); letter-spacing:.01em; }
+  .ds-price-save { flex-basis:100%; text-align:center; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--warn); }
   .ds-cta {
     display:flex; align-items:center; justify-content:center; gap:9px; width:100%;
     text-decoration:none; cursor:pointer; background:var(--gradient-1); color:#04140c;
@@ -3870,6 +3881,9 @@
         'ds.b1': '<b>Pass vitalício</b> — pagas uma vez, acesso para sempre.',
         'ds.b2': '<b>-20%</b> só nesta janela de pré-lançamento.',
         'ds.b3': '<b>Vagas limitadas</b> e condições exclusivas nesta janela.',
+        'ds.priceOld': '993,84 €',
+        'ds.priceNew': '795,07 €',
+        'ds.priceSave': '-20% · poupas 198,77 €',
         'ds.cta': 'Falar comigo no Telegram',
         'ds.note': 'Falas diretamente comigo, o Surfista — sem bots.',
         'ds.dismiss': 'Agora não',
@@ -3960,6 +3974,9 @@
         'ds.b1': '<b>Lifetime pass</b> — pay once, access forever.',
         'ds.b2': '<b>-20%</b> during this pre-launch window only.',
         'ds.b3': '<b>Limited spots</b> and exclusive terms in this window.',
+        'ds.priceOld': '€993.84',
+        'ds.priceNew': '€795.07',
+        'ds.priceSave': '-20% · save €198.77',
         'ds.cta': 'Talk to me on Telegram',
         'ds.note': 'You talk directly to me, the Surfista — no bots.',
         'ds.dismiss': 'Not now',
@@ -4050,6 +4067,9 @@
         'ds.b1': '<b>Pase vitalicio</b> — pagas una vez, acceso para siempre.',
         'ds.b2': '<b>-20%</b> solo en esta ventana de pre-lanzamiento.',
         'ds.b3': '<b>Plazas limitadas</b> y condiciones exclusivas en esta ventana.',
+        'ds.priceOld': '993,84 €',
+        'ds.priceNew': '795,07 €',
+        'ds.priceSave': '-20% · ahorras 198,77 €',
         'ds.cta': 'Hablar conmigo en Telegram',
         'ds.note': 'Hablas directamente conmigo, el Surfista — sin bots.',
         'ds.dismiss': 'Ahora no',
