@@ -3558,11 +3558,18 @@
     </div>
     <a class="ds-cta" id="dsCta" href="https://t.me/surfistacrypto" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71l-4.14-3.05-1.99 1.93c-.23.23-.42.42-.86.42z"/></svg>
-      <span data-i18n="ds.cta">Falar comigo no Telegram</span>
+      <span data-i18n="ds.cta">Garantir a minha vaga</span>
     </a>
     <p class="ds-note" data-i18n="ds.note">A mensagem já vai copiada — é só colar e enviar. Falas comigo, sem bots.</p>
     <button class="ds-dismiss" id="dsDismiss" type="button" data-i18n="ds.dismiss">Agora não</button>
   </div>
+</div>
+
+<!-- === BARRA FIXA DE OFERTA DEFI SURFERS === -->
+<div class="ds-bar" id="dsBar" role="region" aria-label="Oferta pré-lançamento">
+  <span class="ds-bar-txt" data-i18n-html="ds.bar.txt"><b>Pré-lançamento DeFi Surfers</b> · -20% · vagas limitadas</span>
+  <button class="ds-bar-cta" id="dsBarCta" type="button" data-i18n="ds.bar.cta">Garantir vaga</button>
+  <button class="ds-bar-x" id="dsBarX" type="button" aria-label="Fechar">×</button>
 </div>
 
 <style>
@@ -3625,6 +3632,36 @@
   .ds-note { text-align:center; font-size:11.5px; color:var(--text-faint); margin:12px 0 0; }
   .ds-dismiss { display:block; margin:14px auto 0; background:none; border:none; color:var(--text-faint); font-family:'JetBrains Mono',monospace; font-size:11px; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
   .ds-dismiss:hover { color:var(--text-dim); }
+  /* Barra fixa de oferta */
+  .ds-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 150;
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    padding: 9px 44px 9px 16px;
+    background: linear-gradient(90deg, #160f04, #2a1f08, #160f04);
+    border-bottom: 1px solid rgba(245,213,106,0.45);
+    box-shadow: 0 2px 18px rgba(0,0,0,0.35);
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--text);
+  }
+  .ds-bar-txt b { color: #f5d56a; font-weight: 700; }
+  .ds-bar-cta {
+    flex: 0 0 auto; cursor: pointer; border: none;
+    background: var(--gradient-1); color: #04140c;
+    font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 12px; letter-spacing: .02em;
+    padding: 7px 16px; border-radius: 999px; white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0,255,157,0.25); transition: transform .15s, box-shadow .15s;
+  }
+  .ds-bar-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,255,157,0.38); }
+  .ds-bar-x {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--text-faint); font-size: 20px; line-height: 1; cursor: pointer; padding: 0 4px;
+  }
+  .ds-bar-x:hover { color: var(--text); }
+  body.ds-bar-on { padding-top: 42px; }
+  @media (max-width: 560px) {
+    .ds-bar { font-size: 11px; gap: 9px; padding: 8px 36px 8px 12px; }
+    .ds-bar-txt { line-height: 1.2; }
+    body.ds-bar-on { padding-top: 58px; }
+  }
   @media (max-width:480px){ .ds-card{padding:26px 20px 20px} .ds-title{font-size:22px} }
   @media (prefers-reduced-motion: reduce){ .ds-overlay,.ds-card,.ds-cta{transition:none} .ds-card,.ds-badge .ds-dot{animation:none} }
 </style>
@@ -3666,6 +3703,14 @@
       if (lbl) { var orig = lbl.textContent; lbl.textContent = '✓ Copiado — cola no Telegram'; setTimeout(function(){ lbl.textContent = orig; }, 2500); }
       setTimeout(closeModal, 400);
     });
+    // Barra fixa de oferta: CTA abre o modal; × esconde a barra
+    var bar = document.getElementById('dsBar');
+    var barCta = document.getElementById('dsBarCta');
+    var barX = document.getElementById('dsBarX');
+    if (bar) document.body.classList.add('ds-bar-on');
+    if (barCta) barCta.addEventListener('click', openModal);
+    if (barX && bar) barX.addEventListener('click', function(){ bar.style.display = 'none'; document.body.classList.remove('ds-bar-on'); });
+
     setTimeout(openModal, SHOW_DELAY); // sempre (todos os carregamentos)
   })();
 </script>
@@ -3907,9 +3952,11 @@
         'ds.priceOld': '993,84 €',
         'ds.priceNew': '795,07 €',
         'ds.priceSave': '-20% · poupas 198,77 €',
-        'ds.cta': 'Falar comigo no Telegram',
+        'ds.cta': 'Garantir a minha vaga',
         'ds.note': 'A mensagem já vai copiada — é só colar e enviar. Falas comigo, sem bots.',
         'ds.dismiss': 'Agora não',
+        'ds.bar.txt': '<b>Pré-lançamento DeFi Surfers</b> · -20% · vagas limitadas',
+        'ds.bar.cta': 'Garantir vaga',
       },
 
       en: {
@@ -4000,9 +4047,11 @@
         'ds.priceOld': '€993.84',
         'ds.priceNew': '€795.07',
         'ds.priceSave': '-20% · save €198.77',
-        'ds.cta': 'Talk to me on Telegram',
+        'ds.cta': 'Secure my spot',
         'ds.note': 'The message is copied — just paste & send. You talk to me, no bots.',
         'ds.dismiss': 'Not now',
+        'ds.bar.txt': '<b>DeFi Surfers pre-launch</b> · -20% · limited spots',
+        'ds.bar.cta': 'Get my spot',
       },
 
       es: {
@@ -4093,9 +4142,11 @@
         'ds.priceOld': '993,84 €',
         'ds.priceNew': '795,07 €',
         'ds.priceSave': '-20% · ahorras 198,77 €',
-        'ds.cta': 'Hablar conmigo en Telegram',
+        'ds.cta': 'Conseguir mi plaza',
         'ds.note': 'El mensaje ya va copiado — solo pega y envía. Hablas conmigo, sin bots.',
         'ds.dismiss': 'Ahora no',
+        'ds.bar.txt': '<b>Pre-lanzamiento DeFi Surfers</b> · -20% · plazas limitadas',
+        'ds.bar.cta': 'Conseguir plaza',
       }
     };
 
