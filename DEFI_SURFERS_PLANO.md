@@ -109,12 +109,22 @@ sem perder qualidade onde importa.
     (Stripe ou checkout cripto) — não fazer no arranque.
 
 ## 3. O que só o utilizador pode desbloquear (paralelo ao trabalho de código)
-- Comprar/confirmar domínio `defisurfers.<tld>` (Tarefa #5)
-- Criar app Discord + bot + Server Members Intent + role ID (Tarefa #6)
+- Comprar/confirmar domínio `defisurfers.<tld>` (Tarefa #5) — utilizador decidiu deixar PARA O FIM
+- ~~Criar app Discord + bot + Server Members Intent + role ID (Tarefa #6)~~ ✅ FEITO 2026-07-02
 - Criar conta e obter API key na fonte de dados de mercado (Tarefa #7)
 
-Nenhum destes bloqueia o Bloco A (motor) nem o desenho do Bloco C — só
-bloqueiam a integração final com dados reais/Discord/domínio.
+### ✅ Discord — credenciais públicas (concluído 2026-07-02, via browser)
+- Application/Client ID: **1522367057671491685**
+- Guild ID (servidor "Defi Surfers", 303 membros): **1193216608030687284**
+- Role ID do cargo **"DefiSurfers"** (200 membros — o cargo dos membros pagos): **1193224247573741699**
+  - Nota: existem também "DefiSurfer Adm" (10) e "DefiSurfer #1" (1, integração); o gate usa "DefiSurfers".
+- Server Members Intent: **ativado** ✅
+- Bot adicionado ao servidor com permissões mínimas (Ver canais + Enviar mensagens) ✅
+- **PENDENTE (utilizador):** gerar o Bot Token (Developer Portal → Bot → "Redefinir token")
+  e guardá-lo como env var no Vercel (`DISCORD_BOT_TOKEN`) quando formos ligar o bot/verificação.
+  O token é secreto — nunca colar no chat nem em ficheiros do repo.
+- **PENDENTE (depois do domínio):** adicionar OAuth2 Redirect URI no Developer Portal
+  (ex: `https://defisurfers.<tld>/api/auth/callback/discord`).
 
 ## 4. Histórico de decisões (para não repetir discussões)
 - Domínio: `defisurfers.<tld>` em vez de manter `surfdrops.vercel.app`
