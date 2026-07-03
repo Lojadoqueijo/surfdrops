@@ -58,3 +58,34 @@ tr:hover td { background: var(--panel); }
   margin-top: 24px; padding: 12px 14px; border: 1px solid var(--border);
   border-radius: 8px; color: var(--muted); font-size: 12px; line-height: 1.6;
 }
+
+/* ---- Página de login ---- */
+.login-page { max-width: 460px; padding-top: 12vh; text-align: center; }
+.login-page .brand { justify-content: center; }
+.login-box {
+  margin-top: 28px; padding: 28px 24px; border: 1px solid var(--border);
+  border-radius: 12px; background: var(--panel);
+}
+.btn-discord {
+  display: block; width: 100%; padding: 13px 0; border-radius: 8px;
+  background: #5865f2; color: #fff; font-weight: 700; font-size: 14px;
+  text-align: center; text-decoration: none;
+}
+.btn-discord:hover { background: #4752c4; text-decoration: none; }
+.or { margin: 16px 0 12px; }
+.key-form { display: flex; gap: 8px; }
+.key-form input {
+  flex: 1; padding: 11px 12px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); font-family: inherit; font-size: 13px;
+}
+.key-form button {
+  padding: 11px 18px; border-radius: 8px; border: 1px solid var(--aqua);
+  background: transparent; color: var(--aqua); font-family: inherit;
+  font-weight: 700; font-size: 13px; cursor: pointer;
+}
+.key-form button:hover { background: rgba(34, 211, 238, 0.1); }
+.login-error {
+  margin-top: 18px; padding: 10px 14px; border-radius: 8px; font-size: 13px;
+  background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
