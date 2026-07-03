@@ -126,6 +126,24 @@ sem perder qualidade onde importa.
 - **PENDENTE (depois do domínio):** adicionar OAuth2 Redirect URI no Developer Portal
   (ex: `https://defisurfers.<tld>/api/auth/callback/discord`).
 
+## 3.5 Fontes de dados de mercado (DECISÃO FECHADA 2026-07-02)
+Cobertura igual à do Bullmania (tokens, ações, ETFs, commodities, índices):
+- **Cripto → Binance API pública** (primário): klines 1W/1D com OHLC completo,
+  grátis, sem API key, sem limites relevantes. **CoinGecko = fallback** apenas
+  para tokens fora da Binance (limitação: OHLC grátis do CoinGecko dá velas de
+  4 dias em históricos longos → qualidade inferior; evitar quando possível).
+- **Ações / ETFs / commodities / índices → Twelve Data** (plano Basic GRÁTIS,
+  confirmado na página oficial de preços): 800 créditos/dia, máx. 8/minuto.
+- Uso estimado atual: ~46 pedidos/dia total, dos quais ~28 no Twelve Data
+  (≈6% do limite diário). Cripto não gasta créditos nenhuns (Binance).
+- **Restrição a respeitar: 8 pedidos/minuto no Twelve Data** → o cron não pode
+  disparar tudo de rajada. Como as funções Vercel têm timeout (60s no hobby),
+  a solução é processar por lotes: vários crons espaçados (ex: 00:15, 00:20,
+  00:25) com cursor em BD, ou cron único por setor. [implementação: SONNET,
+  junto com o Bloco C.9/Supabase]
+- TradingView NÃO tem API pública de dados (confirmado) — é só visualização;
+  scrapers violam os ToS e ficam excluídos.
+
 ## 4. Histórico de decisões (para não repetir discussões)
 - Domínio: `defisurfers.<tld>` em vez de manter `surfdrops.vercel.app`
   (subdomínio partilhado sem equity de SEO real a proteger; a marca

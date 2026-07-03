@@ -6,6 +6,9 @@ import { getSnapshots } from "@/lib/data/getSnapshots";
 // página de membros. Quando houver BD (Supabase — Bloco C.9), este endpoint
 // passa também a persistir o histórico de flips para alertas/notificações.
 
+export const dynamic = "force-dynamic";
+export const maxDuration = 300; // throttle Twelve Data (8/min) precisa de tempo
+
 export async function GET(request: Request) {
   const auth = request.headers.get("authorization");
   if (process.env.CRON_SECRET && auth !== `Bearer ${process.env.CRON_SECRET}`) {
