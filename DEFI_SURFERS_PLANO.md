@@ -144,6 +144,32 @@ Cobertura igual à do Bullmania (tokens, ações, ETFs, commodities, índices):
 - TradingView NÃO tem API pública de dados (confirmado) — é só visualização;
   scrapers violam os ToS e ficam excluídos.
 
+## 3.6 Estado do deploy (2026-07-03)
+- ✅ **Members-app AO VIVO em produção:** `defi-surfers-members.vercel.app` —
+  projeto Vercel novo `defi-surfers-members` (team lojadoqueijo, Hobby),
+  Root Directory `members-app`, Framework Next.js, **Production Branch =
+  `defi-surfers`** (não a main!). O projeto do site estático/funil continua
+  intocado.
+- ✅ **Cripto com dados REAIS da Binance** (sem key): BTC 59.980, ALIGNED BEAR,
+  Since Flip -35,8%, Flip Level 81.908 — **valida o motor TS contra o Pine**
+  (TradingView mostrava -35,78% / ~80-83k). Ações/ETFs/etc. em mock até a
+  TWELVEDATA_API_KEY ser colada.
+- ✅ **Gate temporário** (middleware.ts): bloqueado por defeito; acesso via
+  `?key=<MEMBERS_GATE_KEY>` (cookie 30 dias). Vercel Auth "All Deployments"
+  é só Pro — não usada. Substituir pelo OAuth Discord (C.10).
+- ⏳ **PENDENTE (utilizador) — env vars no Vercel** (Settings → Environment
+  Variables do projeto defi-surfers-members):
+  1. `TWELVEDATA_API_KEY` = a key da conta criada
+  2. `MEMBERS_GATE_KEY` = password de acesso temporária à escolha
+  (Depois de colar: Redeploy para aplicar.)
+- ⏳ Domínio `defisurfers.xyz` comprado, ainda não ligado (fica para a fase
+  do site principal; a members-app pode receber ex: `app.defisurfers.xyz`).
+- Histórico: 1º projeto de import (surfdrops-8uc4) foi criado por engano com
+  root ./ e publicou uma CÓPIA do funil em surfdrops-8uc4.vercel.app —
+  **apagado pelo utilizador**. Lição: o wizard de import da Vercel lê a
+  DEFAULT branch (main); para monorepo em branch, criar com build a falhar
+  (`exit 1`) e corrigir Root Directory/Production Branch nas settings depois.
+
 ## 4. Histórico de decisões (para não repetir discussões)
 - Domínio: `defisurfers.<tld>` em vez de manter `surfdrops.vercel.app`
   (subdomínio partilhado sem equity de SEO real a proteger; a marca
