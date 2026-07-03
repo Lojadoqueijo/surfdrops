@@ -157,11 +157,11 @@ Cobertura igual à do Bullmania (tokens, ações, ETFs, commodities, índices):
 - ✅ **Gate temporário** (middleware.ts): bloqueado por defeito; acesso via
   `?key=<MEMBERS_GATE_KEY>` (cookie 30 dias). Vercel Auth "All Deployments"
   é só Pro — não usada. Substituir pelo OAuth Discord (C.10).
-- ⏳ **PENDENTE (utilizador) — env vars no Vercel** (Settings → Environment
-  Variables do projeto defi-surfers-members):
-  1. `TWELVEDATA_API_KEY` = a key da conta criada
-  2. `MEMBERS_GATE_KEY` = password de acesso temporária à escolha
-  (Depois de colar: Redeploy para aplicar.)
+- ✅ **Env vars colocadas + redeploy feito (2026-07-03):** `TWELVEDATA_API_KEY`
+  (dados reais de ações/ETFs/commodities/índices ativos) e `MEMBERS_GATE_KEY`
+  (password do gate temporário, escolhida pelo utilizador — o Fable não a viu).
+  Ambas "Sensitive", Production+Preview. Gate verificado: `/members` sem chave
+  devolve 401 "acesso só para membros". Acesso com `/members?key=<password>`.
 - ⏳ Domínio `defisurfers.xyz` comprado, ainda não ligado (fica para a fase
   do site principal; a members-app pode receber ex: `app.defisurfers.xyz`).
 - Histórico: 1º projeto de import (surfdrops-8uc4) foi criado por engano com
