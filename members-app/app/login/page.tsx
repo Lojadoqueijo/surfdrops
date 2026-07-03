@@ -29,11 +29,9 @@ export default async function LoginPage({
         <a className="btn-discord" href="/api/auth/login">
           Entrar com Discord
         </a>
-        <p className="muted or">— ou —</p>
-        <form action="/members" method="get" className="key-form">
-          <input type="password" name="key" placeholder="Password de membro" required />
-          <button type="submit">Entrar</button>
-        </form>
+        <p className="muted or-note">
+          Acesso reservado a membros com o cargo <b>DefiSurfers</b>.
+        </p>
       </div>
 
       <p className="note">
