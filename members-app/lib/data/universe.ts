@@ -32,6 +32,7 @@ export interface UniverseAsset {
   country: string | null; // ISO 3166-1 alpha-2, para a bandeira; null = sem país (cripto)
   logoUrl: string | null;
   rankHint: number; // desempate de ordenação por defeito; não é market cap real
+  marketCap?: number | null; // presente no universo cripto dinâmico (CoinGecko)
   source: DataSource;
   binanceSymbol?: string; // ex: BTCUSDT
   twelveSymbol?: string; // ex: AAPL, XAU/USD

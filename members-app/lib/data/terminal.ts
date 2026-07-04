@@ -56,19 +56,21 @@ function metaFor(symbol: string): UniverseAsset | undefined {
 
 export function toTerminalRows(snapshots: AssetSnapshot[]): TerminalRow[] {
   return snapshots.map((s) => {
+    // Metadados: preferir os embebidos no snapshot (universo cripto dinâmico);
+    // fallback para a lista estática (ações/ETFs e snapshots antigos).
     const m = metaFor(s.symbol);
     return {
       symbol: s.symbol,
-      name: m?.name ?? s.symbol,
+      name: s.name ?? m?.name ?? s.symbol,
       sector: s.sector,
       assetClass: classOfSector(s.sector),
-      categories: m?.categories ?? [],
+      categories: s.categories ?? m?.categories ?? [],
       currency: m?.currency ?? "USD",
       country: m?.country ?? null,
-      logoUrl: m?.logoUrl ?? null,
-      tvSymbol: m?.tvSymbol ?? s.symbol,
-      yahooSymbol: m?.yahooSymbol ?? null,
-      rankHint: m?.rankHint ?? 9999,
+      logoUrl: s.logoUrl ?? m?.logoUrl ?? null,
+      tvSymbol: s.tvSymbol ?? m?.tvSymbol ?? s.symbol,
+      yahooSymbol: s.yahooSymbol ?? m?.yahooSymbol ?? null,
+      rankHint: s.rank ?? m?.rankHint ?? 9999,
 
       trend: s.trend,
       weeklyTrend: s.weeklyTrend,

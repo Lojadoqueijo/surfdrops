@@ -24,13 +24,24 @@ function lastChangeIndex(series: Array<TrendDir>): number | null {
  * sentido aqui, cruzando as duas séries — equivalente ao par hiTrend/loTrend
  * do swellline.pine.
  */
+export interface SnapshotMeta {
+  name?: string | null;
+  logoUrl?: string | null;
+  tvSymbol?: string | null;
+  yahooSymbol?: string | null;
+  rank?: number | null;
+  categories?: string[] | null;
+  marketCap?: number | null;
+}
+
 export function buildAssetSnapshot(params: {
   symbol: string;
   sector: string;
   weeklyCandles: Candle[];
   dailyCandles: Candle[];
+  meta?: SnapshotMeta;
 }): AssetSnapshot | null {
-  const { symbol, sector, weeklyCandles, dailyCandles } = params;
+  const { symbol, sector, weeklyCandles, dailyCandles, meta } = params;
   if (weeklyCandles.length === 0) return null;
 
   const weeklyStates = computeSwellLine(weeklyCandles);
@@ -76,6 +87,12 @@ export function buildAssetSnapshot(params: {
   return {
     symbol,
     sector,
+    name: meta?.name ?? null,
+    logoUrl: meta?.logoUrl ?? null,
+    tvSymbol: meta?.tvSymbol ?? null,
+    yahooSymbol: meta?.yahooSymbol ?? null,
+    rank: meta?.rank ?? null,
+    categories: meta?.categories ?? null,
     trend: last.trend,
     weeklyTrend,
     dailyTrend,
@@ -88,7 +105,7 @@ export function buildAssetSnapshot(params: {
     sinceFlipPct: last.sinceFlipPct,
     price: lastPrice,
     updatedAt: new Date().toISOString(),
-    marketCap: null, // pendente fonte de dados (cripto: CoinGecko; ações: fase 2)
+    marketCap: meta?.marketCap ?? null, // cripto: CoinGecko (universo dinâmico); ações: fase 2
     strength: last.strength,
     warmup,
     cooldown,

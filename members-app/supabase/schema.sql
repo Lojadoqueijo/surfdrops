@@ -9,6 +9,12 @@ create table if not exists snapshots (
   symbol text not null,
   date date not null,
   sector text not null,
+  name text,
+  logo_url text,
+  tv_symbol text,
+  yahoo_symbol text,
+  rank integer,
+  categories jsonb,
   trend text not null check (trend in ('bullish', 'bearish')),
   weekly_trend text check (weekly_trend in ('bullish', 'bearish')),
   daily_trend text check (daily_trend in ('bullish', 'bearish')),
@@ -56,3 +62,13 @@ create table if not exists flip_events (
 
 create index if not exists flip_events_symbol_idx on flip_events (symbol, flip_at desc);
 create index if not exists flip_events_recent_idx on flip_events (flip_at desc);
+
+-- Migração 2026-07-05 (universo cripto dinâmico — metadados embebidos no snapshot).
+-- Idempotente; corre por cima de bases criadas com a versão anterior do schema.
+alter table snapshots
+  add column if not exists name text,
+  add column if not exists logo_url text,
+  add column if not exists tv_symbol text,
+  add column if not exists yahoo_symbol text,
+  add column if not exists rank integer,
+  add column if not exists categories jsonb;

@@ -53,6 +53,14 @@ export type Estado = "ALIGNED BULL" | "ALIGNED BEAR" | "CONFLICT" | null;
 export interface AssetSnapshot {
   symbol: string;
   sector: string;
+  // Metadados de exibição embebidos no snapshot (denormalizados de propósito:
+  // o universo cripto é dinâmico e a página lê só da BD, sem lista estática).
+  name: string | null;
+  logoUrl: string | null;
+  tvSymbol: string | null;
+  yahooSymbol: string | null;
+  rank: number | null;
+  categories: string[] | null;
   trend: "bullish" | "bearish";
   weeklyTrend: TrendDir;
   dailyTrend: TrendDir;

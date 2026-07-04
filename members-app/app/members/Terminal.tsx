@@ -60,19 +60,18 @@ function daysSince(iso: string | null): number {
 // Estados derivados
 // ---------------------------------------------------------------------------
 
-type TrendTag = "BULLISH" | "BEARISH" | "WARMUP" | "COOLDOWN";
+// Decisão 2026-07-05: sem estado WARMUP na UI — um ativo ou está bullish ou
+// bearish (como no terminal do Ivan). Os campos warmup/cooldown continuam no
+// motor/BD para uso futuro (alertas), mas não aparecem.
+type TrendTag = "BULLISH" | "BEARISH";
 
 function trendTag(r: TerminalRow): TrendTag {
-  if (r.trend === "bearish" && r.warmup) return "WARMUP";
-  if (r.trend === "bullish" && r.cooldown) return "COOLDOWN";
   return r.trend === "bullish" ? "BULLISH" : "BEARISH";
 }
 
 const TREND_CLASS: Record<TrendTag, string> = {
   BULLISH: "t-bull",
   BEARISH: "t-bear",
-  WARMUP: "t-warm",
-  COOLDOWN: "t-cool",
 };
 
 interface Warning {
@@ -188,18 +187,6 @@ export default function Terminal({
     return [...set].sort();
   }, [classRows]);
 
-  // Pulso do mar: contagens sobre a classe ativa (bullish/bearish pela direção
-  // base da linha; warmup destacado à parte como funil de atenção pré-flip).
-  const pulse = useMemo(
-    () => ({
-      total: classRows.length,
-      bull: classRows.filter((r) => r.trend === "bullish").length,
-      bear: classRows.filter((r) => r.trend === "bearish").length,
-      warm: classRows.filter((r) => trendTag(r) === "WARMUP").length,
-    }),
-    [classRows]
-  );
-
   const filtered = useMemo(() => {
     let out = classRows;
     if (search.trim()) {
@@ -237,6 +224,16 @@ export default function Terminal({
     return [...out].sort((a, b) => (val(a) - val(b)) * dir);
   }, [classRows, search, trendFilter, category, timeFilter, sortKey, sortDir]);
 
+  // Stats sobre o conjunto FILTRADO (como no terminal do Ivan: com o filtro
+  // bearish ativo, "BULLISH 0 (0%)").
+  const pulse = useMemo(() => {
+    const total = filtered.length;
+    const bull = filtered.filter((r) => r.trend === "bullish").length;
+    const bear = total - bull;
+    const mcap = filtered.reduce((sum, r) => sum + (r.marketCap ?? 0), 0);
+    return { total, bull, bear, mcap };
+  }, [filtered]);
+
   function toggleTrend(t: TrendTag) {
     setTrendFilter((prev) => {
       const next = new Set(prev);
@@ -259,37 +256,59 @@ export default function Terminal({
   return (
     <main className="terminal">
       <header className="term-head">
-        <div className="head-row">
+        <div className="topbar">
           <div className="brand">
             <h1>🌊 DeFi Surfers</h1>
-            <span className="tag">terminal de tendências</span>
           </div>
+          <nav className="tabs">
+            {ASSET_CLASSES.map((c) => (
+              <button
+                key={c}
+                className={c === activeClass ? "tab active" : "tab"}
+                onClick={() => {
+                  setActiveClass(c);
+                  setCategory("");
+                  setExpanded(null);
+                }}
+              >
+                {c}
+              </button>
+            ))}
+          </nav>
           <a className="logout" href="/api/auth/logout" title="Terminar sessão">
             Sair ↩
           </a>
         </div>
+
         <div className="pulse">
+          <div className="profile">
+            <span className="avatar">🌊</span>
+            <div className="profile-txt">
+              <span className="profile-name">DeFi Surfer</span>
+              <span className="profile-sub">membro</span>
+            </div>
+          </div>
           <div className="stat">
-            <span className="stat-k">Ativos</span>
+            <span className="stat-k">Total Market Cap</span>
+            <span className="stat-v">{pulse.mcap > 0 ? fmtMarketCap(pulse.mcap) : "—"}</span>
+          </div>
+          <div className="stat">
+            <span className="stat-k">Total Ativos</span>
             <span className="stat-v">{pulse.total}</span>
           </div>
           <div className="stat">
             <span className="stat-k">Bullish</span>
             <span className="stat-v bull">
+              <em>({pulse.total ? Math.round((pulse.bull / pulse.total) * 100) : 0}%)</em>{" "}
               {pulse.bull}
-              <em>{pulse.total ? ` ${Math.round((pulse.bull / pulse.total) * 100)}%` : ""}</em>
             </span>
           </div>
           <div className="stat">
             <span className="stat-k">Bearish</span>
             <span className="stat-v bear">
+              <em>({pulse.total ? Math.round((pulse.bear / pulse.total) * 100) : 0}%)</em>{" "}
               {pulse.bear}
-              <em>{pulse.total ? ` ${Math.round((pulse.bear / pulse.total) * 100)}%` : ""}</em>
             </span>
-          </div>
-          <div className="stat">
-            <span className="stat-k">Warmup</span>
-            <span className="stat-v warm">{pulse.warm}</span>
           </div>
           <div className="stat upd">
             <span className="stat-k">Última atualização</span>
@@ -298,37 +317,24 @@ export default function Terminal({
         </div>
       </header>
 
-      <nav className="tabs">
-        {ASSET_CLASSES.map((c) => (
-          <button
-            key={c}
-            className={c === activeClass ? "tab active" : "tab"}
-            onClick={() => {
-              setActiveClass(c);
-              setCategory("");
-              setExpanded(null);
-            }}
-          >
-            {c}
-          </button>
-        ))}
-      </nav>
-
-      <div className="controls">
+      <div className="searchbar">
         <input
           className="search"
           placeholder="Pesquisar nome ou símbolo…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+      </div>
+
+      <div className="controls">
         <div className="trend-chips">
-          {(["BULLISH", "BEARISH", "WARMUP"] as TrendTag[]).map((t) => (
+          {(["BULLISH", "BEARISH"] as TrendTag[]).map((t) => (
             <button
               key={t}
               className={`tchip ${TREND_CLASS[t]} ${trendFilter.has(t) ? "on" : ""}`}
               onClick={() => toggleTrend(t)}
             >
-              {t === "BULLISH" ? "↑ Bullish" : t === "BEARISH" ? "↓ Bearish" : "◐ Warmup"}
+              {t === "BULLISH" ? "↑ Bullish" : "↓ Bearish"}
             </button>
           ))}
         </div>
@@ -419,8 +425,8 @@ export default function Terminal({
             <h3>Como ler</h3>
             <p className="muted small">
               A regra de ouro: só se age em <b>ALINHADO</b>, com o flip confirmado no fecho da
-              vela. <b>Warmup</b> = ainda bearish mas a aquecer (radar, não entrada). Clica numa
-              linha para veres o stop (Next Flip), alvos e avisos.
+              vela. Clica numa linha para veres o stop (Next Flip), os alvos em ATR e os avisos
+              de topo/fundo.
             </p>
           </div>
         </aside>

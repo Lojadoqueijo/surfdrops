@@ -25,7 +25,42 @@ export async function snapshotForAsset(asset: UniverseAsset): Promise<AssetSnaps
     sector: asset.sector,
     weeklyCandles: weekly,
     dailyCandles: daily,
+    meta: {
+      name: asset.name,
+      logoUrl: asset.logoUrl,
+      tvSymbol: asset.tvSymbol,
+      yahooSymbol: asset.yahooSymbol,
+      rank: asset.rankHint,
+      categories: asset.categories,
+      marketCap: asset.marketCap ?? null,
+    },
   });
+}
+
+/**
+ * Versão paralela para fontes SEM limite por minuto (Binance): o universo
+ * cripto dinâmico (~300 ativos × 2 timeframes) sequencial não caberia no
+ * maxDuration do cron; com 8 workers fica ~60-90s. NUNCA usar com Twelve Data.
+ */
+export async function getSnapshotsParallel(
+  assets: UniverseAsset[],
+  concurrency = 8
+): Promise<AssetSnapshot[]> {
+  const out: AssetSnapshot[] = [];
+  let next = 0;
+  async function worker() {
+    while (next < assets.length) {
+      const asset = assets[next++];
+      try {
+        const snap = await snapshotForAsset(asset);
+        if (snap) out.push(snap);
+      } catch (err) {
+        console.error(`[snapshots] falhou ${asset.symbol}:`, err);
+      }
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(concurrency, assets.length) }, worker));
+  return out;
 }
 
 export async function getSnapshots(

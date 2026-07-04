@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { getSnapshots } from "@/lib/data/getSnapshots";
+import { getCryptoUniverse } from "@/lib/data/cryptoUniverse";
+import { getSnapshots, getSnapshotsParallel } from "@/lib/data/getSnapshots";
 import { appendFlipEvents, isSupabaseConfigured, upsertSnapshots } from "@/lib/data/supabase";
 import { UNIVERSE } from "@/lib/data/universe";
 
@@ -19,8 +20,12 @@ import { UNIVERSE } from "@/lib/data/universe";
 // deixando folga para 1 cron extra no futuro. Cripto (33 ativos) fica junto
 // porque a Binance não tem limite de pedidos/min; os lotes Twelve Data ficam
 // ≤ ~13 ativos cada (13 × 16s de throttle ≈ 208s < maxDuration 300s).
+// Lote 0 é ESPECIAL: usa o universo cripto DINÂMICO (top 500 CoinGecko ∩
+// Binance USDT, ~300 ativos) processado em paralelo — a Binance não tem
+// limite por minuto relevante. Os restantes lotes são Twelve Data (≤13
+// ativos cada, sequenciais com throttle de 16s).
 const CRON_BATCHES: string[][] = [
-  ["Cripto — Majors", "Cripto — Alts"],
+  ["<cripto dinâmico>"],
   ["Ações — Semis & Hardware"],
   ["Ações — Mega Tech"],
   ["Ações — Cripto-expostas", "ETFs", "Commodities", "Índices"],
@@ -44,20 +49,29 @@ export async function GET(request: Request) {
   const batchParam = searchParams.get("batch");
   const batchIndex = batchParam !== null ? Number(batchParam) : null;
 
-  let assets = UNIVERSE;
-  let batchSectors: string[] | null = null;
-  if (batchIndex !== null) {
-    if (!Number.isInteger(batchIndex) || batchIndex < 0 || batchIndex >= CRON_BATCHES.length) {
-      return NextResponse.json(
-        { error: `batch inválido: ${batchParam} (esperado 0..${CRON_BATCHES.length - 1})` },
-        { status: 400 }
-      );
-    }
-    batchSectors = CRON_BATCHES[batchIndex];
-    assets = UNIVERSE.filter((a) => batchSectors!.includes(a.sector));
+  if (
+    batchIndex !== null &&
+    (!Number.isInteger(batchIndex) || batchIndex < 0 || batchIndex >= CRON_BATCHES.length)
+  ) {
+    return NextResponse.json(
+      { error: `batch inválido: ${batchParam} (esperado 0..${CRON_BATCHES.length - 1})` },
+      { status: 400 }
+    );
   }
+  const batchSectors = batchIndex !== null ? CRON_BATCHES[batchIndex] : null;
 
-  const snapshots = await getSnapshots(assets);
+  let snapshots;
+  if (batchIndex === 0) {
+    // Cripto dinâmico, em paralelo (Binance sem throttle).
+    snapshots = await getSnapshotsParallel(await getCryptoUniverse());
+  } else if (batchSectors) {
+    snapshots = await getSnapshots(UNIVERSE.filter((a) => batchSectors.includes(a.sector)));
+  } else {
+    // Sem ?batch: cripto dinâmico + Twelve Data sequencial (dev/local).
+    const crypto = await getSnapshotsParallel(await getCryptoUniverse());
+    const td = await getSnapshots(UNIVERSE.filter((a) => a.source === "twelvedata"));
+    snapshots = [...crypto, ...td];
+  }
   revalidatePath("/members");
 
   const persistence = isSupabaseConfigured()
