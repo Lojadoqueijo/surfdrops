@@ -44,7 +44,17 @@ export async function GET(req: NextRequest) {
     `https://discord.com/api/v10/guilds/${guildId}/members/${me.id}`,
     { headers: { Authorization: `Bot ${botToken}` } }
   );
-  if (!memberRes.ok) return NextResponse.redirect(`${origin}/login?error=nao-membro`);
+  // 404 = a conta não está no servidor → sem cargo (o servidor é aberto; o que
+  // dá acesso é o cargo — a mensagem é a mesma, orientada à adesão).
+  // Qualquer outro erro (401/403/5xx) é problema NOSSO (token do bot, bot fora
+  // do servidor, Discord em baixo) — nunca culpar o membro.
+  if (memberRes.status === 404) {
+    return NextResponse.redirect(`${origin}/login?error=sem-cargo`);
+  }
+  if (!memberRes.ok) {
+    console.error(`[auth] verificação de cargo falhou: HTTP ${memberRes.status}`);
+    return NextResponse.redirect(`${origin}/login?error=verificacao`);
+  }
   const member = (await memberRes.json()) as { roles?: string[] };
   if (!member.roles?.includes(roleId)) {
     return NextResponse.redirect(`${origin}/login?error=sem-cargo`);
