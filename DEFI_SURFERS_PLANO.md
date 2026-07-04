@@ -170,15 +170,20 @@ Cobertura igual à do Bullmania (tokens, ações, ETFs, commodities, índices):
   DEFAULT branch (main); para monorepo em branch, criar com build a falhar
   (`exit 1`) e corrigir Root Directory/Production Branch nas settings depois.
 
-## 3.7 Especificação UX/UI/Dados (2026-07-04)
-Escrita e fechada em **`DEFI_SURFERS_UXUI.md`** (v1): arquitetura de páginas
-(dashboard "Line-up" + ficha por ativo + como-ler + teaser público), princípios
-de UI (chips, faixa de força como assinatura, mobile-first), extensão do
-AssetSnapshot para paridade com o Pine (lastFlipDate, momentum, exaustão, dots,
-divergências, 200W, TP com hit, sparkline), persistência Supabase (`snapshots`
-+ `flip_events` append-only) e expansão do universo por fases. Ordem de
-implementação com etiquetas de modelo no §5 desse documento — próxima tarefa
-concreta é o item 2 (motor, [SONNET]).
+## 3.7 Especificação UX/UI/Dados (2026-07-04 — v2)
+Escrita e fechada em **`DEFI_SURFERS_UXUI.md`** (v2, substitui a v1 no mesmo
+dia após o utilizador partilhar screenshots reais do BULLMANIA TERMINAL):
+- **Sem gráficos no site** — cada linha da tabela tem links TradingView + Yahoo.
+- Terminal de página única com tabs por classe, stats bar (pulso de mercado),
+  tabela espelhada na do Ivan (rank, ❤, Δ% desde flip, tempo desde flip, preço,
+  mcap, bandeira, links) + extras nossos (Estado W/D, coluna Força, accordion
+  com stop/TP/avisos), estado **WARMUP** (e COOLDOWN), slot para referrals de
+  corretoras do utilizador.
+- Login: exclusivamente cargo Discord "DefiSurfers"; remover fallback `?key=`
+  quando o OAuth estiver validado.
+- Levantamento completo da plataforma Bullmania + tabela de decisão de
+  integração (o que copiar já, fase 2, ou rejeitar) no §0/§5 do documento.
+Próxima tarefa concreta: item 2 do §6 (motor, [SONNET]).
 
 ## 4. Histórico de decisões (para não repetir discussões)
 - Domínio: `defisurfers.<tld>` em vez de manter `surfdrops.vercel.app`

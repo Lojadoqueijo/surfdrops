@@ -1,160 +1,185 @@
-# DeFi Surfers — Especificação UX / UI / Arquitetura de Dados (v1)
+# DeFi Surfers — Especificação UX / UI / Arquitetura de Dados (v2)
 
-_Escrito por Fable a 2026-07-04. Fonte de verdade para a implementação
-(componentes → Sonnet). Alterações de fundo passam por Fable._
+_v2 escrita por Fable a 2026-07-04, depois de analisar screenshots reais do
+BULLMANIA TERMINAL (scanner.bullmania.com) e investigar a plataforma. Substitui
+a v1: SEM gráficos no site (links TradingView + Yahoo por linha), tabela
+espelhada no terminal dele + os nossos extras. Fonte de verdade para
+implementação (componentes → Sonnet)._
 
-## 0. Referência de produto: o que o Ivan (Bullmania) oferece
+## 0. O que a Bullmania oferece (levantamento 2026-07-04)
 
-Levantamento feito a partir dos vídeos/screenshots analisados (jul-2026):
+Confirmado por screenshots do terminal + site público + help center:
 
-| Superfície dele | O que mostra | Equivalente nosso |
-|---|---|---|
-| MoneyLine no gráfico TV | linha de tendência, flip labels, Flip Level, TP 1/2/3 ATR + "Hit %" | SwellLine (Pine, membros com TV) |
-| Tabela no gráfico | Trend, Confirm, Next Flip, Last Flip, **Last Flip Date**, Since Flip, Weekly, Daily, Confluence | tabela SwellLine (parcial — falta a data) |
-| Faixa heatmap | força/momentum a aquecer/arrefecer | medidor de força (MACD÷ATR) já no Pine |
-| Pontos verdes/vermelhos | avisos precoces de fundo/topo (Daily contra Weekly) | dots já no Pine |
-| Zona 200W MA | "200W MA or lower = very cheap" | já no Pine |
-| Extras de calendário | datas FOMC, halvings do BTC | fácil de adicionar (dados estáticos) |
-| **Money Scanner** | screener multi-setor de flips | **members-app (o nosso core)** |
+1. **Money Line** — indicador TradingView invite-only; alertas TV manuais
+   ("Downtrend to Uptrend", once per bar close). Página pública de backtests
+   (BTC/ETH/SOL/SUI semanal; "drawdown 36% vs 90% buy&hold") usada como prova
+   de vendas.
+2. **Money Scanner / BULLMANIA TERMINAL** (Pro Plan + "Connect Discord"):
+   - Tabs por classe: Crypto · Stocks · Commodities · ETFs · Forex · **Portfolio**
+   - Barra de stats: total market cap, nº ativos, contagem/percentagem
+     BULLISH vs BEARISH (o "pulso de mercado")
+   - Pesquisa por nome/símbolo; "Last Update" com timestamp UTC
+   - Filtros: **Trend (BULLISH / BEARISH / WARMUP)** · Time Since Flipped ·
+     **Timeframe (Daily / Weekly / Monthly)** · Country · **Categories**
+     (AI Stage 1/2/3, Biotech, Crypto & Blockchain, Defense & Army,
+     Gold & Silver Miners, Mag7) · Market Cap; pares USD / BTC / SPX no cripto
+   - Colunas: # rank · ❤ · ativo (logo, nome, ticker) · Trend chip ·
+     **Price Change Since Flip %** · **Time Since Flip** (1Y 3W 3D 9h) ·
+     Price (moeda local: USD/KRW/TWD/JPY) · Market Cap · bandeira do país ·
+     link TradingView · link Yahoo Finance
+   - **❤ = portfolio + alerta automático quando o ativo flipa** (retenção!)
+   - Caixa "Trade on Bybit / PIONEX / Capital.com" = referrals dele
+   - Escala: ~8.000 ativos, ações internacionais (KR, TW, JP…)
+3. **Market Pulse** — feed de notícias cripto/TradFi com análise/sentimento AI.
+4. **Comunidade/educação** — Discord privado, sessões semanais, flat fee,
+   funil com treino grátis em vídeo; programa de afiliados "Earn $1000+".
 
-**A nossa vantagem a explorar (não copiar, superar):** o scanner dele vive dentro
-do TradingView (fricção: invite-only, setup). O nosso é **web + telemóvel, login
-Discord, digest diário no Discord** — zero fricção. Preço transparente, sem
-chamada de vendas. O tom visual é surf (onda, line-up, swell) e não "terminal".
+**Posicionamento nosso:** ele varre 8.000 ativos; nós somos o **radar curado**
+(~50-100 ativos que interessam à comunidade) com preço transparente, sem
+chamada de vendas — e o digest diário chega ao Discord sem abrir o site.
 
-## 1. Personas e jobs-to-be-done
+## 1. Decisões desta versão (do utilizador, 2026-07-04)
 
-1. **Membro pago (200 no Discord)** — "diz-me o que mudou hoje e o que devo
-   olhar; não me faças analisar 26 gráficos". Vem do telemóvel (Telegram/Discord).
-2. **Curioso do Telegram (3.000)** — vê o teaser público, sente FOMO, converte.
-3. **O próprio Ivan-watcher** — membro que já segue o Ivan e compara; precisa de
-   confiar que os números batem certo (transparência do método = página "Como ler").
+- **Login: exclusivamente cargo Discord "DefiSurfers"** (role id 1193224247573741699).
+  Quando o OAuth estiver ativo ponta a ponta, **remover o fallback `?key=`** do
+  middleware — sem porta lateral.
+- **Sem gráficos no site.** Cada linha tem link para TradingView e Yahoo
+  Finance (como o terminal dele). Cai o mini-gráfico da v1.
+- **UI da tabela = espelho do terminal dele** com todos aqueles dados, mais os
+  nossos extras (§3).
+- **Referrals de corretoras do utilizador** entram mais à frente — a UI já
+  nasce com o slot reservado.
 
-## 2. Arquitetura de informação (páginas)
+## 2. Arquitetura de informação
 
 ```
-/login                        → Entrar com Discord (já existe)
-/members                      → DASHBOARD "Line-up" (hoje)
-/members/[symbol]             → FICHA do ativo (detalhe)
-/members/como-ler             → guia rápido do método (retenção/confiança)
-/members/alerts               → favoritos + alertas          [fase 2]
-site público (Surf Drops)     → bloco teaser sem símbolos    [Bloco D.14]
+/login                → "Entrar com Discord" (só cargo DefiSurfers)
+/members              → TERMINAL (uma página, tabs por classe de ativo)
+/members/como-ler     → guia do método (confiança/retenção)
+Surf Drops (público)  → teaser "X flips esta semana" sem símbolos
 ```
 
-### 2.1 Dashboard `/members` — hierarquia (mobile-first)
+Uma única página de terminal com tabs — não páginas separadas por setor — para
+manter a sensação de "sala de comando" e simplificar o estado dos filtros.
 
-1. **Barra de estado do mar** (topo): resumo de mercado em 1 linha —
-   "🌊 Hoje: 2 flips bullish · 1 bearish · 14/26 ativos em ALIGNED BULL".
-   É o pulso diário; muda todos os dias → hábito de abrir.
-2. **"Acabou de flipar"** (cards horizontais): ativos com flip Daily/Weekly nos
-   últimos 5 dias úteis, mais recente primeiro. Card = símbolo, setor, direção,
-   data do flip, Since Flip %, CTA "ver ficha". É o produto — vai primeiro.
-3. **Screener completo** (tabela): agrupada por setor, colunas nucleares
-   (ver §4). Ordenação default: flips mais recentes primeiro dentro do setor.
-   Filtros: setor · direção · estado (ALIGNED/CONFLICT) · "só recém-flipados".
-4. **Rodapé de dados**: "Atualizado às HH:MM UTC · fecho diário" — gere
-   expectativas (cadência diária, não tempo real).
+### 2.1 Terminal `/members` (de cima para baixo)
 
-### 2.2 Ficha `/members/[symbol]` — o upgrade vs. tabela
+1. **Barra de stats** (pulso do mar): nº de ativos no radar, contagem + % 
+   BULLISH / BEARISH / WARMUP, "Last update HH:MM UTC". Muda todos os dias →
+   hábito de abrir.
+2. **Tabs de classe**: Cripto · Ações · ETFs · Commodities · Índices
+   (Forex fica para depois; Portfolio/favoritos = fase 2).
+3. **Pesquisa** por nome/símbolo + **filtros**: Trend (Bullish/Bearish/Warmup) ·
+   Time since flip (Hoje / Esta semana / Este mês / Qualquer) · Timeframe
+   (Daily/Weekly) · Categoria · Market cap. País só quando tivermos ações
+   internacionais.
+4. **Tabela** (colunas, por ordem):
+   | # | ❤ | Ativo (logo+nome+ticker) | Trend | Δ% desde flip | Tempo desde flip | Preço (moeda) | Market cap | Estado W/D | Força | TV | Yahoo |
+   - **Δ% desde flip** = coluna de ordenação default (desc) — é o que vende
+     (Samsung +1340% no dele).
+   - **Estado W/D** (ALIGNED/CONFLICT) e **Força** (mini heatmap) são os
+     nossos extras que o dele NÃO tem na tabela — diferenciação visível.
+   - Linha expandível (accordion, sem sair da página): Next Flip (o stop),
+     Last Flip + data, alvos 1/2/3 ATR com ✅/⭕, avisos ativos (exaustão,
+     divergência, dot topo/fundo, zona 200W barata) com frase de ação.
+5. **Caixa "Trade" (referrals)**: slot na coluna lateral/fundo, escondido até
+   o utilizador fornecer os links de afiliado dele.
 
-- **Cabeçalho**: nome, setor, preço, chip de estado grande (ALIGNED BULL /
-  CONFLICT / ALIGNED BEAR), botão "Abrir no TradingView".
-- **Mini-gráfico** (SVG/canvas leve, ~120 velas semanais): preço + SwellLine
-  verde/vermelha + marcas de flip. Sem lib pesada; os dados já vêm do snapshot.
-- **Cartões de nível**: Next Flip (o stop), Last Flip + data, Since Flip %,
-  alvos 1/2/3 ATR com estado (atingido ✅ / por atingir ⭕) — equivalente
-  honesto ao "TP Hit%" dele.
-- **Avisos ativos**: exaustão (X ATR da linha), divergência topo/fundo,
-  ponto de viragem Daily-contra-Weekly, zona 200W "very cheap". Cada um com
-  frase de ação em PT simples (reutilizar os tooltips do Pine — já escritos).
-- **Histórico de flips** (tabela): data, direção, nível, resultado % até ao
-  flip seguinte. Prova social do método com dados reais.
+### 2.2 Estado "WARMUP" (adotar, com a nossa mecânica)
 
-### 2.3 Teaser público (Surf Drops)
+No dele, WARMUP é um terceiro estado de trend. No nosso motor já existe a
+matéria-prima: **WARMUP = trend bearish MAS (momentum a aquecer OU dot de
+fundo OU divergência bullish)** — chip amarelo. Simétrico: **COOLDOWN** para
+bull a arrefecer (o dele não mostra; vantagem nossa). Regra exata afinável no
+motor, mas o conceito fica fechado: é o funil de atenção pré-flip.
 
-Bloco no site atual (sem tocar no funil): "Esta semana **3 ativos** flipparam
-bullish e **1** bearish no radar dos DeFi Surfers" — números reais do cron,
-símbolos borrados/ocultos, CTA para o Telegram (funil existente). Nunca dar
-símbolo + direção + timing de graça.
+### 2.3 ❤ Favoritos + alertas (fase 2, mas desenhar já a UI)
 
-## 3. Princípios de UI
+Coração na linha = watchlist pessoal (por membro Discord) + alerta automático
+por DM/canal Discord quando esse ativo flipa. É a feature de retenção mais
+forte do terminal dele — fica no roadmap logo a seguir ao core.
 
-- **Tema**: dark (herda o Surf Drops), acentos verde-lima (bull) / vermelho
-  (bear) / laranja (conflito/aviso) — as mesmas cores do indicador, para o
-  membro reconhecer o produto no gráfico e no site.
-- **Chips, não texto**: estado sempre como chip colorido; Since Flip % com
-  sinal e cor; "FLIP HOJE" / "FLIP ESTA SEMANA" como badge pulsante.
-- **Faixa de força como assinatura**: a coluna "Força" da tabela é um mini
-  heatmap (gradiente vermelho→amarelo→verde, igual ao Pine). Nenhum
-  concorrente web tem isto; é a nossa marca visual.
-- **Mobile primeiro**: tabela colapsa em cards por setor; filtros viram chips
-  scrolláveis; tudo utilizável com o polegar.
-- **Números com respeito**: fontes tabulares (tabular-nums), 2 decimais em %,
-  formato de preço por classe de ativo (cripto 0-2 dec, FX/commodities 2-4).
+## 3. Arquitetura de dados
 
-## 4. Arquitetura de dados
+### 3.1 Universo — metadados novos (estáticos, custo zero)
 
-### 4.1 Extensão do `AssetSnapshot` (motor TS ← paridade com o Pine)
+`UniverseAsset` ganha: `name`, `logoUrl` (clearbit/estático), `currency`
+(USD/KRW/…), `country` (ISO p/ bandeira), `categories: string[]`
+(ex: ["AI","Semis"], ["Mag7"], ["Gold"]), `yahooSymbol` (link),
+`rankHint` (ordem por mcap). Tudo curado à mão no ficheiro — sem API.
 
-O snapshot atual só cobre a tabela básica. Falta portar do Pine o que alimenta
-a ficha e os avisos — **tudo já existe em `swellline.pine`, é portar 1:1**:
+### 3.2 Snapshot — extensão (paridade Pine + colunas do terminal)
 
 ```ts
-export interface AssetSnapshot {
-  // — existente —
-  symbol: string; sector: string;
-  trend: "bullish" | "bearish";
-  weeklyTrend: TrendDir; dailyTrend: TrendDir; estado: Estado;
-  nextFlip: number; lastFlip: number | null; sinceFlipPct: number | null;
-  price: number; updatedAt: string;
-  // — novo (paridade Pine + ficha) —
-  lastFlipDate: string | null;      // o Ivan mostra; nós não — corrigir
-  dailyFlipDate: string | null;     // p/ badge "FLIP HOJE" com rigor
-  strength: number | null;          // momentum MACD÷ATR suavizado (-1..+1 clamp)
-  exhaustionAtr: number | null;     // (close-swell)/ATR; aviso se ≥ 4
-  dotTop: boolean; dotBottom: boolean;       // Daily vira contra Weekly
-  bearDiv: boolean; bullDiv: boolean;        // divergências de momentum
-  cheapZone: boolean;               // close ≤ 200W MA
-  tp: { t1: number; t2: number; t3: number;  // alvos ATR do último flip
+interface AssetSnapshot {
+  // existente: symbol, sector, trend, weeklyTrend, dailyTrend, estado,
+  //            nextFlip, lastFlip, sinceFlipPct, price, updatedAt
+  lastFlipDate: string | null;   // → coluna "tempo desde flip" (calculado no cliente)
+  marketCap: number | null;      // cripto: CoinGecko grátis; ações: fase 2
+  strength: number | null;       // momentum MACD÷ATR (-1..+1) → coluna Força
+  warmup: boolean;               // §2.2
+  cooldown: boolean;
+  exhaustionAtr: number | null;
+  dotTop: boolean; dotBottom: boolean;
+  bearDiv: boolean; bullDiv: boolean;
+  cheapZone: boolean;            // close ≤ 200W MA
+  tp: { t1: number; t2: number; t3: number;
         hit1: boolean; hit2: boolean; hit3: boolean } | null;
-  spark: { closes: number[]; swell: number[] } | null; // mini-gráfico (~120 sem.)
 }
 ```
 
-### 4.2 Persistência (Supabase — free tier)
+### 3.3 Persistência (Supabase, inalterado da v1)
 
-Duas tabelas, nada mais no MVP:
+- `snapshots` (symbol, date) — upsert diário do cron (lotes, 8 req/min TD).
+- `flip_events` (symbol, date, dir, level, price, timeframe) — **append-only**;
+  alimenta "time since flip", teaser público, histórico e futuras estatísticas.
+- Fase 2: `favorites` (discord_user_id, symbol) → alertas do bot.
 
-- **`snapshots`** — 1 linha por ativo/dia (upsert pelo cron). Serve o dashboard.
-  PK `(symbol, date)`. Guardar o JSON do snapshot + colunas extraídas para
-  filtro rápido (trend, estado, flipped_today bool).
-- **`flip_events`** — histórico permanente: `(symbol, date, dir, level,
-  price_at_flip, timeframe)`. **Append-only, nunca apagar** — alimenta:
-  "acabou de flipar" (query, não recomputação), histórico da ficha, o teaser
-  público, e futuras estatísticas de acerto. É o ativo de dados do negócio.
+### 3.4 Timeframes
 
-Cron: mantém 00:15 UTC; por lotes para respeitar 8 req/min do Twelve Data
-(cursor em BD; ~26 ativos → 4 lotes de 7). Cripto (Binance) primeiro, sem limite.
+Daily + Weekly já calculados (é o par que define ALIGNED/CONFLICT). Monthly
+(que o dele tem) = agregação das velas semanais que já temos, custo zero —
+adicionar ao motor quando a tabela suportar o filtro. Não é prioritário.
 
-### 4.3 Universo (expansão controlada)
+## 4. Princípios de UI (mantidos da v1 + ajustes)
 
-26 ativos é pouco para "scanner" (o Ivan varre dezenas). Expandir por fases
-mantendo o free tier do Twelve Data (800 créditos/dia = ~380 ativos/dia com
-2 TF; folga enorme): fase 1 → +alts Binance (custo zero: SUI, SEI, INJ, ARB,
-OP, APT, NEAR, DOT, ADA...), fase 2 → +ações AI/semis (MU, MRVL, AVGO, ALAB,
-SNDK, INTC, META, AMZN, AAPL), fase 3 → pedido dos membros (canal Discord
-"sugestões" = retenção + roadmap grátis).
+- Dark, acentos lima/vermelho/amarelo (bull/bear/warmup) — as cores do indicador.
+- Chips coloridos, nunca texto puro; `tabular-nums`; preço formatado por moeda.
+- Mobile-first: tabela → cards; filtros → chips scrolláveis; accordion no toque.
+- A coluna **Força** (heatmap) é a assinatura visual DeFi Surfers.
+- Logos dos ativos importam (o terminal dele parece "produto" por causa disso).
 
-## 5. Ordem de implementação (com etiquetas de modelo)
+## 5. Features dele — decisão de integração (recomendação Fable)
 
-1. [FABLE] ✅ Esta especificação.
-2. [SONNET] Motor: portar momentum/exaustão/dots/divergências/200W/TP do Pine
-   para `lib/engine` + estender snapshot (§4.1) + testes vs. valores do Pine.
-3. [SONNET] Supabase: tabelas §4.2 + cron por lotes + `flip_events`.
-4. [FABLE→spec, SONNET→código] Dashboard novo (§2.1) e ficha (§2.2).
-5. [FABLE] Teaser público no Surf Drops + copy (§2.3) — mexe no funil, cuidado
-   máximo, revisão Fable obrigatória.
-6. [HAIKU] Traduções PT/EN/ES do novo copy aprovado.
+| Feature dele | Veredicto | Porquê |
+|---|---|---|
+| Tabela rank/Δ%/tempo/mcap/links TV+Yahoo | **SIM, agora** | é o pedido desta v2 |
+| WARMUP | **SIM, agora** | temos a mecânica; custo ~zero; grande valor percebido |
+| ❤ favoritos + alerta de flip | **SIM, fase 2** | melhor retenção; precisa de Supabase + bot |
+| Timeframe Monthly | sim, barato | agregação local; fazer quando sobrar tempo |
+| Stats bar (pulso de mercado) | **SIM, agora** | 3 números, FOMO diário |
+| Categorias temáticas (AI Stages, Mag7…) | sim, curadoria manual | narrativa de venda; sem custo de dados |
+| Portfolio tab | mais tarde | favoritos cobrem 80% do valor primeiro |
+| Pares BTC/SPX (trend noutro denominador) | discutir | interessante p/ alts vs BTC; adia — nicho |
+| Market Pulse (news + sentimento AI) | **NÃO por agora** | custo/ruído alto, fora do core "flips" |
+| Ações internacionais (KR/TW/JP) | não no MVP | Twelve Data grátis não cobre bem; rever com receita |
+| Página pública de backtests | **SIM (marketing)** | prova de vendas p/ funil Telegram; Fable escreve |
+| Programa de afiliados próprio | fase monetização | depois do Stripe/checkout |
+| Referrals corretoras (os do utilizador) | slot já na UI | ativa quando ele der os links |
 
-Bloqueadores do utilizador (inalterados): Redirect URI no portal Discord +
-`DISCORD_CLIENT_SECRET`/`DISCORD_BOT_TOKEN` no Vercel + redeploy → login E2E.
+## 6. Ordem de implementação (etiquetas de modelo)
+
+1. [FABLE] ✅ Esta especificação v2.
+2. [SONNET] Motor: momentum/exaustão/dots/divergências/200W/TP/warmup +
+   `lastFlipDate` + snapshot §3.2 + testes vs. Pine.
+3. [SONNET] Universo com metadados §3.1 (curadoria inicial Fable→lista, Sonnet→código).
+4. [SONNET] Supabase (`snapshots`, `flip_events`) + cron por lotes.
+5. [FABLE spec fina → SONNET código] Terminal §2.1 (stats bar, tabs, filtros,
+   tabela, accordion, slot referrals).
+6. [FABLE] Remover fallback `?key=` quando o OAuth Discord estiver validado E2E.
+7. [FABLE] Teaser público + página "como ler" + (marketing) backtests.
+8. [HAIKU] Traduções PT/EN/ES do copy aprovado.
+
+Bloqueadores do utilizador (inalterados): Redirect URI Discord +
+`DISCORD_CLIENT_SECRET`/`DISCORD_BOT_TOKEN` no Vercel + redeploy;
+links de referral das corretoras (quando quiser ativar a caixa Trade).
