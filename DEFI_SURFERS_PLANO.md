@@ -279,6 +279,35 @@ Próxima tarefa concreta: item 2 do §6 (motor, [SONNET]).
   1h). Passar a LER de `snapshots` (Supabase) fica para quando o projeto
   Supabase existir — é uma troca de fonte no `page.tsx`, não mexe no Terminal.
 
+## 3.8 Login Discord ATIVO (2026-07-04, sessão épica de debugging)
+**Estado final: login end-to-end A FUNCIONAR** (confirmado nos logs: /members 200
+com sessão válida). Cadeia de problemas resolvidos, por ordem:
+1. Faltavam as env vars públicas no Vercel (`DISCORD_CLIENT_ID/GUILD_ID/ROLE_ID`)
+   → adicionadas via browser; `?error=config` desapareceu.
+2. O token no Vercel era de outra app (o utilizador tem 3 apps: LagostaSurfista,
+   Lagosta_Surfista, DeFi Surfers) → resetado na app certa.
+3. **O anti-bot AuthGG (configurado pelo Danyunder) expulsava o bot DeFi
+   Surfers#7820 segundos após entrar** (3x confirmado no audit log: kick +
+   exclusão da integração), mesmo com kick/manage-guild desligados no cargo dele.
+4. **Solução definitiva: login SEM bot** — scope OAuth `identify
+   guilds.members.read`; o próprio membro autoriza a leitura dos seus cargos
+   (`GET /users/@me/guilds/{id}/member`). Zero dependência de bot no servidor.
+   Commit d6d0679.
+Melhorias de UX/diagnóstico feitas pelo caminho: mensagens de erro orientadas
+ao cargo (nunca "não estás no servidor" — o servidor é aberto), CTA de venda só
+via Telegram (t.me/surfistacrypto) com botão próprio, erro técnico distinto do
+"sem cargo", logs com status+code+identidade do bot, `DISCORD_ROLE_ID` aceita
+vários cargos separados por vírgula (para Adm/#1).
+
+**Pendências que esta sessão deixa:**
+- [FABLE] Remover o fallback `?key=` (MEMBERS_GATE_KEY) do middleware — o
+  OAuth está validado; o gate por password já não é preciso.
+- [utilizador→Danyunder] Whitelist do bot `DeFi Surfers#7820` no AuthGG —
+  pré-requisito APENAS do Bloco B/bot da tabela diária, não do login.
+- `DISCORD_BOT_TOKEN` no Vercel está válido e da app certa; sem uso no login.
+- Erros 429 do Twelve Data no /members (recomputação ao vivo por pedido)
+  reforçam a migração da página para ler do Supabase (§ item 4 do §6).
+
 ## 4. Histórico de decisões (para não repetir discussões)
 - Domínio: `defisurfers.<tld>` em vez de manter `surfdrops.vercel.app`
   (subdomínio partilhado sem equity de SEO real a proteger; a marca
