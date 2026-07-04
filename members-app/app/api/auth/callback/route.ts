@@ -2,8 +2,15 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createSession } from "@/lib/auth/session";
 
 // Callback OAuth do Discord:
-//  código → access token → id do utilizador → verificação do cargo
-//  "DefiSurfers" no servidor (via bot) → cookie de sessão assinado.
+//  código → access token (scopes: identify + guilds.members.read) → id do
+//  utilizador → leitura dos PRÓPRIOS cargos no servidor (endpoint
+//  /users/@me/guilds/{id}/member, autorizado pelo próprio membro) → cookie
+//  de sessão assinado.
+//
+// NOTA: o gate NÃO depende de bot no servidor. A verificação por bot
+// (DISCORD_BOT_TOKEN) foi abandonada para o login porque o anti-bot do
+// servidor (AuthGG) expulsava o nosso bot ao entrar — ver DEFI_SURFERS_PLANO.
+// O bot token continua reservado para features futuras (tabela diária no canal).
 
 export async function GET(req: NextRequest) {
   const origin = req.nextUrl.origin;
@@ -12,10 +19,9 @@ export async function GET(req: NextRequest) {
 
   const clientId = process.env.DISCORD_CLIENT_ID;
   const clientSecret = process.env.DISCORD_CLIENT_SECRET;
-  const botToken = process.env.DISCORD_BOT_TOKEN;
   const guildId = process.env.DISCORD_GUILD_ID;
   const roleId = process.env.DISCORD_ROLE_ID;
-  if (!clientId || !clientSecret || !botToken || !guildId || !roleId) {
+  if (!clientId || !clientSecret || !guildId || !roleId) {
     return NextResponse.redirect(`${origin}/login?error=config`);
   }
 
@@ -40,43 +46,21 @@ export async function GET(req: NextRequest) {
   if (!meRes.ok) return NextResponse.redirect(`${origin}/login?error=perfil`);
   const me = (await meRes.json()) as { id: string };
 
+  // Cargos do próprio membro, com o token DELE (scope guilds.members.read).
   const memberRes = await fetch(
-    `https://discord.com/api/v10/guilds/${guildId}/members/${me.id}`,
-    { headers: { Authorization: `Bot ${botToken}` } }
+    `https://discord.com/api/v10/users/@me/guilds/${guildId}/member`,
+    { headers: { Authorization: `Bearer ${access_token}` } }
   );
-  // Distinguir os dois 404 do Discord: code 10007 (Unknown Member) = a conta
-  // não está no servidor → tratamento igual a "sem cargo" (o servidor é aberto;
-  // o que dá acesso é o cargo). Code 10004 (Unknown Guild) = o BOT do token não
-  // está neste servidor (token de outra app?) → problema NOSSO, nunca do membro.
-  // Restantes erros (401/403/5xx) idem: técnicos, com log para diagnóstico.
+  // 404 = a conta não está no servidor → tratamento igual a "sem cargo"
+  // (o servidor é aberto; o que dá acesso é o cargo — mensagem de adesão).
+  if (memberRes.status === 404) {
+    return NextResponse.redirect(`${origin}/login?error=sem-cargo`);
+  }
   if (!memberRes.ok) {
-    let discordCode: number | undefined;
-    try {
-      discordCode = ((await memberRes.json()) as { code?: number }).code;
-    } catch {
-      /* corpo não-JSON — segue como erro técnico */
-    }
-    if (memberRes.status === 404 && discordCode === 10007) {
-      return NextResponse.redirect(`${origin}/login?error=sem-cargo`);
-    }
-    // Diagnóstico: identificar A QUE BOT pertence o token em uso (apanha o caso
-    // clássico de o token colado ser de outra aplicação — ex: 404/10004).
-    let botIdentity = "desconhecido";
-    try {
-      const botMe = await fetch("https://discord.com/api/v10/users/@me", {
-        headers: { Authorization: `Bot ${botToken}` },
-      });
-      botIdentity = botMe.ok
-        ? JSON.stringify(await botMe.json())
-        : `inválido (HTTP ${botMe.status})`;
-    } catch {
-      /* diagnóstico é best-effort */
-    }
-    console.error(
-      `[auth] verificação de cargo falhou: HTTP ${memberRes.status}, code=${discordCode ?? "?"}; bot do token: ${botIdentity}`
-    );
+    console.error(`[auth] leitura de cargos falhou: HTTP ${memberRes.status}`);
     return NextResponse.redirect(`${origin}/login?error=verificacao`);
   }
+
   // DISCORD_ROLE_ID aceita vários IDs separados por vírgula (ex: cargo base +
   // "DefiSurfer Adm" + "DefiSurfer #1") — basta ter UM deles para entrar.
   const allowedRoles = roleId.split(",").map((r) => r.trim()).filter(Boolean);
