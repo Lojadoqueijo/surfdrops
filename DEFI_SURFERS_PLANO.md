@@ -185,6 +185,36 @@ dia após o utilizador partilhar screenshots reais do BULLMANIA TERMINAL):
   integração (o que copiar já, fase 2, ou rejeitar) no §0/§5 do documento.
 Próxima tarefa concreta: item 2 do §6 (motor, [SONNET]).
 
+### ✅ Itens 2-3 do §6 concluídos (2026-07-04, Sonnet)
+- **Motor estendido** (`lib/engine/swellline.ts`): medidor de força (EMA12/18÷ATR,
+  suavização EMA3, clamp ±1), exaustão sinalizada, divergências (pivô ±2 bars),
+  200-período SMA + `cheapZone`, alvos TP 1/2/3 ATR com tracking de `hit1/2/3`
+  (baseado em closes desde o flip). Núcleo up/dn/trend **intocado** (zero risco
+  de regressão). Nova `trendDirectionSeries()` (série completa, não só o último
+  valor) — necessária para os dots.
+- **`lib/engine/snapshot.ts`**: agora calcula `dotTop`/`dotBottom` (Daily vira
+  contra Weekly), `warmup`/`cooldown` (invenção própria — ver UXUI §2.2),
+  `lastFlipDate`/`dailyFlipDate` (ISO, a partir do timestamp da candle).
+- **`lib/data/universe.ts`**: todos os 26 ativos com `yahooSymbol` (verificado
+  um a um — atenção ao Toncoin: `TON11419-USD`, não `TON-USD`, que é outro
+  token), `logoUrl` (Clearbit para empresas, jsDelivr cryptocurrency-icons para
+  cripto), `currency`, `country`, `categories[]`, `rankHint`.
+- **Validação:** sem Node/npm nesta máquina (não instalado) — não foi possível
+  correr `tsc`/testes reais. Em vez disso, portei a lógica nova para PowerShell
+  e corri contra os dados semanais reais do BTC (Bitstamp): sem NaN após o
+  warmup, sinais coerentes (strength/exaustão com o sinal certo, cheapZone
+  false fora de bear profundo, 3 divergências detetadas na série, TP1/2/3
+  todos `hit=true` num movimento de -35%). O core (não tocado) continua a
+  bater com o comportamento já validado. **Ainda falta**: correr
+  `npm install && npm run build` num ambiente com Node para apanhar erros de
+  tipos que a leitura manual não apanhe, e escrever testes unitários reais
+  (Jest/Vitest) — ficou por fazer por falta de Node nesta máquina.
+- **`AssetSnapshot.marketCap` fica `null`** por agora (fonte de dados adiada,
+  não fazia parte deste item).
+- **Por fazer a seguir:** item 4 do §6 (Supabase: `snapshots` + `flip_events`
+  + cron por lotes) e item 5 (reescrever o terminal `/members` para o layout
+  espelhado no Bullmania — precisa de uma spec fina do Fable antes do código).
+
 ## 4. Histórico de decisões (para não repetir discussões)
 - Domínio: `defisurfers.<tld>` em vez de manter `surfdrops.vercel.app`
   (subdomínio partilhado sem equity de SEO real a proteger; a marca
