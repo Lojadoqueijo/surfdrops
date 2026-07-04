@@ -259,26 +259,42 @@ export default function Terminal({
   return (
     <main className="terminal">
       <header className="term-head">
-        <div className="brand">
-          <h1>🌊 DeFi Surfers</h1>
-          <span className="tag">terminal de tendências · membros</span>
+        <div className="head-row">
+          <div className="brand">
+            <h1>🌊 DeFi Surfers</h1>
+            <span className="tag">terminal de tendências</span>
+          </div>
+          <a className="logout" href="/api/auth/logout" title="Terminar sessão">
+            Sair ↩
+          </a>
         </div>
         <div className="pulse">
-          <span className="pulse-item">
-            <b>{pulse.total}</b> ativos
-          </span>
-          <span className="pulse-item bull">
-            <b>{pulse.bull}</b> bullish
-          </span>
-          <span className="pulse-item bear">
-            <b>{pulse.bear}</b> bearish
-          </span>
-          <span className="pulse-item warm">
-            <b>{pulse.warm}</b> warmup
-          </span>
-          <span className="pulse-upd">
-            atualizado {new Date(updatedAt).toLocaleString("pt-PT")}
-          </span>
+          <div className="stat">
+            <span className="stat-k">Ativos</span>
+            <span className="stat-v">{pulse.total}</span>
+          </div>
+          <div className="stat">
+            <span className="stat-k">Bullish</span>
+            <span className="stat-v bull">
+              {pulse.bull}
+              <em>{pulse.total ? ` ${Math.round((pulse.bull / pulse.total) * 100)}%` : ""}</em>
+            </span>
+          </div>
+          <div className="stat">
+            <span className="stat-k">Bearish</span>
+            <span className="stat-v bear">
+              {pulse.bear}
+              <em>{pulse.total ? ` ${Math.round((pulse.bear / pulse.total) * 100)}%` : ""}</em>
+            </span>
+          </div>
+          <div className="stat">
+            <span className="stat-k">Warmup</span>
+            <span className="stat-v warm">{pulse.warm}</span>
+          </div>
+          <div className="stat upd">
+            <span className="stat-k">Última atualização</span>
+            <span className="stat-v small-v">{new Date(updatedAt).toLocaleString("pt-PT")}</span>
+          </div>
         </div>
       </header>
 

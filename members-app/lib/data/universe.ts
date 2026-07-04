@@ -1,4 +1,5 @@
-// Lista curada inicial (MVP). Cobertura tipo Bullmania: cripto, ações, ETFs,
+// Universo curado (expansão 2026-07-04). Cobertura tipo Bullmania: cripto
+// (majors + alts), ações (semis/hardware + mega tech + cripto-expostas), ETFs,
 // commodities, índices. Expandir com feedback dos membros.
 //
 // Routing de dados (ver DEFI_SURFERS_PLANO.md §3.5):
@@ -6,20 +7,17 @@
 //  - source "twelvedata" → Twelve Data (ações/ETFs/commodities/índices; 8 req/min)
 //  - coingeckoId         → fallback para tokens fora da Binance (qualidade inferior)
 //
-// Metadados novos (DEFI_SURFERS_UXUI.md §3.1, terminal espelhado no do Ivan):
-//  - logoUrl: Clearbit Logo API para empresas/emissores (logo.clearbit.com/<domínio>)
-//    e jsDelivr cryptocurrency-icons para cripto — ambos grátis, sem key. Trocar
-//    de fonte é local a este ficheiro se algum dia deixarem de ser fiáveis.
-//  - currency/country: hoje tudo USD/US (ainda sem ações internacionais — ver
-//    "não no MVP" no §5 da spec). Ficam prontos para quando expandirmos.
-//  - categories: tags temáticas para o filtro "Categories" do terminal (Mag7,
-//    AI, Semis, Crypto and Blockchain, ETF, Commodities, Indices...).
-//  - yahooSymbol: para o link "Yahoo Finance" por linha (pedido do utilizador,
-//    2026-07-04) — verificados manualmente, não assumir o padrão óbvio sempre
-//    bate certo (ex: Toncoin é TON11419-USD no Yahoo, não TON-USD — esse é um
-//    token diferente na Ethereum).
-//  - rankHint: só um desempate de ordenação por defeito (grosseiro, não é
-//    market cap real) até termos mcap para todos os ativos.
+// ORÇAMENTO Twelve Data (grátis: 800 créditos/dia, 8/min): cada ativo TD custa
+// 2 pedidos/dia (1W+1D). Com o throttle de 16s/ativo, cada lote do cron aguenta
+// ~18 ativos TD em 300s — ver CRON_BATCHES no route do cron ao mexer aqui.
+//
+// Metadados (DEFI_SURFERS_UXUI.md §3.1):
+//  - logoUrl: Clearbit (empresas) e jsDelivr cryptocurrency-icons (cripto).
+//    Para tokens que NÃO existem no pack de ícones (novos: SUI, SEI, TIA...)
+//    fica null → a UI mostra as iniciais. Não inventar URLs.
+//  - yahooSymbol: verificado manualmente; o padrão óbvio nem sempre bate certo
+//    (ex: Toncoin é TON11419-USD; Uniswap é UNI7083-USD). Em caso de dúvida →
+//    null (a UI esconde o botão YF) e corrige-se depois.
 
 export type DataSource = "binance" | "twelvedata";
 
@@ -44,44 +42,146 @@ const CRYPTO_ICON = (ticker: string) =>
   `https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1.0/128/color/${ticker.toLowerCase()}.png`;
 const COMPANY_LOGO = (domain: string) => `https://logo.clearbit.com/${domain}`;
 
+// Helper compacto para cripto Binance.
+function cripto(
+  ticker: string,
+  name: string,
+  rankHint: number,
+  opts: { sector?: string; categories?: string[]; yahoo?: string | null; icon?: boolean; coingeckoId?: string } = {}
+): UniverseAsset {
+  return {
+    symbol: `${ticker}/USD`,
+    tvSymbol: `CRYPTO:${ticker}USD`,
+    yahooSymbol: opts.yahoo ?? null,
+    name,
+    sector: opts.sector ?? "Cripto — Alts",
+    categories: opts.categories ?? ["Crypto and Blockchain", "Alts"],
+    currency: "USD",
+    country: null,
+    logoUrl: opts.icon === false ? null : CRYPTO_ICON(ticker),
+    rankHint,
+    source: "binance",
+    binanceSymbol: `${ticker}USDT`,
+    coingeckoId: opts.coingeckoId,
+  };
+}
+
+// Helper compacto para ações/ETFs Twelve Data.
+function td(
+  symbol: string,
+  name: string,
+  rankHint: number,
+  opts: {
+    sector: string;
+    categories: string[];
+    tv: string;
+    domain?: string;
+    yahoo?: string | null;
+    twelveSymbol?: string;
+    country?: string | null;
+  }
+): UniverseAsset {
+  return {
+    symbol,
+    tvSymbol: opts.tv,
+    yahooSymbol: opts.yahoo === undefined ? symbol : opts.yahoo,
+    name,
+    sector: opts.sector,
+    categories: opts.categories,
+    currency: "USD",
+    country: opts.country === undefined ? "US" : opts.country,
+    logoUrl: opts.domain ? COMPANY_LOGO(opts.domain) : null,
+    rankHint,
+    source: "twelvedata",
+    twelveSymbol: opts.twelveSymbol ?? symbol,
+  };
+}
+
+const MAJORS = { sector: "Cripto — Majors", categories: ["Crypto and Blockchain", "Majors"] };
+
 export const UNIVERSE: UniverseAsset[] = [
   // --- Cripto: majors (Binance, grátis) ---
-  { symbol: "BTC/USD", tvSymbol: "CRYPTO:BTCUSD", yahooSymbol: "BTC-USD", name: "Bitcoin", sector: "Cripto — Majors", categories: ["Crypto and Blockchain", "Majors"], currency: "USD", country: null, logoUrl: CRYPTO_ICON("btc"), rankHint: 1, source: "binance", binanceSymbol: "BTCUSDT", coingeckoId: "bitcoin" },
-  { symbol: "ETH/USD", tvSymbol: "CRYPTO:ETHUSD", yahooSymbol: "ETH-USD", name: "Ethereum", sector: "Cripto — Majors", categories: ["Crypto and Blockchain", "Majors"], currency: "USD", country: null, logoUrl: CRYPTO_ICON("eth"), rankHint: 2, source: "binance", binanceSymbol: "ETHUSDT", coingeckoId: "ethereum" },
-  { symbol: "SOL/USD", tvSymbol: "CRYPTO:SOLUSD", yahooSymbol: "SOL-USD", name: "Solana", sector: "Cripto — Majors", categories: ["Crypto and Blockchain", "Majors"], currency: "USD", country: null, logoUrl: CRYPTO_ICON("sol"), rankHint: 5, source: "binance", binanceSymbol: "SOLUSDT", coingeckoId: "solana" },
-  { symbol: "BNB/USD", tvSymbol: "CRYPTO:BNBUSD", yahooSymbol: "BNB-USD", name: "BNB", sector: "Cripto — Majors", categories: ["Crypto and Blockchain", "Majors"], currency: "USD", country: null, logoUrl: CRYPTO_ICON("bnb"), rankHint: 6, source: "binance", binanceSymbol: "BNBUSDT", coingeckoId: "binancecoin" },
-  { symbol: "XRP/USD", tvSymbol: "CRYPTO:XRPUSD", yahooSymbol: "XRP-USD", name: "XRP", sector: "Cripto — Majors", categories: ["Crypto and Blockchain", "Majors"], currency: "USD", country: null, logoUrl: CRYPTO_ICON("xrp"), rankHint: 7, source: "binance", binanceSymbol: "XRPUSDT", coingeckoId: "ripple" },
-  { symbol: "AVAX/USD", tvSymbol: "CRYPTO:AVAXUSD", yahooSymbol: "AVAX-USD", name: "Avalanche", sector: "Cripto — Majors", categories: ["Crypto and Blockchain", "Majors"], currency: "USD", country: null, logoUrl: CRYPTO_ICON("avax"), rankHint: 15, source: "binance", binanceSymbol: "AVAXUSDT", coingeckoId: "avalanche-2" },
-  { symbol: "LINK/USD", tvSymbol: "CRYPTO:LINKUSD", yahooSymbol: "LINK-USD", name: "Chainlink", sector: "Cripto — Majors", categories: ["Crypto and Blockchain", "Majors"], currency: "USD", country: null, logoUrl: CRYPTO_ICON("link"), rankHint: 16, source: "binance", binanceSymbol: "LINKUSDT", coingeckoId: "chainlink" },
-  // Yahoo: Toncoin usa TON11419-USD (colisão de ticker); TON-USD é outro token (Ethereum).
-  { symbol: "TON/USD", tvSymbol: "CRYPTO:TONUSD", yahooSymbol: "TON11419-USD", name: "Toncoin", sector: "Cripto — Majors", categories: ["Crypto and Blockchain", "Majors"], currency: "USD", country: null, logoUrl: CRYPTO_ICON("ton"), rankHint: 20, source: "binance", binanceSymbol: "TONUSDT", coingeckoId: "the-open-network" },
-  { symbol: "DOGE/USD", tvSymbol: "CRYPTO:DOGEUSD", yahooSymbol: "DOGE-USD", name: "Dogecoin", sector: "Cripto — Majors", categories: ["Crypto and Blockchain", "Majors"], currency: "USD", country: null, logoUrl: CRYPTO_ICON("doge"), rankHint: 10, source: "binance", binanceSymbol: "DOGEUSDT", coingeckoId: "dogecoin" },
+  cripto("BTC", "Bitcoin", 1, { ...MAJORS, yahoo: "BTC-USD", coingeckoId: "bitcoin" }),
+  cripto("ETH", "Ethereum", 2, { ...MAJORS, yahoo: "ETH-USD", coingeckoId: "ethereum" }),
+  cripto("SOL", "Solana", 5, { ...MAJORS, yahoo: "SOL-USD", coingeckoId: "solana" }),
+  cripto("BNB", "BNB", 6, { ...MAJORS, yahoo: "BNB-USD", coingeckoId: "binancecoin" }),
+  cripto("XRP", "XRP", 7, { ...MAJORS, yahoo: "XRP-USD", coingeckoId: "ripple" }),
+  cripto("ADA", "Cardano", 9, { ...MAJORS, yahoo: "ADA-USD", coingeckoId: "cardano" }),
+  cripto("DOGE", "Dogecoin", 10, { sector: MAJORS.sector, categories: ["Crypto and Blockchain", "Majors", "Memes"], yahoo: "DOGE-USD", coingeckoId: "dogecoin" }),
+  cripto("TRX", "TRON", 11, { ...MAJORS, yahoo: "TRX-USD", coingeckoId: "tron" }),
+  cripto("AVAX", "Avalanche", 15, { ...MAJORS, yahoo: "AVAX-USD", coingeckoId: "avalanche-2" }),
+  cripto("LINK", "Chainlink", 16, { ...MAJORS, yahoo: "LINK-USD", coingeckoId: "chainlink" }),
+  // Yahoo: Toncoin usa TON11419-USD (colisão de ticker); TON-USD é outro token.
+  cripto("TON", "Toncoin", 20, { ...MAJORS, yahoo: "TON11419-USD", coingeckoId: "the-open-network", icon: false }),
 
-  // --- Ações: AI / Tech (Twelve Data) ---
-  { symbol: "NVDA", tvSymbol: "NASDAQ:NVDA", yahooSymbol: "NVDA", name: "NVIDIA", sector: "Ações — AI/Tech", categories: ["AI", "Semis", "Mag7"], currency: "USD", country: "US", logoUrl: COMPANY_LOGO("nvidia.com"), rankHint: 30, source: "twelvedata", twelveSymbol: "NVDA" },
-  { symbol: "MSFT", tvSymbol: "NASDAQ:MSFT", yahooSymbol: "MSFT", name: "Microsoft", sector: "Ações — AI/Tech", categories: ["AI", "Mag7"], currency: "USD", country: "US", logoUrl: COMPANY_LOGO("microsoft.com"), rankHint: 31, source: "twelvedata", twelveSymbol: "MSFT" },
-  { symbol: "GOOGL", tvSymbol: "NASDAQ:GOOGL", yahooSymbol: "GOOGL", name: "Alphabet", sector: "Ações — AI/Tech", categories: ["AI", "Mag7"], currency: "USD", country: "US", logoUrl: COMPANY_LOGO("abc.xyz"), rankHint: 32, source: "twelvedata", twelveSymbol: "GOOGL" },
-  { symbol: "AMD", tvSymbol: "NASDAQ:AMD", yahooSymbol: "AMD", name: "AMD", sector: "Ações — AI/Tech", categories: ["AI", "Semis"], currency: "USD", country: "US", logoUrl: COMPANY_LOGO("amd.com"), rankHint: 40, source: "twelvedata", twelveSymbol: "AMD" },
-  { symbol: "PLTR", tvSymbol: "NASDAQ:PLTR", yahooSymbol: "PLTR", name: "Palantir", sector: "Ações — AI/Tech", categories: ["AI"], currency: "USD", country: "US", logoUrl: COMPANY_LOGO("palantir.com"), rankHint: 41, source: "twelvedata", twelveSymbol: "PLTR" },
-  { symbol: "TSM", tvSymbol: "NYSE:TSM", yahooSymbol: "TSM", name: "TSMC", sector: "Ações — AI/Tech", categories: ["AI", "Semis"], currency: "USD", country: "US", logoUrl: COMPANY_LOGO("tsmc.com"), rankHint: 33, source: "twelvedata", twelveSymbol: "TSM" },
-  { symbol: "TSLA", tvSymbol: "NASDAQ:TSLA", yahooSymbol: "TSLA", name: "Tesla", sector: "Ações — AI/Tech", categories: ["Mag7"], currency: "USD", country: "US", logoUrl: COMPANY_LOGO("tesla.com"), rankHint: 34, source: "twelvedata", twelveSymbol: "TSLA" },
-  { symbol: "COIN", tvSymbol: "NASDAQ:COIN", yahooSymbol: "COIN", name: "Coinbase", sector: "Ações — Cripto-expostas", categories: ["Crypto and Blockchain"], currency: "USD", country: "US", logoUrl: COMPANY_LOGO("coinbase.com"), rankHint: 50, source: "twelvedata", twelveSymbol: "COIN" },
-  { symbol: "MSTR", tvSymbol: "NASDAQ:MSTR", yahooSymbol: "MSTR", name: "Strategy", sector: "Ações — Cripto-expostas", categories: ["Crypto and Blockchain"], currency: "USD", country: "US", logoUrl: COMPANY_LOGO("strategy.com"), rankHint: 51, source: "twelvedata", twelveSymbol: "MSTR" },
+  // --- Cripto: alts (Binance, grátis) ---
+  cripto("DOT", "Polkadot", 30, { yahoo: "DOT-USD" }),
+  cripto("LTC", "Litecoin", 31, { yahoo: "LTC-USD" }),
+  cripto("XLM", "Stellar", 32, { yahoo: "XLM-USD" }),
+  cripto("HBAR", "Hedera", 33, { icon: false }),
+  cripto("ATOM", "Cosmos", 34, { yahoo: "ATOM-USD" }),
+  cripto("FIL", "Filecoin", 35, { yahoo: "FIL-USD" }),
+  cripto("NEAR", "NEAR Protocol", 36, { yahoo: "NEAR-USD" }),
+  cripto("APT", "Aptos", 37, { icon: false }),
+  cripto("SUI", "Sui", 38, { icon: false }),
+  cripto("SEI", "Sei", 39, { icon: false }),
+  cripto("INJ", "Injective", 40, { icon: false }),
+  cripto("ARB", "Arbitrum", 41, { icon: false }),
+  cripto("OP", "Optimism", 42, { icon: false }),
+  cripto("TIA", "Celestia", 43, { icon: false }),
+  cripto("UNI", "Uniswap", 44, { categories: ["Crypto and Blockchain", "Alts", "DeFi"], yahoo: "UNI7083-USD" }),
+  cripto("AAVE", "Aave", 45, { categories: ["Crypto and Blockchain", "Alts", "DeFi"], yahoo: "AAVE-USD" }),
+  cripto("FET", "Fetch.ai (ASI)", 46, { categories: ["Crypto and Blockchain", "Alts", "AI"], icon: false }),
+  cripto("RENDER", "Render", 47, { categories: ["Crypto and Blockchain", "Alts", "AI"], icon: false }),
+  cripto("TAO", "Bittensor", 48, { categories: ["Crypto and Blockchain", "Alts", "AI"], icon: false }),
+  cripto("ZEC", "Zcash", 49, { categories: ["Crypto and Blockchain", "Alts", "Privacy"], yahoo: "ZEC-USD" }),
+  cripto("SHIB", "Shiba Inu", 50, { categories: ["Crypto and Blockchain", "Alts", "Memes"], yahoo: "SHIB-USD" }),
+  cripto("PEPE", "Pepe", 51, { categories: ["Crypto and Blockchain", "Alts", "Memes"], icon: false }),
+
+  // --- Ações: Semis & Hardware (Twelve Data) ---
+  td("NVDA", "NVIDIA", 100, { sector: "Ações — Semis & Hardware", categories: ["AI", "Semis", "Mag7"], tv: "NASDAQ:NVDA", domain: "nvidia.com" }),
+  td("AMD", "AMD", 101, { sector: "Ações — Semis & Hardware", categories: ["AI", "Semis"], tv: "NASDAQ:AMD", domain: "amd.com" }),
+  td("TSM", "TSMC", 102, { sector: "Ações — Semis & Hardware", categories: ["AI", "Semis"], tv: "NYSE:TSM", domain: "tsmc.com" }),
+  td("MU", "Micron", 103, { sector: "Ações — Semis & Hardware", categories: ["AI", "Semis"], tv: "NASDAQ:MU", domain: "micron.com" }),
+  td("MRVL", "Marvell", 104, { sector: "Ações — Semis & Hardware", categories: ["AI", "Semis"], tv: "NASDAQ:MRVL", domain: "marvell.com" }),
+  td("AVGO", "Broadcom", 105, { sector: "Ações — Semis & Hardware", categories: ["AI", "Semis"], tv: "NASDAQ:AVGO", domain: "broadcom.com" }),
+  td("ALAB", "Astera Labs", 106, { sector: "Ações — Semis & Hardware", categories: ["AI", "Semis"], tv: "NASDAQ:ALAB", domain: "asteralabs.com" }),
+  td("SNDK", "Sandisk", 107, { sector: "Ações — Semis & Hardware", categories: ["AI", "Semis"], tv: "NASDAQ:SNDK", domain: "sandisk.com" }),
+  td("INTC", "Intel", 108, { sector: "Ações — Semis & Hardware", categories: ["AI", "Semis"], tv: "NASDAQ:INTC", domain: "intel.com" }),
+  td("SMCI", "Super Micro", 109, { sector: "Ações — Semis & Hardware", categories: ["AI", "Hardware"], tv: "NASDAQ:SMCI", domain: "supermicro.com" }),
+  td("ARM", "Arm Holdings", 110, { sector: "Ações — Semis & Hardware", categories: ["AI", "Semis"], tv: "NASDAQ:ARM", domain: "arm.com" }),
+  td("DELL", "Dell", 111, { sector: "Ações — Semis & Hardware", categories: ["AI", "Hardware"], tv: "NYSE:DELL", domain: "dell.com" }),
+
+  // --- Ações: Mega Tech / AI (Twelve Data) ---
+  td("MSFT", "Microsoft", 120, { sector: "Ações — Mega Tech", categories: ["AI", "Mag7"], tv: "NASDAQ:MSFT", domain: "microsoft.com" }),
+  td("AAPL", "Apple", 121, { sector: "Ações — Mega Tech", categories: ["Mag7"], tv: "NASDAQ:AAPL", domain: "apple.com" }),
+  td("GOOGL", "Alphabet", 122, { sector: "Ações — Mega Tech", categories: ["AI", "Mag7"], tv: "NASDAQ:GOOGL", domain: "abc.xyz" }),
+  td("AMZN", "Amazon", 123, { sector: "Ações — Mega Tech", categories: ["AI", "Mag7"], tv: "NASDAQ:AMZN", domain: "amazon.com" }),
+  td("META", "Meta", 124, { sector: "Ações — Mega Tech", categories: ["AI", "Mag7"], tv: "NASDAQ:META", domain: "meta.com" }),
+  td("TSLA", "Tesla", 125, { sector: "Ações — Mega Tech", categories: ["Mag7"], tv: "NASDAQ:TSLA", domain: "tesla.com" }),
+  td("ORCL", "Oracle", 126, { sector: "Ações — Mega Tech", categories: ["AI"], tv: "NYSE:ORCL", domain: "oracle.com" }),
+  td("PLTR", "Palantir", 127, { sector: "Ações — Mega Tech", categories: ["AI"], tv: "NASDAQ:PLTR", domain: "palantir.com" }),
+
+  // --- Ações: cripto-expostas (Twelve Data) ---
+  td("COIN", "Coinbase", 140, { sector: "Ações — Cripto-expostas", categories: ["Crypto and Blockchain"], tv: "NASDAQ:COIN", domain: "coinbase.com" }),
+  td("MSTR", "Strategy", 141, { sector: "Ações — Cripto-expostas", categories: ["Crypto and Blockchain"], tv: "NASDAQ:MSTR", domain: "strategy.com" }),
 
   // --- ETFs (Twelve Data) ---
-  { symbol: "SPY", tvSymbol: "AMEX:SPY", yahooSymbol: "SPY", name: "SPDR S&P 500", sector: "ETFs", categories: ["ETF", "Broad Market"], currency: "USD", country: "US", logoUrl: COMPANY_LOGO("ssga.com"), rankHint: 60, source: "twelvedata", twelveSymbol: "SPY" },
-  { symbol: "QQQ", tvSymbol: "NASDAQ:QQQ", yahooSymbol: "QQQ", name: "Invesco QQQ", sector: "ETFs", categories: ["ETF", "Broad Market"], currency: "USD", country: "US", logoUrl: COMPANY_LOGO("invesco.com"), rankHint: 61, source: "twelvedata", twelveSymbol: "QQQ" },
-  { symbol: "GLD", tvSymbol: "AMEX:GLD", yahooSymbol: "GLD", name: "SPDR Gold Shares", sector: "ETFs", categories: ["ETF", "Commodities"], currency: "USD", country: "US", logoUrl: COMPANY_LOGO("ssga.com"), rankHint: 62, source: "twelvedata", twelveSymbol: "GLD" },
-  { symbol: "IBIT", tvSymbol: "NASDAQ:IBIT", yahooSymbol: "IBIT", name: "iShares Bitcoin Trust", sector: "ETFs", categories: ["ETF", "Crypto and Blockchain"], currency: "USD", country: "US", logoUrl: COMPANY_LOGO("ishares.com"), rankHint: 63, source: "twelvedata", twelveSymbol: "IBIT" },
+  td("SPY", "SPDR S&P 500", 160, { sector: "ETFs", categories: ["ETF", "Broad Market"], tv: "AMEX:SPY", domain: "ssga.com" }),
+  td("QQQ", "Invesco QQQ", 161, { sector: "ETFs", categories: ["ETF", "Broad Market"], tv: "NASDAQ:QQQ", domain: "invesco.com" }),
+  td("SMH", "VanEck Semiconductor", 162, { sector: "ETFs", categories: ["ETF", "AI", "Semis"], tv: "NASDAQ:SMH", domain: "vaneck.com" }),
+  td("GLD", "SPDR Gold Shares", 163, { sector: "ETFs", categories: ["ETF", "Commodities"], tv: "AMEX:GLD", domain: "ssga.com" }),
+  td("SLV", "iShares Silver Trust", 164, { sector: "ETFs", categories: ["ETF", "Commodities"], tv: "AMEX:SLV", domain: "ishares.com" }),
+  td("IBIT", "iShares Bitcoin Trust", 165, { sector: "ETFs", categories: ["ETF", "Crypto and Blockchain"], tv: "NASDAQ:IBIT", domain: "ishares.com" }),
 
   // --- Commodities (Twelve Data) ---
-  { symbol: "XAU/USD", tvSymbol: "OANDA:XAUUSD", yahooSymbol: "XAUUSD=X", name: "Ouro", sector: "Commodities", categories: ["Commodities"], currency: "USD", country: null, logoUrl: null, rankHint: 70, source: "twelvedata", twelveSymbol: "XAU/USD" },
-  { symbol: "XAG/USD", tvSymbol: "OANDA:XAGUSD", yahooSymbol: "XAGUSD=X", name: "Prata", sector: "Commodities", categories: ["Commodities"], currency: "USD", country: null, logoUrl: null, rankHint: 71, source: "twelvedata", twelveSymbol: "XAG/USD" },
-  { symbol: "WTI/USD", tvSymbol: "TVC:USOIL", yahooSymbol: "CL=F", name: "Petróleo WTI", sector: "Commodities", categories: ["Commodities"], currency: "USD", country: null, logoUrl: null, rankHint: 72, source: "twelvedata", twelveSymbol: "WTI/USD" },
+  td("XAU/USD", "Ouro", 180, { sector: "Commodities", categories: ["Commodities"], tv: "OANDA:XAUUSD", yahoo: "XAUUSD=X", twelveSymbol: "XAU/USD", country: null }),
+  td("XAG/USD", "Prata", 181, { sector: "Commodities", categories: ["Commodities"], tv: "OANDA:XAGUSD", yahoo: "XAGUSD=X", twelveSymbol: "XAG/USD", country: null }),
+  td("WTI/USD", "Petróleo WTI", 182, { sector: "Commodities", categories: ["Commodities"], tv: "TVC:USOIL", yahoo: "CL=F", twelveSymbol: "WTI/USD", country: null }),
 
   // --- Índices (Twelve Data) ---
-  { symbol: "SPX", tvSymbol: "SP:SPX", yahooSymbol: "^GSPC", name: "S&P 500", sector: "Índices", categories: ["Indices"], currency: "USD", country: "US", logoUrl: null, rankHint: 80, source: "twelvedata", twelveSymbol: "SPX" },
-  { symbol: "NDX", tvSymbol: "NASDAQ:NDX", yahooSymbol: "^NDX", name: "Nasdaq 100", sector: "Índices", categories: ["Indices"], currency: "USD", country: "US", logoUrl: null, rankHint: 81, source: "twelvedata", twelveSymbol: "NDX" },
+  td("SPX", "S&P 500", 190, { sector: "Índices", categories: ["Indices"], tv: "SP:SPX", yahoo: "^GSPC" }),
+  td("NDX", "Nasdaq 100", 191, { sector: "Índices", categories: ["Indices"], tv: "NASDAQ:NDX", yahoo: "^NDX" }),
 ];
 
 export const SECTORS = [...new Set(UNIVERSE.map((a) => a.sector))];

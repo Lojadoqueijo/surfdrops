@@ -16,13 +16,14 @@ import { UNIVERSE } from "@/lib/data/universe";
 //
 // O Vercel Hobby só permite 5 cron jobs por projeto (1x/dia cada) — por isso
 // os setores estão agrupados manualmente em 4 lotes (não 1 lote por setor),
-// deixando folga para 1 cron extra no futuro. Cripto fica isolado porque a
-// Binance não tem limite de pedidos/min (ao contrário do Twelve Data).
+// deixando folga para 1 cron extra no futuro. Cripto (33 ativos) fica junto
+// porque a Binance não tem limite de pedidos/min; os lotes Twelve Data ficam
+// ≤ ~13 ativos cada (13 × 16s de throttle ≈ 208s < maxDuration 300s).
 const CRON_BATCHES: string[][] = [
-  ["Cripto — Majors"],
-  ["Ações — AI/Tech"],
-  ["Ações — Cripto-expostas", "ETFs"],
-  ["Commodities", "Índices"],
+  ["Cripto — Majors", "Cripto — Alts"],
+  ["Ações — Semis & Hardware"],
+  ["Ações — Mega Tech"],
+  ["Ações — Cripto-expostas", "ETFs", "Commodities", "Índices"],
 ];
 
 // Persistência: se SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY estiverem

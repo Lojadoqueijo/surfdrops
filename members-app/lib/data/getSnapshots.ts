@@ -28,14 +28,21 @@ export async function snapshotForAsset(asset: UniverseAsset): Promise<AssetSnaps
   });
 }
 
-export async function getSnapshots(assets: UniverseAsset[] = UNIVERSE): Promise<AssetSnapshot[]> {
+export async function getSnapshots(
+  assets: UniverseAsset[] = UNIVERSE,
+  opts: { throttle?: boolean } = {}
+): Promise<AssetSnapshot[]> {
+  // throttle=true (default; cron): respeita os 8 req/min do Twelve Data.
+  // throttle=false (página, fallback sem BD): responde depressa e deixa o 429
+  // acontecer — alguns ativos TD falham nesse pedido, mas a página carrega.
+  const throttle = opts.throttle ?? true;
   const out: AssetSnapshot[] = [];
 
   for (const asset of assets) {
     try {
       const snap = await snapshotForAsset(asset);
       if (snap) out.push(snap);
-      if (isThrottled(asset)) await sleep(THROTTLE_MS);
+      if (throttle && isThrottled(asset)) await sleep(THROTTLE_MS);
     } catch (err) {
       console.error(`[snapshots] falhou ${asset.symbol}:`, err);
     }

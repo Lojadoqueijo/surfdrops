@@ -73,6 +73,70 @@ export async function upsertSnapshots(snapshots: AssetSnapshot[]): Promise<Persi
 }
 
 /**
+ * Últimos snapshots por ativo (para a página de membros LER da BD em vez de
+ * recomputar ao vivo — com o universo expandido, o throttle do Twelve Data
+ * torna a computação por pedido inviável). Devolve null se o Supabase não
+ * estiver configurado ou ainda não houver dados (fallback: computar ao vivo).
+ */
+export async function readLatestSnapshots(): Promise<
+  { rows: AssetSnapshot[]; updatedAt: string } | null
+> {
+  const supabase = getSupabase();
+  if (!supabase) return null;
+
+  const since = new Date(Date.now() - 4 * 86_400_000).toISOString().slice(0, 10);
+  const { data, error } = await supabase
+    .from("snapshots")
+    .select("*")
+    .gte("date", since)
+    .order("date", { ascending: false });
+  if (error) {
+    console.error("[supabase] leitura de snapshots falhou:", error.message);
+    return null;
+  }
+  if (!data || data.length === 0) return null;
+
+  const seen = new Set<string>();
+  const rows: AssetSnapshot[] = [];
+  let updatedAt = "";
+  for (const r of data as Record<string, unknown>[]) {
+    const symbol = r.symbol as string;
+    if (seen.has(symbol)) continue; // ordenado por data desc → primeiro = mais recente
+    seen.add(symbol);
+    const rowUpdated = (r.updated_at as string) ?? "";
+    if (rowUpdated > updatedAt) updatedAt = rowUpdated;
+    rows.push({
+      symbol,
+      sector: r.sector as string,
+      trend: r.trend as AssetSnapshot["trend"],
+      weeklyTrend: (r.weekly_trend as AssetSnapshot["weeklyTrend"]) ?? null,
+      dailyTrend: (r.daily_trend as AssetSnapshot["dailyTrend"]) ?? null,
+      estado: (r.estado as AssetSnapshot["estado"]) ?? null,
+      nextFlip: r.next_flip as number,
+      lastFlip: (r.last_flip as number) ?? null,
+      lastFlipClose: (r.last_flip_close as number) ?? null,
+      lastFlipDate: (r.last_flip_date as string) ?? null,
+      dailyFlipDate: (r.daily_flip_date as string) ?? null,
+      sinceFlipPct: (r.since_flip_pct as number) ?? null,
+      price: r.price as number,
+      updatedAt: rowUpdated,
+      marketCap: (r.market_cap as number) ?? null,
+      strength: (r.strength as number) ?? null,
+      warmup: Boolean(r.warmup),
+      cooldown: Boolean(r.cooldown),
+      exhaustionAtr: (r.exhaustion_atr as number) ?? null,
+      dotTop: Boolean(r.dot_top),
+      dotBottom: Boolean(r.dot_bottom),
+      bearDiv: Boolean(r.bear_div),
+      bullDiv: Boolean(r.bull_div),
+      cheapZone: Boolean(r.cheap_zone),
+      tp: (r.tp as AssetSnapshot["tp"]) ?? null,
+    });
+  }
+  return { rows, updatedAt };
+}
+
+/**
  * flip_events: histórico append-only. Só persistimos o flip WEEKLY (é o que
  * tem um nível de linha próprio — lastFlip/lastFlipClose). O motor de
  * confirmação Daily (trendDirectionSeries) hoje só dá direção, sem o nível da
