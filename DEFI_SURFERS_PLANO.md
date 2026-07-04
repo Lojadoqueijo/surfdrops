@@ -308,6 +308,24 @@ vários cargos separados por vírgula (para Adm/#1).
 - Erros 429 do Twelve Data no /members (recomputação ao vivo por pedido)
   reforçam a migração da página para ler do Supabase (§ item 4 do §6).
 
+## 3.9 Supabase AO VIVO + terminal v2.1 (2026-07-04/05)
+- **Supabase ligado de ponta a ponta**: projeto `jfehjdfgqsegxewifwws` (org
+  Lojadoqueijo, AWS eu-west-1), schema corrido no SQL Editor, env vars no
+  Vercel (`SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` Sensitive). A página
+  `/members` LÊ de `snapshots` (fallback: computo ao vivo sem throttle).
+- **Armadilha descoberta e corrigida: Binance devolve HTTP 451 (geo-block) a
+  IPs dos EUA** — a região default das funções Vercel (iad1) matava 30/33
+  criptos. Fix: `"regions": ["dub1"]` no vercel.json (Dublin = mesma região do
+  Supabase). Primeiro carregamento manual: 33/33 criptos gravados, flip fresco
+  do TRX detetado.
+- **Terminal v2.1**: universo 26→68 ativos (33 cripto, 22 ações
+  Semis/Mega Tech, 6 ETFs), estética Bullmania (preto-arroxeado, sans, stats
+  bar com %, tabs pílula), botão logout (/api/auth/logout), lotes do cron
+  rebalanceados (≤13 TD/lote).
+- Pendências: apagar `MEMBERS_GATE_KEY` do Vercel (acesso só por cargo);
+  CRON_SECRET não definido (endpoint de cron é público — baixo risco, mas
+  definir um dia); teasers públicos; referrals.
+
 ## 4. Histórico de decisões (para não repetir discussões)
 - Domínio: `defisurfers.<tld>` em vez de manter `surfdrops.vercel.app`
   (subdomínio partilhado sem equity de SEO real a proteger; a marca

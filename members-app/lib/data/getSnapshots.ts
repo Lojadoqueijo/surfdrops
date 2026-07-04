@@ -42,9 +42,12 @@ export async function getSnapshots(
     try {
       const snap = await snapshotForAsset(asset);
       if (snap) out.push(snap);
-      if (throttle && isThrottled(asset)) await sleep(THROTTLE_MS);
     } catch (err) {
       console.error(`[snapshots] falhou ${asset.symbol}:`, err);
+    } finally {
+      // A pausa tem de acontecer MESMO quando o pedido falha — um 429 em
+      // cadeia sem pausa queima o limite por minuto do Twelve Data em segundos.
+      if (throttle && isThrottled(asset)) await sleep(THROTTLE_MS);
     }
   }
   return out;
