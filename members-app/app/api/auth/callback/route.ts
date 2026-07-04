@@ -55,8 +55,11 @@ export async function GET(req: NextRequest) {
     console.error(`[auth] verificação de cargo falhou: HTTP ${memberRes.status}`);
     return NextResponse.redirect(`${origin}/login?error=verificacao`);
   }
+  // DISCORD_ROLE_ID aceita vários IDs separados por vírgula (ex: cargo base +
+  // "DefiSurfer Adm" + "DefiSurfer #1") — basta ter UM deles para entrar.
+  const allowedRoles = roleId.split(",").map((r) => r.trim()).filter(Boolean);
   const member = (await memberRes.json()) as { roles?: string[] };
-  if (!member.roles?.includes(roleId)) {
+  if (!member.roles?.some((r) => allowedRoles.includes(r))) {
     return NextResponse.redirect(`${origin}/login?error=sem-cargo`);
   }
 
