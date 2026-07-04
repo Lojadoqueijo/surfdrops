@@ -59,8 +59,21 @@ export async function GET(req: NextRequest) {
     if (memberRes.status === 404 && discordCode === 10007) {
       return NextResponse.redirect(`${origin}/login?error=sem-cargo`);
     }
+    // Diagnóstico: identificar A QUE BOT pertence o token em uso (apanha o caso
+    // clássico de o token colado ser de outra aplicação — ex: 404/10004).
+    let botIdentity = "desconhecido";
+    try {
+      const botMe = await fetch("https://discord.com/api/v10/users/@me", {
+        headers: { Authorization: `Bot ${botToken}` },
+      });
+      botIdentity = botMe.ok
+        ? JSON.stringify(await botMe.json())
+        : `inválido (HTTP ${botMe.status})`;
+    } catch {
+      /* diagnóstico é best-effort */
+    }
     console.error(
-      `[auth] verificação de cargo falhou: HTTP ${memberRes.status}, code=${discordCode ?? "?"}`
+      `[auth] verificação de cargo falhou: HTTP ${memberRes.status}, code=${discordCode ?? "?"}; bot do token: ${botIdentity}`
     );
     return NextResponse.redirect(`${origin}/login?error=verificacao`);
   }
