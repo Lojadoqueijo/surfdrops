@@ -33,6 +33,7 @@ export interface SwellLineState {
   swellLevel: number; // = "Next Flip" na tabela
   lastFlipPrice: number | null;
   lastFlipIndex: number | null;
+  lastFlipClose: number | null; // close do bar do flip (distinto de lastFlipPrice = nível da linha partida)
   sinceFlipPct: number | null;
   atr: number;
   // --- extensões (paridade com o grupo "Topos & Fundos" / medidor do Pine) ---
@@ -58,6 +59,7 @@ export interface AssetSnapshot {
   estado: Estado;
   nextFlip: number;
   lastFlip: number | null;
+  lastFlipClose: number | null; // preço de fecho no bar do flip (para flip_events)
   lastFlipDate: string | null; // ISO date do close semanal onde ocorreu o flip
   dailyFlipDate: string | null; // ISO date do último flip Daily (para badge "FLIP HOJE")
   sinceFlipPct: number | null;

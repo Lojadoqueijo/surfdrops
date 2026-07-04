@@ -1,8 +1,8 @@
 {
   "crons": [
-    {
-      "path": "/api/cron/refresh",
-      "schedule": "15 0 * * *"
-    }
+    { "path": "/api/cron/refresh?batch=0", "schedule": "15 0 * * *" },
+    { "path": "/api/cron/refresh?batch=1", "schedule": "20 0 * * *" },
+    { "path": "/api/cron/refresh?batch=2", "schedule": "25 0 * * *" },
+    { "path": "/api/cron/refresh?batch=3", "schedule": "30 0 * * *" }
   ]
 }

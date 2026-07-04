@@ -215,6 +215,41 @@ Próxima tarefa concreta: item 2 do §6 (motor, [SONNET]).
   + cron por lotes) e item 5 (reescrever o terminal `/members` para o layout
   espelhado no Bullmania — precisa de uma spec fina do Fable antes do código).
 
+### ✅ Item 4 do §6 concluído (2026-07-04, Sonnet) — Supabase + cron por lotes
+- **`supabase/schema.sql`** (novo, na raiz do `members-app`): tabelas
+  `snapshots` (1 linha/ativo/dia, upsert por `(symbol,date)`) e `flip_events`
+  (histórico **append-only**, unique `(symbol,timeframe,flip_at)` — evita
+  duplicar o mesmo flip em execuções seguintes). Ainda não corrido em lado
+  nenhum — o projeto Supabase não existe. Só persistimos flips **weekly**: o
+  motor de confirmação Daily (`trendDirectionSeries`) só dá direção, não
+  expõe um nível de linha próprio — persistir flips diários fica para depois
+  de o motor Daily expor esse nível.
+- **`lib/data/supabase.ts`** (novo): cliente + `upsertSnapshots()` +
+  `appendFlipEvents()`. Grau de robustez: sem `SUPABASE_URL`/
+  `SUPABASE_SERVICE_ROLE_KEY`, ambas as funções devolvem `{ skipped: true }`
+  sem rebentar nada — o cron continua "live only" como hoje.
+- **Adicionado `AssetSnapshot.lastFlipClose`** (preço de fecho no bar do
+  flip, distinto de `lastFlip` = nível da linha partida) — necessário para
+  gravar `price_at_flip` em `flip_events` com um valor real, não inventado.
+- **Cron por lotes** (`app/api/cron/refresh/route.ts` + `vercel.json`):
+  descoberta importante a meio da tarefa — **o Vercel Hobby só permite 5 cron
+  jobs por projeto** (1x/dia cada), não "vários crons espaçados" à vontade
+  como o plano original sugeria. Por isso os 6 setores foram agrupados
+  manualmente em **4 lotes** (`CRON_BATCHES` no route.ts): Cripto sozinho
+  (Binance, sem limite/min), Ações AI/Tech sozinho, Ações Cripto-expostas+ETFs
+  juntos, Commodities+Índices juntos — todos a correr no mesmo dia UTC
+  (00:15/00:20/00:25/00:30), cobertura diária completa mantida, só a execução
+  fica repartida. Fica 1 cron de folga no orçamento do Hobby. Endpoint aceita
+  `?batch=0..3`; sem o parâmetro processa tudo de uma vez (fallback local/dev).
+- **`@supabase/supabase-js` adicionado ao `package.json`** — não foi possível
+  correr `npm install` nesta máquina (sem Node); a próxima pessoa/CI a fazer
+  build vai instalá-lo.
+- **Por fazer:** criar o projeto Supabase (utilizador), correr o
+  `schema.sql`, colar as env vars no Vercel + redeploy. Depois disso, o
+  próximo passo natural é a página `/members` passar a LER de `snapshots`
+  em vez de recomputar tudo ao vivo em cada pedido — decidir isso junto com
+  a reescrita do terminal (item 5), não antes.
+
 ## 4. Histórico de decisões (para não repetir discussões)
 - Domínio: `defisurfers.<tld>` em vez de manter `surfdrops.vercel.app`
   (subdomínio partilhado sem equity de SEO real a proteger; a marca

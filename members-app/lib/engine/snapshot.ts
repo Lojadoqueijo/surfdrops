@@ -82,6 +82,7 @@ export function buildAssetSnapshot(params: {
     estado,
     nextFlip: last.swellLevel,
     lastFlip: last.lastFlipPrice,
+    lastFlipClose: last.lastFlipClose,
     lastFlipDate,
     dailyFlipDate,
     sinceFlipPct: last.sinceFlipPct,

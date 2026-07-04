@@ -1,16 +1,26 @@
 # DeFi Surfers — Members App
 
 Área privada de membros com o screener de tendências multi-setor (motor SwellLine).
-Plano geral: ver `../DEFI_SURFERS_PLANO.md`.
+Plano geral: ver `../DEFI_SURFERS_PLANO.md`. Spec UX/UI/dados: ver `../DEFI_SURFERS_UXUI.md`.
 
 ## Estado
 
-- ✅ Motor SwellLine portado (`lib/engine/`) — lógica calibrada do `swellline.pine`
-- ✅ Página de membros com tabela, filtros por setor/estado e destaque "FLIP RECENTE"
-- ✅ Endpoint de cron diário (`/api/cron/refresh`, 00:15 UTC)
-- 🟡 Dados em **mock** — falta API key (Twelve Data/Polygon) → `lib/data/provider.ts`
+- ✅ Motor SwellLine portado e estendido (`lib/engine/`) — trailing stop
+  calibrado + medidor de força, exaustão, divergências, 200-período MA/cheapZone,
+  alvos TP 1/2/3 ATR com hit tracking, dots Daily-contra-Weekly, warmup/cooldown
+- ✅ Universo com metadados (`lib/data/universe.ts`): logos, moeda, país,
+  categorias temáticas, link TradingView + Yahoo Finance por ativo
+- ✅ Dados reais: Binance (cripto, sem key) + Twelve Data (resto, precisa de key)
+- ✅ Cron diário por lotes (`/api/cron/refresh?batch=0..3`, ver `vercel.json`) —
+  4 lotes por causa do limite do Vercel Hobby (máx. 5 cron jobs/projeto, 1x/dia)
+- ✅ Persistência opcional Supabase (`lib/data/supabase.ts`): `snapshots`
+  (upsert diário) + `flip_events` (histórico append-only) — funciona em modo
+  "live only" (sem gravar nada) enquanto o projeto Supabase não existir
+- 🟡 Página de membros ainda no layout MVP antigo (tabela simples) — a
+  reescrita para o layout "terminal" (espelhado no Bullmania, ver UXUI §2)
+  ainda não foi feita
 - 🔴 Sem gate Discord ainda — falta app OAuth + bot + role ID
-- 🔴 Sem BD (Supabase) — histórico de flips/notificações vem depois
+- 🔴 Sem projeto Supabase criado — `supabase/schema.sql` pronto a correr
 
 ## Correr localmente
 
@@ -27,18 +37,26 @@ npm run dev   # http://localhost:3000/members
 1. Vercel → Add New Project → importar `Lojadoqueijo/surfdrops`
 2. **Root Directory: `members-app`** (crítico — não deployar a raiz)
 3. Definir env vars (ver `.env.example`)
-4. O cron do `vercel.json` fica ativo automaticamente
+4. Os crons do `vercel.json` ficam ativos automaticamente
+
+## Ligar o Supabase (opcional, mas necessário para histórico/alertas)
+
+1. Criar projeto em supabase.com
+2. SQL Editor → colar e correr `supabase/schema.sql` (cria `snapshots` e `flip_events`)
+3. Copiar `SUPABASE_URL` e a **Service Role Key** (não a `anon`) para as env
+   vars do Vercel — a service role key é secreta, nunca no cliente/repo
+4. Redeploy; o próximo cron já persiste
 
 ## Variáveis de ambiente
 
-Ver `.env.example`. Três bloqueios pendentes do utilizador:
-- **API de dados** (`TWELVEDATA_API_KEY` ou `POLYGON_API_KEY`)
-- **Discord** (client id/secret, bot token, guild id, role id do cargo "DeFi Surfer")
-- **Supabase** (quando o histórico/notificações entrarem)
+Ver `.env.example`. Bloqueios pendentes do utilizador:
+- **Discord** (client secret, bot token — os IDs públicos já estão no `.env.example`)
+- **Supabase** (criar o projeto + colar `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY`)
 
 ## Próximos passos (com o modelo certo — ver plano §1)
 
-- [SONNET] Provider real Twelve Data/Polygon (substituir mock)
-- [SONNET] Testes do motor contra valores validados (BTC: Last Flip ≈ 94.219 @ 2025-11-17)
-- [FABLE] OAuth Discord + verificação do cargo
+- [SONNET] Testar `npm run build` num ambiente com Node (não disponível na
+  máquina onde o motor foi estendido — ver nota no `DEFI_SURFERS_PLANO.md`)
+- [FABLE spec fina → SONNET código] Reescrever o terminal `/members` (UXUI §2)
+- [FABLE] OAuth Discord + verificação do cargo; remover fallback `?key=`
 - [FABLE] Teasers públicos no site principal

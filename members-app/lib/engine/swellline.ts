@@ -160,11 +160,13 @@ export function computeSwellLine(
   const isBullArr = new Array<boolean>(n).fill(true);
   const lastFlipPriceArr = new Array<number | null>(n).fill(null);
   const lastFlipIndexArr = new Array<number | null>(n).fill(null);
+  const lastFlipCloseArr = new Array<number | null>(n).fill(null);
   const atrAtFlipArr = new Array<number | null>(n).fill(null);
   const sinceFlipPctArr = new Array<number | null>(n).fill(null);
 
   let lastFlipPrice: number | null = null;
   let lastFlipIndex: number | null = null;
+  let lastFlipClose: number | null = null;
   let atrAtFlip: number | null = null;
 
   for (let i = 0; i < n; i++) {
@@ -203,11 +205,13 @@ export function computeSwellLine(
     if (i > 0 && (flipBull || flipBear)) {
       lastFlipPrice = flipBear ? up[i - 1] : dn[i - 1];
       lastFlipIndex = i;
+      lastFlipClose = close[i];
       atrAtFlip = atrArr[i];
     }
 
     lastFlipPriceArr[i] = lastFlipPrice;
     lastFlipIndexArr[i] = lastFlipIndex;
+    lastFlipCloseArr[i] = lastFlipClose;
     atrAtFlipArr[i] = atrAtFlip;
     sinceFlipPctArr[i] =
       lastFlipPrice !== null ? ((close[i] - lastFlipPrice) / lastFlipPrice) * 100 : null;
@@ -328,6 +332,7 @@ export function computeSwellLine(
         swellLevel: NaN,
         lastFlipPrice: null,
         lastFlipIndex: null,
+        lastFlipClose: null,
         sinceFlipPct: null,
         atr: NaN,
         strength: null,
@@ -346,6 +351,7 @@ export function computeSwellLine(
       swellLevel: swellArr[i],
       lastFlipPrice: lastFlipPriceArr[i],
       lastFlipIndex: lastFlipIndexArr[i],
+      lastFlipClose: lastFlipCloseArr[i],
       sinceFlipPct: sinceFlipPctArr[i],
       atr: atrArr[i],
       strength: strengthArr[i],
