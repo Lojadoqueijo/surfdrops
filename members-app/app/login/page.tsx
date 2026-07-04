@@ -1,5 +1,7 @@
+const TELEGRAM_EQUIPA = "https://t.me/surfistacrypto";
+
 const SEM_CARGO =
-  "A tua conta Discord ainda não tem o cargo DefiSurfers — o terminal é exclusivo dos membros DeFi Surfers. Fala com a equipa no Discord ou no Telegram para desbloqueares o acesso.";
+  "A tua conta Discord ainda não tem o cargo DefiSurfers — o terminal é exclusivo dos membros DeFi Surfers. Fala com a equipa no Telegram para desbloqueares o acesso.";
 
 const MESSAGES: Record<string, string> = {
   "sem-codigo": "Login cancelado no Discord. Tenta outra vez.",
@@ -38,10 +40,17 @@ export default async function LoginPage({
         </p>
       </div>
 
-      <p className="note">
-        Ainda não és membro? Junta-te à comunidade DeFi Surfers — fala connosco no Telegram
-        ou no Discord.
-      </p>
+      <div className="note join-note">
+        <p>Ainda não és membro? O acesso ao terminal faz parte da comunidade DeFi Surfers.</p>
+        <a
+          className="btn-telegram"
+          href={TELEGRAM_EQUIPA}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          💬 Falar com a equipa no Telegram
+        </a>
+      </div>
     </main>
   );
 }

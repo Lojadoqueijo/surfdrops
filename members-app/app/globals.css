@@ -209,6 +209,13 @@ tr:hover td { background: var(--panel); }
   text-align: center; text-decoration: none;
 }
 .btn-discord:hover { background: #4752c4; text-decoration: none; }
+.join-note p { margin: 0 0 12px; }
+.btn-telegram {
+  display: block; width: 100%; padding: 12px 0; border-radius: 8px;
+  background: #2aabee; color: #fff; font-weight: 700; font-size: 13px;
+  text-align: center; text-decoration: none;
+}
+.btn-telegram:hover { background: #1e96d6; text-decoration: none; color: #fff; }
 .or { margin: 16px 0 12px; }
 .key-form { display: flex; gap: 8px; }
 .key-form input {
