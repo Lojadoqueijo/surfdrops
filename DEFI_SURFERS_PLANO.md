@@ -250,6 +250,35 @@ Próxima tarefa concreta: item 2 do §6 (motor, [SONNET]).
   em vez de recomputar tudo ao vivo em cada pedido — decidir isso junto com
   a reescrita do terminal (item 5), não antes.
 
+### ✅ Item 5 do §6 concluído (2026-07-04, Fable/Opus) — terminal `/members` reescrito
+- **Layout espelhado no BULLMANIA TERMINAL** (UXUI §2.1), agora sim substitui
+  a tabela MVP antiga. `app/members/Terminal.tsx` (novo, client component) +
+  `lib/data/terminal.ts` (novo, enriquecimento snapshot×universo) + `page.tsx`
+  reescrito (server: fetch → enrich → passa ao client) + `globals.css` (bloco
+  "Terminal de membros").
+- **Componentes:** stats bar (pulso: nº ativos + bullish/bearish/warmup da
+  classe ativa), tabs por classe de ativo (Cripto/Ações/ETFs/Commodities/
+  Índices), pesquisa, chips de trend (Bullish/Bearish/Warmup), dropdowns
+  (tempo desde flip · categoria dinâmica por classe), tabela ordenável
+  (default Δ% desde flip desc) com logo+nome+ticker, chip de trend, Δ%, tempo,
+  preço (formatado por moeda), mkt cap, **Estado W/D** e **coluna Força**
+  (heatmap — extras nossos que o Ivan não tem na tabela), links **TV + Yahoo**
+  por linha (sem gráficos no site, como pedido). Linha expande em accordion:
+  Next Flip (stop), Last Flip+data, alvos 1/2/3 ATR com ✅/⭕, avisos ativos
+  (exaustão/divergência/dot/zona barata) com tooltip de ação.
+- **Painel lateral:** slot "Negociar" (referrals de corretoras — placeholders
+  "em breve" à espera dos links do utilizador) + "Como ler".
+- **❤ favoritos:** ícone presente mas inerte (tooltip "em breve") — a feature
+  real (watchlist + alerta de flip) é fase 2, precisa de Supabase+bot.
+- **WARMUP/COOLDOWN** aparecem como chip de trend próprio (amarelo/aqua).
+- **Verificado ao vivo** (localhost, Node instalado nesta sessão): build de
+  produção limpo (typecheck OK), tabs/filtros/ordenação/accordion/força/logos
+  todos a funcionar; responsive mobile empilha controlos + scroll horizontal
+  da tabela. Testado em modo mock (dados reais precisam da TWELVEDATA_API_KEY).
+- **Nota:** a página continua a RECOMPUTAR ao vivo em cada pedido (revalidate
+  1h). Passar a LER de `snapshots` (Supabase) fica para quando o projeto
+  Supabase existir — é uma troca de fonte no `page.tsx`, não mexe no Terminal.
+
 ## 4. Histórico de decisões (para não repetir discussões)
 - Domínio: `defisurfers.<tld>` em vez de manter `surfdrops.vercel.app`
   (subdomínio partilhado sem equity de SEO real a proteger; a marca

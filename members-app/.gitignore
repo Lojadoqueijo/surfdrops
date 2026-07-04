@@ -1,4 +1,5 @@
 node_modules/
+run-dev.cmd
 .next/
 .env
 .env.local
