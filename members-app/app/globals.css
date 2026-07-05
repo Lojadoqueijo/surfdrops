@@ -280,6 +280,27 @@ a:hover { text-decoration: underline; }
   .stat-v { font-size: 18px; }
 }
 
+/* ---- Página de Termos ---- */
+.terms-page { max-width: 780px; }
+.terms-box {
+  margin-top: 20px; padding: 28px 30px; border: 1px solid var(--border);
+  border-radius: 14px; background: var(--panel); line-height: 1.7; font-size: 13.5px;
+}
+.terms-box h2 { margin: 0 0 6px; font-size: 18px; }
+.terms-box h3 { margin: 22px 0 6px; font-size: 14px; color: #c4b5fd; }
+.terms-box p { margin: 0 0 10px; color: var(--text); }
+.terms-actions {
+  display: flex; flex-direction: column; gap: 10px; align-items: center;
+  margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border);
+}
+.btn-accept {
+  width: 100%; padding: 14px 0; border: none; border-radius: 10px; cursor: pointer;
+  background: var(--purple); color: #fff; font-family: inherit; font-weight: 800; font-size: 14px;
+}
+.btn-accept:hover { background: #7c4ce6; }
+.btn-decline { color: var(--muted); font-size: 12px; }
+.btn-decline:hover { color: var(--red); text-decoration: none; }
+
 /* ---- Página de login ---- */
 .login-page { max-width: 460px; padding-top: 12vh; text-align: center; }
 .login-page .brand { justify-content: center; }
