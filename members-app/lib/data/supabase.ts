@@ -91,21 +91,32 @@ export async function readLatestSnapshots(): Promise<
   if (!supabase) return null;
 
   const since = new Date(Date.now() - 4 * 86_400_000).toISOString().slice(0, 10);
-  const { data, error } = await supabase
-    .from("snapshots")
-    .select("*")
-    .gte("date", since)
-    .order("date", { ascending: false });
-  if (error) {
-    console.error("[supabase] leitura de snapshots falhou:", error.message);
-    return null;
+  // Paginação obrigatória: o PostgREST corta a 1000 linhas por pedido e o
+  // universo (3k+ ações × 4 dias) ultrapassa isso largamente.
+  const PAGE = 1000;
+  const data: Record<string, unknown>[] = [];
+  for (let from = 0; from < 40_000; from += PAGE) {
+    const { data: page, error } = await supabase
+      .from("snapshots")
+      .select("*")
+      .gte("date", since)
+      .order("date", { ascending: false })
+      .order("symbol", { ascending: true })
+      .range(from, from + PAGE - 1);
+    if (error) {
+      console.error("[supabase] leitura de snapshots falhou:", error.message);
+      return null;
+    }
+    if (!page || page.length === 0) break;
+    data.push(...(page as Record<string, unknown>[]));
+    if (page.length < PAGE) break;
   }
-  if (!data || data.length === 0) return null;
+  if (data.length === 0) return null;
 
   const seen = new Set<string>();
   const rows: AssetSnapshot[] = [];
   let updatedAt = "";
-  for (const r of data as Record<string, unknown>[]) {
+  for (const r of data) {
     const symbol = r.symbol as string;
     if (seen.has(symbol)) continue; // ordenado por data desc → primeiro = mais recente
     seen.add(symbol);

@@ -2,7 +2,7 @@ import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { getCryptoUniverse } from "@/lib/data/cryptoUniverse";
 import { getSnapshots, getSnapshotsParallel } from "@/lib/data/getSnapshots";
-import { getStockUniverse } from "@/lib/data/stockUniverse";
+import { getStockUniverse, STOCK_SLICE_SIZE } from "@/lib/data/stockUniverse";
 import { appendFlipEvents, isSupabaseConfigured, upsertSnapshots } from "@/lib/data/supabase";
 import { UNIVERSE } from "@/lib/data/universe";
 
@@ -18,11 +18,12 @@ import { UNIVERSE } from "@/lib/data/universe";
 //
 // O Vercel Hobby só permite 5 cron jobs por projeto (1x/dia cada).
 // Lote 0: universo cripto DINÂMICO (top 500 CoinGecko ∩ 5 exchanges, ~330
-//   ativos) em paralelo — exchanges sem limite por minuto relevante.
-// Lote 1: universo de ações DINÂMICO (S&P 500 via Yahoo, ~500 ativos) em
-//   paralelo com concorrência mais baixa (endpoint não-oficial — gentileza).
-//   As ações estáticas antigas (Semis/Mega Tech/Cripto-expostas) estão
-//   contidas no S&P 500 e deixaram de ter lote próprio.
+//   ativos) em paralelo, às 00:15 UTC (a vela diária cripto fecha às 00:00).
+// Lote 1: universo de ações DINÂMICO (top 3000 EUA por mcap via Yahoo) em
+//   FATIAS de 500 (?batch=1&slice=0..5) — cada fatia cabe folgada no
+//   maxDuration. Fatias 0-2 = crons Vercel (21:45/21:55/22:05 UTC, depois do
+//   fecho de Wall Street em ambos os regimes de DST); fatias 3-5 = GitHub
+//   Actions às 22:15 (o limite de 5 crons do Hobby não chega para tudo).
 // Lote 2: restantes ativos estáticos (ETFs/Commodities/Índices, ~11) via
 //   Twelve Data, sequencial com throttle de 16s (8 créditos/min no grátis).
 const CRON_BATCHES: string[][] = [
@@ -60,13 +61,25 @@ export async function GET(request: Request) {
   }
   const batchSectors = batchIndex !== null ? CRON_BATCHES[batchIndex] : null;
 
+  // Fatia opcional do lote de ações (?slice=0..N): top 3000 ÷ 500 = 6 fatias.
+  const sliceParam = searchParams.get("slice");
+  const slice = sliceParam !== null ? Number(sliceParam) : null;
+  if (slice !== null && (!Number.isInteger(slice) || slice < 0)) {
+    return NextResponse.json({ error: `slice inválido: ${sliceParam}` }, { status: 400 });
+  }
+
   let snapshots;
   if (batchIndex === 0) {
     // Cripto dinâmico, em paralelo (exchanges sem throttle).
     snapshots = await getSnapshotsParallel(await getCryptoUniverse());
   } else if (batchIndex === 1) {
-    // Ações dinâmicas (S&P 500) via Yahoo — concorrência 6 por cortesia.
-    snapshots = await getSnapshotsParallel(await getStockUniverse(), 6);
+    // Ações dinâmicas via Yahoo — concorrência 6 por cortesia (não-oficial).
+    const universe = await getStockUniverse();
+    const assets =
+      slice !== null
+        ? universe.slice(slice * STOCK_SLICE_SIZE, (slice + 1) * STOCK_SLICE_SIZE)
+        : universe;
+    snapshots = await getSnapshotsParallel(assets, 6);
   } else if (batchSectors) {
     snapshots = await getSnapshots(UNIVERSE.filter((a) => batchSectors.includes(a.sector)));
   } else {
@@ -92,6 +105,7 @@ export async function GET(request: Request) {
   return NextResponse.json({
     ok: true,
     batch: batchIndex,
+    slice,
     sectors: batchSectors,
     assets: snapshots.length,
     freshFlips: freshFlips.map((s) => ({ symbol: s.symbol, trend: s.trend })),

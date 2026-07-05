@@ -2,7 +2,9 @@
   "regions": ["dub1"],
   "crons": [
     { "path": "/api/cron/refresh?batch=0", "schedule": "15 0 * * *" },
-    { "path": "/api/cron/refresh?batch=1", "schedule": "25 0 * * *" },
-    { "path": "/api/cron/refresh?batch=2", "schedule": "35 0 * * *" }
+    { "path": "/api/cron/refresh?batch=1&slice=0", "schedule": "45 21 * * 1-5" },
+    { "path": "/api/cron/refresh?batch=1&slice=1", "schedule": "55 21 * * 1-5" },
+    { "path": "/api/cron/refresh?batch=1&slice=2", "schedule": "5 22 * * 1-5" },
+    { "path": "/api/cron/refresh?batch=2", "schedule": "40 22 * * 1-5" }
   ]
 }

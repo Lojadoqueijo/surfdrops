@@ -150,6 +150,19 @@ function ForceBar({ strength }: { strength: number | null }) {
   );
 }
 
+// Logo com fallback: os CDNs de logos de ações (Parqet) devolvem 404 para
+// alguns tickers — nesses casos cai para as iniciais em vez do ícone partido.
+function AssetLogo({ logoUrl, symbol }: { logoUrl: string | null; symbol: string }) {
+  const [failed, setFailed] = useState(false);
+  if (!logoUrl || failed) {
+    return <span className="logo logo-ph">{symbol.slice(0, 2)}</span>;
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={logoUrl} alt="" className="logo" loading="lazy" onError={() => setFailed(true)} />
+  );
+}
+
 function EstadoChip({ estado }: { estado: TerminalRow["estado"] }) {
   if (!estado) return <span className="muted">—</span>;
   const cls =
@@ -717,12 +730,7 @@ function FragmentRow({
           </button>
         </td>
         <td className="asset">
-          {r.logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={r.logoUrl} alt="" className="logo" loading="lazy" />
-          ) : (
-            <span className="logo logo-ph">{r.symbol.slice(0, 2)}</span>
-          )}
+          <AssetLogo logoUrl={r.logoUrl} symbol={r.symbol} />
           <span className="asset-txt">
             <span className="asset-name">{r.name}</span>
             <span className="asset-sym muted">{r.symbol}</span>

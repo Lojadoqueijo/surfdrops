@@ -1,0 +1,22 @@
+# Fatias 3-5 do lote de ações (top 3000 EUA): o Vercel Hobby só permite 5
+# cron jobs e estão todos ocupados — o GitHub Actions cobre o resto.
+# Corre depois do fecho de Wall Street (20:00 UTC verão / 21:00 inverno),
+# em sequência para não martelar o Yahoo.
+name: Refresh stocks (fatias 3-5)
+
+on:
+  schedule:
+    - cron: "15 22 * * 1-5"
+  workflow_dispatch: {}
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chamar fatias 3-5
+        run: |
+          for s in 3 4 5; do
+            echo "== slice $s =="
+            curl -sS --max-time 320 "https://defi-surfers-members.vercel.app/api/cron/refresh?batch=1&slice=$s" || true
+            echo
+          done
