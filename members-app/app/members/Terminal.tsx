@@ -667,7 +667,11 @@ export default function Terminal({
 
       <p className="disclaimer">
         {mock ? "⚠️ Dados demo (mock). " : ""}
-        Material educativo — não é aconselhamento financeiro.
+        Os DeFi Surfers são uma comunidade de educação e ferramentas de análise. Todo o conteúdo
+        desta plataforma é estritamente educativo e informativo — nada aqui constitui recomendação
+        de compra ou venda de qualquer ativo, nem aconselhamento financeiro. Referências a
+        desempenho passado são meramente ilustrativas e não representam resultados típicos ou
+        garantidos. As decisões, e o risco, são sempre teus.
       </p>
     </main>
   );
