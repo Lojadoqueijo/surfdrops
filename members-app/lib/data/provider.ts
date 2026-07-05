@@ -7,6 +7,7 @@ import { getGateCandles } from "./providers/gateio";
 import { getMexcCandles } from "./providers/mexc";
 import { getOkxCandles } from "./providers/okx";
 import { getTwelveDataCandles } from "./providers/twelvedata";
+import { getYahooCandles } from "./providers/yahoo";
 
 export type Timeframe = "1day" | "1week";
 
@@ -56,6 +57,20 @@ export async function getCandlesForAsset(
   if (asset.source === "gate") {
     if (!asset.gatePair) throw new Error(`${asset.symbol}: sem gatePair`);
     return getGateCandles(asset.gatePair, timeframe, limit);
+  }
+
+  if (asset.source === "yahoo") {
+    if (!asset.yahooSymbol) throw new Error(`${asset.symbol}: sem yahooSymbol`);
+    try {
+      return await getYahooCandles(asset.yahooSymbol, timeframe, limit);
+    } catch (err) {
+      // Endpoint não-oficial — se partir, os ativos curados caem no Twelve Data.
+      if (asset.twelveSymbol && process.env.TWELVEDATA_API_KEY) {
+        console.warn(`[data] Yahoo falhou para ${asset.symbol}, fallback Twelve Data:`, err);
+        return getTwelveDataCandles(asset.twelveSymbol, timeframe, limit);
+      }
+      throw err;
+    }
   }
 
   // twelvedata

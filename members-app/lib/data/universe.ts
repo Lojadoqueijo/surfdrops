@@ -19,7 +19,7 @@
 //    (ex: Toncoin é TON11419-USD; Uniswap é UNI7083-USD). Em caso de dúvida →
 //    null (a UI esconde o botão YF) e corrige-se depois.
 
-export type DataSource = "binance" | "okx" | "bybit" | "mexc" | "gate" | "twelvedata";
+export type DataSource = "binance" | "okx" | "bybit" | "mexc" | "gate" | "yahoo" | "twelvedata";
 
 export interface UniverseAsset {
   symbol: string; // identificador interno/de exibição

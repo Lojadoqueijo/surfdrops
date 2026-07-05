@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { getCryptoUniverse } from "@/lib/data/cryptoUniverse";
 import { getSnapshots, getSnapshotsParallel } from "@/lib/data/getSnapshots";
+import { getStockUniverse } from "@/lib/data/stockUniverse";
 import { appendFlipEvents, isSupabaseConfigured, upsertSnapshots } from "@/lib/data/supabase";
 import { UNIVERSE } from "@/lib/data/universe";
 
@@ -15,20 +16,19 @@ import { UNIVERSE } from "@/lib/data/universe";
 // completa mantida, só a EXECUÇÃO é repartida. Sem ?batch, processa tudo de
 // uma vez (comportamento antigo — útil local/dev/teste).
 //
-// O Vercel Hobby só permite 5 cron jobs por projeto (1x/dia cada) — por isso
-// os setores estão agrupados manualmente em 4 lotes (não 1 lote por setor),
-// deixando folga para 1 cron extra no futuro. Cripto (33 ativos) fica junto
-// porque a Binance não tem limite de pedidos/min; os lotes Twelve Data ficam
-// ≤ ~13 ativos cada (13 × 16s de throttle ≈ 208s < maxDuration 300s).
-// Lote 0 é ESPECIAL: usa o universo cripto DINÂMICO (top 500 CoinGecko ∩
-// Binance USDT, ~300 ativos) processado em paralelo — a Binance não tem
-// limite por minuto relevante. Os restantes lotes são Twelve Data (≤13
-// ativos cada, sequenciais com throttle de 16s).
+// O Vercel Hobby só permite 5 cron jobs por projeto (1x/dia cada).
+// Lote 0: universo cripto DINÂMICO (top 500 CoinGecko ∩ 5 exchanges, ~330
+//   ativos) em paralelo — exchanges sem limite por minuto relevante.
+// Lote 1: universo de ações DINÂMICO (S&P 500 via Yahoo, ~500 ativos) em
+//   paralelo com concorrência mais baixa (endpoint não-oficial — gentileza).
+//   As ações estáticas antigas (Semis/Mega Tech/Cripto-expostas) estão
+//   contidas no S&P 500 e deixaram de ter lote próprio.
+// Lote 2: restantes ativos estáticos (ETFs/Commodities/Índices, ~11) via
+//   Twelve Data, sequencial com throttle de 16s (8 créditos/min no grátis).
 const CRON_BATCHES: string[][] = [
   ["<cripto dinâmico>"],
-  ["Ações — Semis & Hardware"],
-  ["Ações — Mega Tech"],
-  ["Ações — Cripto-expostas", "ETFs", "Commodities", "Índices"],
+  ["<ações dinâmico>"],
+  ["ETFs", "Commodities", "Índices"],
 ];
 
 // Persistência: se SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY estiverem
@@ -62,15 +62,19 @@ export async function GET(request: Request) {
 
   let snapshots;
   if (batchIndex === 0) {
-    // Cripto dinâmico, em paralelo (Binance sem throttle).
+    // Cripto dinâmico, em paralelo (exchanges sem throttle).
     snapshots = await getSnapshotsParallel(await getCryptoUniverse());
+  } else if (batchIndex === 1) {
+    // Ações dinâmicas (S&P 500) via Yahoo — concorrência 6 por cortesia.
+    snapshots = await getSnapshotsParallel(await getStockUniverse(), 6);
   } else if (batchSectors) {
     snapshots = await getSnapshots(UNIVERSE.filter((a) => batchSectors.includes(a.sector)));
   } else {
-    // Sem ?batch: cripto dinâmico + Twelve Data sequencial (dev/local).
+    // Sem ?batch: tudo de uma vez (dev/local).
     const crypto = await getSnapshotsParallel(await getCryptoUniverse());
+    const stocks = await getSnapshotsParallel(await getStockUniverse(), 6);
     const td = await getSnapshots(UNIVERSE.filter((a) => a.source === "twelvedata"));
-    snapshots = [...crypto, ...td];
+    snapshots = [...crypto, ...stocks, ...td];
   }
   revalidatePath("/members");
 
