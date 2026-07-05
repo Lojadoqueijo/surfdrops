@@ -526,6 +526,15 @@ export default function Terminal({
       </header>
 
       <div className="controls">
+        <input
+          className="search"
+          placeholder="Pesquisar nome ou símbolo…"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
+        />
         <div className="trend-chips">
           {(["BULLISH", "BEARISH"] as TrendTag[]).map((t) => (
             <button
@@ -574,15 +583,6 @@ export default function Terminal({
             </option>
           ))}
         </select>
-        <input
-          className="search"
-          placeholder="Pesquisar nome ou símbolo…"
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-        />
       </div>
 
       <div className="term-body">
