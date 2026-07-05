@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 interface TgUpdate {
   message?: {
-    chat: { id: number };
+    chat: { id: number; type?: string };
     from?: { username?: string };
     text?: string;
   };
@@ -32,6 +32,11 @@ export async function POST(req: NextRequest) {
   const msg = update.message;
   const text = msg?.text?.trim();
   if (!msg || !text) return NextResponse.json({ ok: true });
+  // Só conversas PRIVADAS: ligar o bot a um grupo/canal permitiria que uma
+  // sala inteira de não-membros recebesse os alertas de um único membro.
+  if (msg.chat.type && msg.chat.type !== "private") {
+    return NextResponse.json({ ok: true });
+  }
   const chatId = msg.chat.id;
 
   try {
