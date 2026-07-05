@@ -2820,7 +2820,7 @@
   // reais, cache 1h). Se a API falhar, os skeletons ficam — a secção degrada
   // sem quebrar a página.
   (function () {
-    var API = 'https://defi-surfers-members.vercel.app/api/public/teaser';
+    var API = 'https://app.defisurfers.xyz/api/public/teaser';
     function pctTxt(p) {
       if (p === null || p === undefined) return '—';
       return (p >= 0 ? '+' : '') + p.toLocaleString('pt-PT', { maximumFractionDigits: 1 }) + '%';
