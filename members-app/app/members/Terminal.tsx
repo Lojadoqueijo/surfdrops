@@ -597,7 +597,7 @@ export default function Terminal({
                 <th>Ativo</th>
                 <th>Trend</th>
                 <th className="num sortable col-delta" onClick={() => setSort("sinceFlipPct")}>
-                  Δ desde flip{sortArrow("sinceFlipPct")}
+                  Desde o flip{sortArrow("sinceFlipPct")}
                 </th>
                 <th className="num sortable col-tempo" onClick={() => setSort("since")}>
                   Tempo{sortArrow("since")}
