@@ -260,6 +260,13 @@ a:hover { text-decoration: underline; }
 .alert-input:focus { outline: none; border-color: var(--aqua); }
 .btn-save { border: none; width: 100%; cursor: pointer; font-family: inherit; background: #2aabee; }
 .btn-save:hover { background: #1e96d6; }
+.btn-tg { border: none; width: 100%; cursor: pointer; font-family: inherit; background: #2aabee; }
+.btn-tg:hover { background: #1e96d6; }
+.btn-tg:disabled { opacity: 0.6; cursor: default; }
+.alert-linked {
+  margin-top: 10px; padding: 10px 12px; border-radius: 10px; font-size: 12px; font-weight: 700;
+  color: var(--green); background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.35);
+}
 .alerts-note { margin-bottom: 0; }
 
 /* ---- Colunas responsivas: esconder as secundárias antes de a tabela partir ---- */

@@ -72,3 +72,39 @@ alter table snapshots
   add column if not exists yahoo_symbol text,
   add column if not exists rank integer,
   add column if not exists categories jsonb;
+
+-- ==========================================================================
+-- Alertas Telegram (2026-07-06). O membro liga o Telegram uma vez (deep-link
+-- /start com código curto), guardamos o chat_id, e o cron envia alertas dos
+-- ativos da sua watchlist quando ocorre um flip.
+-- ==========================================================================
+
+-- Subscrição de alertas por membro (chave = Discord id, o "sub" da sessão).
+create table if not exists alert_subs (
+  discord_id text primary key,
+  chat_id bigint,                       -- null enquanto não ligar o Telegram
+  telegram_username text,
+  flips boolean not null default true,  -- alerta de flip semanal
+  signals boolean not null default false, -- avisos topo/fundo (v2)
+  digest boolean not null default false,  -- resumo diário (v2)
+  watchlist text[] not null default '{}',
+  linked_at timestamptz,
+  updated_at timestamptz not null default now()
+);
+create index if not exists alert_subs_chat_idx on alert_subs (chat_id);
+
+-- Códigos de ligação de uso único (deep-link t.me/bot?start=CODE), TTL curto.
+create table if not exists alert_link_codes (
+  code text primary key,
+  discord_id text not null,
+  expires_at timestamptz not null
+);
+
+-- Log de envios para deduplicar: 1 alerta por (membro, símbolo, flip).
+create table if not exists alert_log (
+  discord_id text not null,
+  symbol text not null,
+  flip_at date not null,
+  sent_at timestamptz not null default now(),
+  primary key (discord_id, symbol, flip_at)
+);

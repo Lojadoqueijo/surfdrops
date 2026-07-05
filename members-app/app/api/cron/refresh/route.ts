@@ -1,5 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
+import { dispatchFlipAlerts } from "@/lib/data/alertDispatch";
 import { getCryptoUniverse } from "@/lib/data/cryptoUniverse";
 import { getSnapshots, getSnapshotsParallel } from "@/lib/data/getSnapshots";
 import { getStockUniverse, STOCK_SLICE_SIZE } from "@/lib/data/stockUniverse";
@@ -98,6 +99,9 @@ export async function GET(request: Request) {
       }
     : { snapshots: { ok: true, skipped: true }, flipEvents: { ok: true, skipped: true } };
 
+  // Alertas Telegram dos flips recentes (no-op sem bot/Supabase).
+  const alerts = await dispatchFlipAlerts(snapshots);
+
   const freshFlips = snapshots.filter(
     (s) => s.sinceFlipPct !== null && Math.abs(s.sinceFlipPct) < 3
   );
@@ -110,6 +114,7 @@ export async function GET(request: Request) {
     assets: snapshots.length,
     freshFlips: freshFlips.map((s) => ({ symbol: s.symbol, trend: s.trend })),
     persistence,
+    alerts,
     at: new Date().toISOString(),
   });
 }

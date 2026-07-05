@@ -9,7 +9,14 @@ import { TERMS_COOKIE, TERMS_VERSION } from "@/lib/terms";
 // O antigo fallback por password (MEMBERS_GATE_KEY / ?key=) foi removido —
 // o acesso é exclusivamente por cargo Discord.
 
-const PUBLIC = [/^\/login/, /^\/api\/auth\//, /^\/api\/cron\//, /^\/api\/public\//, /^\/favicon/];
+const PUBLIC = [
+  /^\/login/,
+  /^\/api\/auth\//,
+  /^\/api\/cron\//,
+  /^\/api\/public\//,
+  /^\/api\/telegram\//,
+  /^\/favicon/,
+];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;

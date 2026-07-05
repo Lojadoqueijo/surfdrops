@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ASSET_CLASSES,
   type AssetClass,
@@ -353,7 +353,6 @@ export default function Terminal({
 
   // Preferências de alertas Telegram (persistidas no browser).
   const [prefs, setPrefs] = useState<AlertPrefs>(DEFAULT_PREFS);
-  const [prefsSaved, setPrefsSaved] = useState(false);
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(ALERTS_STORAGE_KEY) ?? "null");
@@ -362,19 +361,75 @@ export default function Terminal({
       /* preferências corrompidas → defaults */
     }
   }, []);
-  function savePrefs() {
+  function setPref<K extends keyof AlertPrefs>(k: K, v: AlertPrefs[K]) {
+    setPrefs((p) => {
+      const next = { ...p, [k]: v };
+      try {
+        localStorage.setItem(ALERTS_STORAGE_KEY, JSON.stringify(next));
+      } catch {
+        /* armazenamento indisponível */
+      }
+      return next;
+    });
+  }
+
+  // Estado da ligação Telegram: bot disponível? membro ligado?
+  const [alertStatus, setAlertStatus] = useState<{
+    botAvailable: boolean;
+    linked: boolean;
+    username: string | null;
+  } | null>(null);
+  const [linking, setLinking] = useState(false);
+
+  const refreshAlertStatus = useCallback(async () => {
     try {
-      localStorage.setItem(ALERTS_STORAGE_KEY, JSON.stringify(prefs));
-      setPrefsSaved(true);
-      setTimeout(() => setPrefsSaved(false), 2500);
+      const r = await fetch("/api/alerts/status");
+      if (!r.ok) return;
+      const d = await r.json();
+      if (d?.ok) {
+        setAlertStatus({ botAvailable: d.botAvailable, linked: d.linked, username: d.username });
+      }
     } catch {
-      /* armazenamento indisponível */
+      /* sem estado → mantém placeholder */
+    }
+  }, []);
+  useEffect(() => {
+    refreshAlertStatus();
+  }, [refreshAlertStatus]);
+
+  async function linkTelegram() {
+    setLinking(true);
+    try {
+      const r = await fetch("/api/alerts/link", { method: "POST" });
+      const d = await r.json();
+      if (d?.ok && d.url) {
+        window.open(d.url, "_blank", "noopener");
+        // O membro confirma no Telegram; refrescamos o estado a seguir.
+        setTimeout(refreshAlertStatus, 6000);
+        setTimeout(refreshAlertStatus, 15000);
+      }
+    } catch {
+      /* ignora — o botão volta ao estado inicial */
+    } finally {
+      setLinking(false);
     }
   }
-  function setPref<K extends keyof AlertPrefs>(k: K, v: AlertPrefs[K]) {
-    setPrefsSaved(false);
-    setPrefs((p) => ({ ...p, [k]: v }));
-  }
+
+  // Sincroniza preferências + watchlist para o servidor quando ligado, para o
+  // cron saber a quem e sobre o quê enviar.
+  useEffect(() => {
+    if (!alertStatus?.linked) return;
+    fetch("/api/alerts/sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        flips: prefs.flips,
+        signals: prefs.signals,
+        digest: prefs.digest,
+        watchlist: [...watchlist],
+      }),
+    }).catch(() => {});
+  }, [prefs, watchlist, alertStatus?.linked]);
 
   function setSort(key: SortKey) {
     setPage(1);
@@ -656,19 +711,31 @@ export default function Terminal({
                   <em>estado da watchlist, uma mensagem por dia</em>
                 </span>
               </label>
-              <input
-                className="alert-input"
-                placeholder="@teu_username no Telegram"
-                value={prefs.telegram}
-                onChange={(e) => setPref("telegram", e.target.value)}
-              />
-              <button className="trade-btn btn-save" onClick={savePrefs}>
-                {prefsSaved ? "Guardado ✓" : "Guardar preferências"}
-              </button>
-              <p className="muted small alerts-note">
-                🔧 Envio em preparação — as tuas escolhas ficam guardadas e ativam-se
-                automaticamente quando o bot da comunidade estiver ligado.
-              </p>
+              {alertStatus && !alertStatus.botAvailable ? (
+                <p className="muted small alerts-note">
+                  🔧 O bot de alertas está a ser configurado. As tuas escolhas ficam guardadas e
+                  ativam-se assim que estiver pronto.
+                </p>
+              ) : alertStatus?.linked ? (
+                <>
+                  <div className="alert-linked">
+                    ✅ Telegram ligado{alertStatus.username ? ` · @${alertStatus.username}` : ""}
+                  </div>
+                  <p className="muted small alerts-note">
+                    Recebes um alerta sempre que um ativo com ♥ vira bullish/bearish no fecho da vela.
+                    Envia <b>/stop</b> ao bot para desligar.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <button className="trade-btn btn-tg" onClick={linkTelegram} disabled={linking}>
+                    {linking ? "A abrir o Telegram…" : "🔗 Ligar Telegram"}
+                  </button>
+                  <p className="muted small alerts-note">
+                    Liga uma vez e recebes no Telegram os flips dos ativos que marcaste com ♥.
+                  </p>
+                </>
+              )}
             </div>
           )}
           <div className="panel trade-panel">
