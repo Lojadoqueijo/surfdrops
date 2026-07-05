@@ -1,11 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ASSET_CLASSES,
   type AssetClass,
   type TerminalRow,
 } from "@/lib/data/terminal";
+
+// Tab extra além das classes de ativos: a watchlist pessoal (corações).
+type TabId = AssetClass | "Watchlist";
+const TABS: TabId[] = [...ASSET_CLASSES, "Watchlist"];
+const WATCHLIST_STORAGE_KEY = "ds_watchlist";
+const PAGE_SIZE = 20;
 
 // ---------------------------------------------------------------------------
 // Formatação
@@ -167,18 +173,48 @@ export default function Terminal({
   updatedAt: string;
   mock: boolean;
 }) {
-  const [activeClass, setActiveClass] = useState<AssetClass>("Cripto");
+  const [activeClass, setActiveClass] = useState<TabId>("Cripto");
   const [search, setSearch] = useState("");
   const [trendFilter, setTrendFilter] = useState<Set<TrendTag>>(new Set());
   const [category, setCategory] = useState<string>("");
   const [timeFilter, setTimeFilter] = useState<string>("any");
-  const [sortKey, setSortKey] = useState<SortKey>("sinceFlipPct");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  // Ordenação por defeito: ranking de market cap (como o terminal do Ivan).
+  const [sortKey, setSortKey] = useState<SortKey>("rank");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+
+  // Watchlist pessoal, persistida no browser (a versão por membro no Supabase
+  // + alertas de flip é a fase seguinte).
+  const [watchlist, setWatchlist] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(WATCHLIST_STORAGE_KEY) ?? "[]");
+      if (Array.isArray(saved)) setWatchlist(new Set(saved as string[]));
+    } catch {
+      /* watchlist corrompida → começa vazia */
+    }
+  }, []);
+  function toggleWatch(symbol: string) {
+    setWatchlist((prev) => {
+      const next = new Set(prev);
+      if (next.has(symbol)) next.delete(symbol);
+      else next.add(symbol);
+      try {
+        localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify([...next]));
+      } catch {
+        /* armazenamento indisponível — mantém só em memória */
+      }
+      return next;
+    });
+  }
 
   const classRows = useMemo(
-    () => rows.filter((r) => r.assetClass === activeClass),
-    [rows, activeClass]
+    () =>
+      activeClass === "Watchlist"
+        ? rows.filter((r) => watchlist.has(r.symbol))
+        : rows.filter((r) => r.assetClass === activeClass),
+    [rows, activeClass, watchlist]
   );
 
   const categories = useMemo(() => {
@@ -234,7 +270,16 @@ export default function Terminal({
     return { total, bull, bear, mcap };
   }, [filtered]);
 
+  // Paginação: 20 por página; clamp quando os filtros encolhem o conjunto.
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paged = useMemo(
+    () => filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
+    [filtered, safePage]
+  );
+
   function toggleTrend(t: TrendTag) {
+    setPage(1);
     setTrendFilter((prev) => {
       const next = new Set(prev);
       if (next.has(t)) next.delete(t);
@@ -244,10 +289,11 @@ export default function Terminal({
   }
 
   function setSort(key: SortKey) {
+    setPage(1);
     if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     else {
       setSortKey(key);
-      setSortDir("desc");
+      setSortDir(key === "rank" ? "asc" : "desc");
     }
   }
 
@@ -261,7 +307,7 @@ export default function Terminal({
             <h1>🌊 DeFi Surfers</h1>
           </div>
           <nav className="tabs">
-            {ASSET_CLASSES.map((c) => (
+            {TABS.map((c) => (
               <button
                 key={c}
                 className={c === activeClass ? "tab active" : "tab"}
@@ -269,9 +315,12 @@ export default function Terminal({
                   setActiveClass(c);
                   setCategory("");
                   setExpanded(null);
+                  setPage(1);
+                  setSortKey("rank");
+                  setSortDir("asc");
                 }}
               >
-                {c}
+                {c === "Watchlist" ? `♥ Watchlist${watchlist.size ? ` (${watchlist.size})` : ""}` : c}
               </button>
             ))}
           </nav>
@@ -322,7 +371,10 @@ export default function Terminal({
           className="search"
           placeholder="Pesquisar nome ou símbolo…"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
         />
       </div>
 
@@ -338,13 +390,25 @@ export default function Terminal({
             </button>
           ))}
         </div>
-        <select value={timeFilter} onChange={(e) => setTimeFilter(e.target.value)}>
+        <select
+          value={timeFilter}
+          onChange={(e) => {
+            setTimeFilter(e.target.value);
+            setPage(1);
+          }}
+        >
           <option value="any">Flip: qualquer altura</option>
           <option value="today">Flip: hoje</option>
           <option value="week">Flip: esta semana</option>
           <option value="month">Flip: este mês</option>
         </select>
-        <select value={category} onChange={(e) => setCategory(e.target.value)}>
+        <select
+          value={category}
+          onChange={(e) => {
+            setCategory(e.target.value);
+            setPage(1);
+          }}
+        >
           <option value="">Todas as categorias</option>
           {categories.map((c) => (
             <option key={c} value={c}>
@@ -377,13 +441,11 @@ export default function Terminal({
                 <th className="num sortable" onClick={() => setSort("marketCap")}>
                   Mkt Cap{sortArrow("marketCap")}
                 </th>
-                <th>Estado</th>
-                <th>Força</th>
                 <th className="col-links"></th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((r, i) => {
+              {paged.map((r, i) => {
                 const tag = trendTag(r);
                 const fresh = daysSince(r.lastFlipDate) <= 7;
                 const isOpen = expanded === r.symbol;
@@ -392,24 +454,41 @@ export default function Terminal({
                   <FragmentRow
                     key={r.symbol}
                     r={r}
-                    i={i}
+                    i={(safePage - 1) * PAGE_SIZE + i}
                     tag={tag}
                     fresh={fresh}
                     isOpen={isOpen}
                     warns={warns}
+                    watched={watchlist.has(r.symbol)}
+                    onWatch={() => toggleWatch(r.symbol)}
                     onToggle={() => setExpanded(isOpen ? null : r.symbol)}
                   />
                 );
               })}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={11} className="empty">
-                    Nenhum ativo corresponde aos filtros.
+                  <td colSpan={9} className="empty">
+                    {activeClass === "Watchlist"
+                      ? "A tua watchlist está vazia — clica no ♥ de um ativo para o acompanhares aqui."
+                      : "Nenhum ativo corresponde aos filtros."}
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
+          {totalPages > 1 && (
+            <div className="pagination">
+              <button disabled={safePage <= 1} onClick={() => setPage(safePage - 1)}>
+                ‹ Anterior
+              </button>
+              <span className="page-info">
+                Página {safePage} de {totalPages} · {filtered.length} ativos
+              </span>
+              <button disabled={safePage >= totalPages} onClick={() => setPage(safePage + 1)}>
+                Seguinte ›
+              </button>
+            </div>
+          )}
         </div>
 
         <aside className="side">
@@ -447,6 +526,8 @@ function FragmentRow({
   fresh,
   isOpen,
   warns,
+  watched,
+  onWatch,
   onToggle,
 }: {
   r: TerminalRow;
@@ -455,6 +536,8 @@ function FragmentRow({
   fresh: boolean;
   isOpen: boolean;
   warns: Warning[];
+  watched: boolean;
+  onWatch: () => void;
   onToggle: () => void;
 }) {
   const tvHref = `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(r.tvSymbol)}`;
@@ -466,10 +549,14 @@ function FragmentRow({
     <>
       <tr className={`${isOpen ? "open" : ""} ${fresh ? "fresh" : ""}`} onClick={onToggle}>
         <td className="muted">{i + 1}</td>
-        <td className="col-heart">
-          <span className="heart" title="Favoritos e alertas em breve">
-            ♡
-          </span>
+        <td className="col-heart" onClick={(e) => e.stopPropagation()}>
+          <button
+            className={`heart ${watched ? "on" : ""}`}
+            title={watched ? "Remover da watchlist" : "Adicionar à watchlist"}
+            onClick={onWatch}
+          >
+            {watched ? "♥" : "♡"}
+          </button>
         </td>
         <td className="asset">
           {r.logoUrl ? (
@@ -493,12 +580,6 @@ function FragmentRow({
         <td className="num muted">{fmtSince(r.lastFlipDate)}</td>
         <td className="num">{fmtPrice(r.price, r.currency)}</td>
         <td className="num muted">{fmtMarketCap(r.marketCap)}</td>
-        <td>
-          <EstadoChip estado={r.estado} />
-        </td>
-        <td>
-          <ForceBar strength={r.strength} />
-        </td>
         <td className="col-links" onClick={(e) => e.stopPropagation()}>
           <a href={tvHref} target="_blank" rel="noopener noreferrer" title="Abrir no TradingView">
             TV
@@ -512,9 +593,21 @@ function FragmentRow({
       </tr>
       {isOpen && (
         <tr className="detail-row">
-          <td colSpan={11}>
+          <td colSpan={9}>
             <div className="detail">
               <div className="detail-levels">
+                <div className="lvl">
+                  <span className="lvl-k">Estado (Weekly/Daily)</span>
+                  <span className="lvl-v">
+                    <EstadoChip estado={r.estado} />
+                  </span>
+                </div>
+                <div className="lvl">
+                  <span className="lvl-k">Força</span>
+                  <span className="lvl-v">
+                    <ForceBar strength={r.strength} />
+                  </span>
+                </div>
                 <div className="lvl">
                   <span className="lvl-k">Next Flip (stop)</span>
                   <span className="lvl-v">{fmtPrice(r.nextFlip, r.currency)}</span>

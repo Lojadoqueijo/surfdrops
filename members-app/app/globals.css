@@ -150,7 +150,25 @@ a:hover { text-decoration: underline; }
 .term-table tr.fresh td { background: rgba(34, 197, 94, 0.05); }
 
 .col-heart { width: 26px; text-align: center; }
-.heart { color: var(--muted); opacity: 0.5; cursor: default; }
+.heart {
+  background: none; border: none; padding: 2px 6px; cursor: pointer;
+  color: var(--muted); opacity: 0.6; font-size: 15px; font-family: inherit;
+}
+.heart:hover { opacity: 1; color: var(--red); }
+.heart.on { color: var(--red); opacity: 1; }
+
+.pagination {
+  display: flex; align-items: center; justify-content: center; gap: 16px;
+  padding: 14px; border-top: 1px solid var(--border);
+}
+.pagination button {
+  border: 1px solid var(--border); border-radius: 8px; background: var(--panel);
+  color: var(--text); font-family: inherit; font-size: 12px; font-weight: 700;
+  padding: 8px 16px; cursor: pointer;
+}
+.pagination button:hover:not(:disabled) { border-color: var(--purple); }
+.pagination button:disabled { opacity: 0.35; cursor: default; }
+.page-info { color: var(--muted); font-size: 12px; }
 .col-links { text-align: right; }
 .col-links a {
   display: inline-block; padding: 3px 8px; margin-left: 4px; border-radius: 6px;
