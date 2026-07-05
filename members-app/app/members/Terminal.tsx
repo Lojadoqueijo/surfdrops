@@ -683,8 +683,14 @@ export default function Terminal({
             >
               Criar conta na OKX ↗
             </a>
-            <div className="trade-slot">Bybit · em breve</div>
-            <div className="trade-slot">Pionex · em breve</div>
+            <a
+              className="trade-btn trade-btn-bybit"
+              href="https://www.bybit.eu/en-EU/sign-up?affiliate_id=138621&group_id=1414396&group_type=1&ref_code=138621&redirectType=globalModalGuideEu"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Criar conta na Bybit ↗
+            </a>
           </div>
           <div className="panel">
             <h3>Como ler</h3>

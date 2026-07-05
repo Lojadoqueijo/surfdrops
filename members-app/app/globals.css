@@ -137,6 +137,8 @@ a:hover { text-decoration: underline; }
   text-align: center; letter-spacing: 0.3px;
 }
 .trade-btn:hover { background: #7c4ce6; text-decoration: none; }
+.trade-btn-bybit { background: #f7a600; color: #0a0714; }
+.trade-btn-bybit:hover { background: #e09600; }
 .trade-slot {
   margin-top: 8px; padding: 10px 12px; border-radius: 10px; border: 1px dashed var(--border);
   color: var(--muted); font-size: 12px; text-align: center;
