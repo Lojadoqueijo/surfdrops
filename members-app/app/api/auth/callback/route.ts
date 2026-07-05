@@ -44,7 +44,12 @@ export async function GET(req: NextRequest) {
     headers: { Authorization: `Bearer ${access_token}` },
   });
   if (!meRes.ok) return NextResponse.redirect(`${origin}/login?error=perfil`);
-  const me = (await meRes.json()) as { id: string };
+  const me = (await meRes.json()) as {
+    id: string;
+    username?: string;
+    global_name?: string | null;
+    avatar?: string | null;
+  };
 
   // Cargos do próprio membro, com o token DELE (scope guilds.members.read).
   const memberRes = await fetch(
@@ -64,12 +69,26 @@ export async function GET(req: NextRequest) {
   // DISCORD_ROLE_ID aceita vários IDs separados por vírgula (ex: cargo base +
   // "DefiSurfer Adm" + "DefiSurfer #1") — basta ter UM deles para entrar.
   const allowedRoles = roleId.split(",").map((r) => r.trim()).filter(Boolean);
-  const member = (await memberRes.json()) as { roles?: string[] };
+  const member = (await memberRes.json()) as {
+    roles?: string[];
+    nick?: string | null;
+    avatar?: string | null;
+  };
   if (!member.roles?.some((r) => allowedRoles.includes(r))) {
     return NextResponse.redirect(`${origin}/login?error=sem-cargo`);
   }
 
-  const session = await createSession(me.id);
+  // Perfil para a UI: preferir identidade DO SERVIDOR (nick/avatar de guild),
+  // depois a global. Só nome de exibição + URL do avatar vão no cookie —
+  // o mínimo necessário, assinado e httpOnly.
+  const name = member.nick || me.global_name || me.username || "DeFi Surfer";
+  const avatar = member.avatar
+    ? `https://cdn.discordapp.com/guilds/${guildId}/users/${me.id}/avatars/${member.avatar}.png?size=96`
+    : me.avatar
+      ? `https://cdn.discordapp.com/avatars/${me.id}/${me.avatar}.png?size=96`
+      : `https://cdn.discordapp.com/embed/avatars/${Number(BigInt(me.id) >> 22n) % 6}.png`;
+
+  const session = await createSession(me.id, { name, avatar });
   if (!session) return NextResponse.redirect(`${origin}/login?error=sessao`);
 
   const res = NextResponse.redirect(`${origin}/members`);

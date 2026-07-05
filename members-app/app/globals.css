@@ -72,6 +72,7 @@ a:hover { text-decoration: underline; }
   background: linear-gradient(135deg, var(--purple) 0%, #4c1d95 100%);
   border: 1px solid var(--border);
 }
+.avatar-img { object-fit: cover; background: var(--panel-2); }
 .profile-txt { display: flex; flex-direction: column; line-height: 1.3; }
 .profile-name { font-weight: 800; font-size: 14px; }
 .profile-sub { color: var(--muted); font-size: 11px; }

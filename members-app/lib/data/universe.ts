@@ -102,6 +102,41 @@ function td(
   };
 }
 
+// Helper para ETFs/commodities/índices via Yahoo (expansão global 2026-07-05).
+// twelveSymbol opcional = fallback Twelve Data se o Yahoo partir (router).
+function yh(
+  symbol: string,
+  name: string,
+  rankHint: number,
+  opts: {
+    sector: string;
+    categories: string[];
+    tv: string;
+    yahoo?: string;
+    logo?: boolean; // true → logo Parqet por símbolo (ETFs)
+    currency?: string;
+    country?: string | null;
+    twelveSymbol?: string;
+  }
+): UniverseAsset {
+  return {
+    symbol,
+    tvSymbol: opts.tv,
+    yahooSymbol: opts.yahoo ?? symbol,
+    name,
+    sector: opts.sector,
+    categories: opts.categories,
+    currency: opts.currency ?? "USD",
+    country: opts.country === undefined ? "US" : opts.country,
+    logoUrl: opts.logo
+      ? `https://assets.parqet.com/logos/symbol/${encodeURIComponent(symbol)}?format=png`
+      : null,
+    rankHint,
+    source: "yahoo",
+    twelveSymbol: opts.twelveSymbol,
+  };
+}
+
 const MAJORS = { sector: "Cripto — Majors", categories: ["Crypto and Blockchain", "Majors"] };
 
 export const UNIVERSE: UniverseAsset[] = [
@@ -171,22 +206,56 @@ export const UNIVERSE: UniverseAsset[] = [
   td("COIN", "Coinbase", 140, { sector: "Ações — Cripto-expostas", categories: ["Crypto and Blockchain"], tv: "NASDAQ:COIN", domain: "coinbase.com" }),
   td("MSTR", "Strategy", 141, { sector: "Ações — Cripto-expostas", categories: ["Crypto and Blockchain"], tv: "NASDAQ:MSTR", domain: "strategy.com" }),
 
-  // --- ETFs (Twelve Data) ---
-  td("SPY", "SPDR S&P 500", 160, { sector: "ETFs", categories: ["ETF", "Broad Market"], tv: "AMEX:SPY", domain: "ssga.com" }),
-  td("QQQ", "Invesco QQQ", 161, { sector: "ETFs", categories: ["ETF", "Broad Market"], tv: "NASDAQ:QQQ", domain: "invesco.com" }),
-  td("SMH", "VanEck Semiconductor", 162, { sector: "ETFs", categories: ["ETF", "AI", "Semis"], tv: "NASDAQ:SMH", domain: "vaneck.com" }),
-  td("GLD", "SPDR Gold Shares", 163, { sector: "ETFs", categories: ["ETF", "Commodities"], tv: "AMEX:GLD", domain: "ssga.com" }),
-  td("SLV", "iShares Silver Trust", 164, { sector: "ETFs", categories: ["ETF", "Commodities"], tv: "AMEX:SLV", domain: "ishares.com" }),
-  td("IBIT", "iShares Bitcoin Trust", 165, { sector: "ETFs", categories: ["ETF", "Crypto and Blockchain"], tv: "NASDAQ:IBIT", domain: "ishares.com" }),
+  // --- ETFs (Yahoo; fallback TD nos que já o tinham) ---
+  yh("SPY", "SPDR S&P 500", 160, { sector: "ETFs", categories: ["ETF", "Broad Market"], tv: "AMEX:SPY", logo: true, twelveSymbol: "SPY" }),
+  yh("QQQ", "Invesco QQQ", 161, { sector: "ETFs", categories: ["ETF", "Broad Market"], tv: "NASDAQ:QQQ", logo: true, twelveSymbol: "QQQ" }),
+  yh("DIA", "SPDR Dow Jones", 162, { sector: "ETFs", categories: ["ETF", "Broad Market"], tv: "AMEX:DIA", logo: true }),
+  yh("IWM", "iShares Russell 2000", 163, { sector: "ETFs", categories: ["ETF", "Broad Market"], tv: "AMEX:IWM", logo: true }),
+  yh("VTI", "Vanguard Total Market", 164, { sector: "ETFs", categories: ["ETF", "Broad Market"], tv: "AMEX:VTI", logo: true }),
+  yh("EFA", "iShares MSCI EAFE (desenvolvidos ex-EUA)", 165, { sector: "ETFs", categories: ["ETF", "Global"], tv: "AMEX:EFA", logo: true }),
+  yh("EEM", "iShares MSCI Emerging Markets", 166, { sector: "ETFs", categories: ["ETF", "Global"], tv: "AMEX:EEM", logo: true }),
+  yh("SMH", "VanEck Semiconductor", 167, { sector: "ETFs", categories: ["ETF", "AI", "Semis"], tv: "NASDAQ:SMH", logo: true, twelveSymbol: "SMH" }),
+  yh("XLK", "Technology Select SPDR", 168, { sector: "ETFs", categories: ["ETF", "Setoriais"], tv: "AMEX:XLK", logo: true }),
+  yh("XLF", "Financial Select SPDR", 169, { sector: "ETFs", categories: ["ETF", "Setoriais"], tv: "AMEX:XLF", logo: true }),
+  yh("XLE", "Energy Select SPDR", 170, { sector: "ETFs", categories: ["ETF", "Setoriais"], tv: "AMEX:XLE", logo: true }),
+  yh("XLV", "Health Care Select SPDR", 171, { sector: "ETFs", categories: ["ETF", "Setoriais"], tv: "AMEX:XLV", logo: true }),
+  yh("VNQ", "Vanguard Real Estate", 172, { sector: "ETFs", categories: ["ETF", "Setoriais"], tv: "AMEX:VNQ", logo: true }),
+  yh("ARKK", "ARK Innovation", 173, { sector: "ETFs", categories: ["ETF", "Growth"], tv: "AMEX:ARKK", logo: true }),
+  yh("TLT", "iShares 20+ Year Treasury", 174, { sector: "ETFs", categories: ["ETF", "Obrigações"], tv: "NASDAQ:TLT", logo: true }),
+  yh("HYG", "iShares High Yield Corporate", 175, { sector: "ETFs", categories: ["ETF", "Obrigações"], tv: "AMEX:HYG", logo: true }),
+  yh("GLD", "SPDR Gold Shares", 176, { sector: "ETFs", categories: ["ETF", "Commodities"], tv: "AMEX:GLD", logo: true, twelveSymbol: "GLD" }),
+  yh("SLV", "iShares Silver Trust", 177, { sector: "ETFs", categories: ["ETF", "Commodities"], tv: "AMEX:SLV", logo: true, twelveSymbol: "SLV" }),
+  yh("IBIT", "iShares Bitcoin Trust", 178, { sector: "ETFs", categories: ["ETF", "Crypto and Blockchain"], tv: "NASDAQ:IBIT", logo: true, twelveSymbol: "IBIT" }),
+  yh("ETHA", "iShares Ethereum Trust", 179, { sector: "ETFs", categories: ["ETF", "Crypto and Blockchain"], tv: "NASDAQ:ETHA", logo: true }),
 
-  // --- Commodities (Twelve Data) ---
-  td("XAU/USD", "Ouro", 180, { sector: "Commodities", categories: ["Commodities"], tv: "OANDA:XAUUSD", yahoo: "XAUUSD=X", twelveSymbol: "XAU/USD", country: null }),
-  td("XAG/USD", "Prata", 181, { sector: "Commodities", categories: ["Commodities"], tv: "OANDA:XAGUSD", yahoo: "XAGUSD=X", twelveSymbol: "XAG/USD", country: null }),
-  td("WTI/USD", "Petróleo WTI", 182, { sector: "Commodities", categories: ["Commodities"], tv: "TVC:USOIL", yahoo: "CL=F", twelveSymbol: "WTI/USD", country: null }),
+  // --- Commodities (Yahoo, futuros contínuos; fallback TD nos 3 originais) ---
+  yh("XAU/USD", "Ouro", 180, { sector: "Commodities", categories: ["Metais"], tv: "OANDA:XAUUSD", yahoo: "GC=F", twelveSymbol: "XAU/USD", country: null }),
+  yh("XAG/USD", "Prata", 181, { sector: "Commodities", categories: ["Metais"], tv: "OANDA:XAGUSD", yahoo: "SI=F", twelveSymbol: "XAG/USD", country: null }),
+  yh("COPPER", "Cobre", 182, { sector: "Commodities", categories: ["Metais"], tv: "COMEX:HG1!", yahoo: "HG=F", country: null }),
+  yh("PLATINUM", "Platina", 183, { sector: "Commodities", categories: ["Metais"], tv: "NYMEX:PL1!", yahoo: "PL=F", country: null }),
+  yh("WTI/USD", "Petróleo WTI", 184, { sector: "Commodities", categories: ["Energia"], tv: "TVC:USOIL", yahoo: "CL=F", twelveSymbol: "WTI/USD", country: null }),
+  yh("BRENT", "Petróleo Brent", 185, { sector: "Commodities", categories: ["Energia"], tv: "TVC:UKOIL", yahoo: "BZ=F", country: null }),
+  yh("NATGAS", "Gás Natural", 186, { sector: "Commodities", categories: ["Energia"], tv: "NYMEX:NG1!", yahoo: "NG=F", country: null }),
+  yh("WHEAT", "Trigo", 187, { sector: "Commodities", categories: ["Agrícolas"], tv: "CBOT:ZW1!", yahoo: "ZW=F", country: null }),
+  yh("CORN", "Milho", 188, { sector: "Commodities", categories: ["Agrícolas"], tv: "CBOT:ZC1!", yahoo: "ZC=F", country: null }),
 
-  // --- Índices (Twelve Data) ---
-  td("SPX", "S&P 500", 190, { sector: "Índices", categories: ["Indices"], tv: "SP:SPX", yahoo: "^GSPC" }),
-  td("NDX", "Nasdaq 100", 191, { sector: "Índices", categories: ["Indices"], tv: "NASDAQ:NDX", yahoo: "^NDX" }),
+  // --- Índices globais (Yahoo) ---
+  yh("SPX", "S&P 500", 190, { sector: "Índices", categories: ["América"], tv: "SP:SPX", yahoo: "^GSPC", twelveSymbol: "SPX" }),
+  yh("NDX", "Nasdaq 100", 191, { sector: "Índices", categories: ["América"], tv: "NASDAQ:NDX", yahoo: "^NDX", twelveSymbol: "NDX" }),
+  yh("DJI", "Dow Jones Industrial", 192, { sector: "Índices", categories: ["América"], tv: "TVC:DJI", yahoo: "^DJI" }),
+  yh("RUT", "Russell 2000", 193, { sector: "Índices", categories: ["América"], tv: "TVC:RUT", yahoo: "^RUT" }),
+  yh("VIX", "VIX (volatilidade)", 194, { sector: "Índices", categories: ["América"], tv: "TVC:VIX", yahoo: "^VIX" }),
+  yh("SX5E", "Euro Stoxx 50", 195, { sector: "Índices", categories: ["Europa"], tv: "TVC:SX5E", yahoo: "^STOXX50E", currency: "EUR", country: null }),
+  yh("DAX", "DAX 40", 196, { sector: "Índices", categories: ["Europa"], tv: "XETR:DAX", yahoo: "^GDAXI", currency: "EUR", country: "DE" }),
+  yh("FTSE", "FTSE 100", 197, { sector: "Índices", categories: ["Europa"], tv: "TVC:UKX", yahoo: "^FTSE", currency: "GBP", country: "GB" }),
+  yh("CAC", "CAC 40", 198, { sector: "Índices", categories: ["Europa"], tv: "TVC:CAC40", yahoo: "^FCHI", currency: "EUR", country: "FR" }),
+  yh("IBEX", "IBEX 35", 199, { sector: "Índices", categories: ["Europa"], tv: "BME:IBC35", yahoo: "^IBEX", currency: "EUR", country: "ES" }),
+  yh("PSI", "PSI (Portugal)", 200, { sector: "Índices", categories: ["Europa"], tv: "EURONEXT:PSI20", yahoo: "PSI20.LS", currency: "EUR", country: "PT" }),
+  yh("N225", "Nikkei 225", 201, { sector: "Índices", categories: ["Ásia"], tv: "TVC:NI225", yahoo: "^N225", currency: "JPY", country: "JP" }),
+  yh("HSI", "Hang Seng", 202, { sector: "Índices", categories: ["Ásia"], tv: "TVC:HSI", yahoo: "^HSI", currency: "HKD", country: "HK" }),
+  yh("SSE", "Shanghai Composite", 203, { sector: "Índices", categories: ["Ásia"], tv: "SSE:000001", yahoo: "000001.SS", currency: "CNY", country: "CN" }),
+  yh("SENSEX", "BSE Sensex", 204, { sector: "Índices", categories: ["Ásia"], tv: "BSE:SENSEX", yahoo: "^BSESN", currency: "INR", country: "IN" }),
+  yh("IBOV", "Ibovespa", 205, { sector: "Índices", categories: ["América"], tv: "INDEX:IBOV", yahoo: "^BVSP", currency: "BRL", country: "BR" }),
 ];
 
 export const SECTORS = [...new Set(UNIVERSE.map((a) => a.sector))];

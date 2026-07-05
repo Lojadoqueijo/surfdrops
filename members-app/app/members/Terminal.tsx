@@ -337,6 +337,20 @@ export default function Terminal({
     });
   }
 
+  // Perfil Discord (nome + avatar): vem de /api/me depois de hidratar — a
+  // página em si é cacheada e não pode depender do cookie de sessão.
+  const [user, setUser] = useState<{ name: string | null; avatar: string | null } | null>(null);
+  useEffect(() => {
+    fetch("/api/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.ok) setUser({ name: d.name, avatar: d.avatar });
+      })
+      .catch(() => {
+        /* sem perfil → placeholder */
+      });
+  }, []);
+
   // Preferências de alertas Telegram (persistidas no browser).
   const [prefs, setPrefs] = useState<AlertPrefs>(DEFAULT_PREFS);
   const [prefsSaved, setPrefsSaved] = useState(false);
@@ -405,10 +419,15 @@ export default function Terminal({
 
         <div className="pulse">
           <div className="profile">
-            <span className="avatar">🌊</span>
+            {user?.avatar ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={user.avatar} alt="" className="avatar avatar-img" />
+            ) : (
+              <span className="avatar">🌊</span>
+            )}
             <div className="profile-txt">
-              <span className="profile-name">DeFi Surfer</span>
-              <span className="profile-sub">membro</span>
+              <span className="profile-name">{user?.name || "DeFi Surfer"}</span>
+              <span className="profile-sub">membro DeFi Surfer</span>
             </div>
           </div>
           <div className="stat">
