@@ -2083,6 +2083,75 @@
     color: var(--accent);
   }
   @media (prefers-reduced-motion: reduce) { .final-cta-card { transition: none; } }
+
+  /* ===== RADAR DO SWELL — teaser ao vivo + planos ===== */
+  .radar { max-width: 1080px; margin: 70px auto; padding: 0 20px; }
+  .radar-head { text-align: center; max-width: 740px; margin: 0 auto 26px; }
+  .radar-tag {
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--accent-blue); border: 1px solid var(--accent-blue);
+    border-radius: 999px; padding: 5px 14px; margin-bottom: 14px;
+  }
+  .radar-head h2 { font-size: clamp(24px, 4vw, 34px); line-height: 1.25; margin-bottom: 12px; }
+  .radar-head h2 span { color: var(--accent); }
+  .radar-lead { color: var(--text-dim); font-size: 14px; }
+  .radar-stats { display: flex; justify-content: center; gap: 36px; margin: 26px 0 18px; flex-wrap: wrap; }
+  .radar-stat { text-align: center; }
+  .radar-stat-v { display: block; font-size: 30px; font-weight: 800; }
+  .radar-stat-v.up { color: var(--accent); }
+  .radar-stat-v.down { color: var(--hot); }
+  .radar-stat-k { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-faint); }
+  .radar-table-wrap {
+    position: relative; max-width: 760px; margin: 0 auto;
+    background: var(--bg-elev); border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+  }
+  .radar-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .radar-table th {
+    padding: 10px 14px; text-align: left; font-size: 10px; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--text-faint); border-bottom: 1px solid var(--border);
+  }
+  .radar-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; text-align: left; }
+  .radar-asset { display: flex; align-items: center; gap: 9px; }
+  .radar-logo { width: 22px; height: 22px; border-radius: 50%; background: #ffffff14; flex-shrink: 0; }
+  .radar-name { color: var(--text-dim); font-size: 11px; }
+  .rchip { font-size: 10.5px; font-weight: 800; letter-spacing: 0.5px; border-radius: 6px; padding: 3px 9px; }
+  .rchip.up { color: var(--accent); background: rgba(0,255,157,0.1); border: 1px solid rgba(0,255,157,0.35); }
+  .rchip.down { color: var(--hot); background: rgba(255,94,94,0.1); border: 1px solid rgba(255,94,94,0.35); }
+  .radar-pct.up { color: var(--accent); font-weight: 700; }
+  .radar-pct.down { color: var(--hot); font-weight: 700; }
+  .radar-skel td span { display: inline-block; height: 12px; border-radius: 6px; background: var(--border); animation: radarPulse 1.4s ease-in-out infinite; }
+  @keyframes radarPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.9; } }
+  .radar-fade {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 160px;
+    background: linear-gradient(180deg, transparent 0%, var(--bg) 90%);
+    display: flex; align-items: flex-end; justify-content: center; padding-bottom: 18px; pointer-events: none;
+  }
+  .radar-lock {
+    display: inline-flex; align-items: center; gap: 8px; background: var(--bg-card);
+    border: 1px solid var(--border-bright); border-radius: 999px; padding: 9px 18px;
+    font-size: 12px; font-weight: 700;
+  }
+  .radar-live-note { text-align: center; color: var(--text-faint); font-size: 11px; margin: 12px 0 36px; }
+  .radar-plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; max-width: 980px; margin: 0 auto; align-items: stretch; }
+  .radar-plan { position: relative; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 26px 22px 22px; display: flex; flex-direction: column; }
+  .radar-plan.best { border-color: var(--accent); box-shadow: 0 0 34px rgba(0,255,157,0.12); }
+  .radar-plan-badge {
+    position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+    background: var(--accent); color: #04140a; font-size: 10px; font-weight: 800;
+    letter-spacing: 1px; text-transform: uppercase; border-radius: 999px; padding: 4px 12px; white-space: nowrap;
+  }
+  .radar-plan-badge.soft { background: var(--bg-elev); color: var(--accent-blue); border: 1px solid var(--accent-blue); }
+  .radar-plan-name { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; }
+  .radar-plan-price { font-size: 30px; font-weight: 800; margin-bottom: 2px; }
+  .radar-plan-price span { font-size: 13px; color: var(--text-dim); font-weight: 600; }
+  .radar-plan-price s { font-size: 15px; color: var(--text-faint); margin-right: 8px; font-weight: 600; }
+  .radar-plan-note { font-size: 11px; color: var(--text-faint); margin-bottom: 14px; }
+  .radar-plan ul { list-style: none; margin: 0 0 18px; padding: 0; font-size: 12.5px; color: var(--text-dim); display: grid; gap: 7px; flex: 1; }
+  .radar-plan ul li::before { content: '▸ '; color: var(--accent); }
+  .radar-plan-btn { display: block; text-align: center; border-radius: 10px; padding: 12px 0; font-weight: 800; font-size: 13px; border: 1px solid var(--border-bright); color: var(--text); }
+  .radar-plan-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .radar-plan.best .radar-plan-btn { background: var(--gradient-1); color: #04140a; border: none; }
+  .radar-pay-note { text-align: center; color: var(--text-faint); font-size: 11px; margin-top: 16px; }
 </style>
 </head>
 <body>
@@ -2181,6 +2250,7 @@
       </div>
       <nav class="nav-links">
         <a href="#airdrops">Airdrops</a>
+        <a href="#radar">Radar</a>
         <a href="#comunidade" data-i18n="nav.community">Comunidade</a>
         <a href="#risco" data-i18n="nav.risk">Risco</a>
         <a href="https://www.youtube.com/@surfistacrypto" target="_blank" rel="noopener" class="nav-cta nav-cta-yt" title="YouTube · Surfista Crypto">
@@ -2663,6 +2733,127 @@
     </div>
   </div>
   </div>
+
+  <!-- ===== RADAR DO SWELL — teaser ao vivo (dados reais do terminal de membros) ===== -->
+  <section class="radar" id="radar">
+    <div class="radar-head">
+      <span class="radar-tag" data-i18n="radar.tag">Novo · Exclusivo de membros</span>
+      <h2 data-i18n-html="radar.title">📡 Radar do Swell — <span>3.350 ativos</span>, um só radar</h2>
+      <p class="radar-lead" data-i18n-html="radar.lead">
+        O mesmo motor da <strong>Linha do Swell</strong>, a varrer cripto, ações dos EUA, ETFs,
+        commodities e índices globais — flips bullish/bearish confirmados no fecho de cada vela.
+        <strong>A Linha diz-te quando. O Radar diz-te onde.</strong>
+      </p>
+    </div>
+
+    <div class="radar-stats" id="radar-stats" hidden>
+      <div class="radar-stat"><span class="radar-stat-v" id="radar-total">—</span><span class="radar-stat-k" data-i18n="radar.stats.total">ativos no radar</span></div>
+      <div class="radar-stat"><span class="radar-stat-v up" id="radar-bull">—</span><span class="radar-stat-k">Bullish</span></div>
+      <div class="radar-stat"><span class="radar-stat-v down" id="radar-bear">—</span><span class="radar-stat-k">Bearish</span></div>
+    </div>
+
+    <div class="radar-table-wrap">
+      <table class="radar-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th data-i18n="radar.th.asset">Ativo</th>
+            <th>Trend</th>
+            <th data-i18n="radar.th.delta">Δ desde flip</th>
+          </tr>
+        </thead>
+        <tbody id="radar-rows">
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:130px"></span></td><td><span style="width:64px"></span></td><td><span style="width:44px"></span></td></tr>
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:110px"></span></td><td><span style="width:64px"></span></td><td><span style="width:52px"></span></td></tr>
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:140px"></span></td><td><span style="width:64px"></span></td><td><span style="width:40px"></span></td></tr>
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:120px"></span></td><td><span style="width:64px"></span></td><td><span style="width:48px"></span></td></tr>
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:135px"></span></td><td><span style="width:64px"></span></td><td><span style="width:44px"></span></td></tr>
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:115px"></span></td><td><span style="width:64px"></span></td><td><span style="width:50px"></span></td></tr>
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:125px"></span></td><td><span style="width:64px"></span></td><td><span style="width:42px"></span></td></tr>
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:105px"></span></td><td><span style="width:64px"></span></td><td><span style="width:46px"></span></td></tr>
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:132px"></span></td><td><span style="width:64px"></span></td><td><span style="width:38px"></span></td></tr>
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:118px"></span></td><td><span style="width:64px"></span></td><td><span style="width:54px"></span></td></tr>
+        </tbody>
+      </table>
+      <div class="radar-fade">
+        <span class="radar-lock">🔒 <span data-i18n="radar.lock">+3.340 ativos, watchlist pessoal e alertas — no Radar completo</span></span>
+      </div>
+    </div>
+    <p class="radar-live-note" id="radar-updated" data-i18n="radar.live">Dados reais · atualização diária ao fecho das velas</p>
+
+    <div class="radar-plans">
+      <div class="radar-plan">
+        <div class="radar-plan-name" data-i18n="radar.plan1.name">Radar · Mensal</div>
+        <div class="radar-plan-price">59€<span>/mês</span></div>
+        <div class="radar-plan-note" data-i18n="radar.plan1.note">sem fidelização</div>
+        <ul data-i18n-html="radar.plan1.f">
+          <li>Acesso completo aos 3.350 ativos</li>
+          <li>Watchlist pessoal + alertas Telegram</li>
+          <li>Acumula Crédito Surfer para a comunidade</li>
+        </ul>
+        <a class="radar-plan-btn" href="https://t.me/surfistacrypto" target="_blank" rel="noopener" data-i18n="radar.cta">Falar com a equipa</a>
+      </div>
+      <div class="radar-plan">
+        <span class="radar-plan-badge soft" data-i18n="radar.plan2.badge">Poupa 32%</span>
+        <div class="radar-plan-name" data-i18n="radar.plan2.name">Radar · Anual</div>
+        <div class="radar-plan-price">479€<span>/ano</span></div>
+        <div class="radar-plan-note" data-i18n="radar.plan2.note">≈ 40€/mês · 12 meses pelo preço de 8</div>
+        <ul data-i18n-html="radar.plan2.f">
+          <li>Tudo do plano mensal</li>
+          <li>Watchlist pessoal + alertas Telegram</li>
+          <li>Acumula Crédito Surfer para a comunidade</li>
+        </ul>
+        <a class="radar-plan-btn" href="https://t.me/surfistacrypto" target="_blank" rel="noopener" data-i18n="radar.cta">Falar com a equipa</a>
+      </div>
+      <div class="radar-plan best">
+        <span class="radar-plan-badge" data-i18n="radar.plan3.badge">Melhor valor</span>
+        <div class="radar-plan-name" data-i18n="radar.plan3.name">DeFi Surfers · Vitalício</div>
+        <div class="radar-plan-price"><s>993,84€</s>795,07€</div>
+        <div class="radar-plan-note" data-i18n="radar.plan3.note">pagamento único · membros não pagam Radar. Nunca.</div>
+        <ul data-i18n-html="radar.plan3.f">
+          <li><strong>Radar do Swell vitalício</strong></li>
+          <li>Linha do Swell (indicador TradingView)</li>
+          <li>+30h de conteúdo prático DeFi</li>
+          <li>Telegram + Discord privados · calls semanais</li>
+          <li>Abre apenas em janelas — vagas limitadas</li>
+        </ul>
+        <a class="radar-plan-btn" href="https://t.me/surfistacrypto" target="_blank" rel="noopener" data-i18n="radar.cta3">Quero ser DeFi Surfer</a>
+      </div>
+    </div>
+    <p class="radar-pay-note" data-i18n="radar.paynote">Pagamento em USDC/USDT · adesão fechada diretamente com a equipa no Telegram</p>
+  </section>
+
+  <script>
+  // Teaser ao vivo do Radar do Swell: top 10 do terminal de membros (dados
+  // reais, cache 1h). Se a API falhar, os skeletons ficam — a secção degrada
+  // sem quebrar a página.
+  (function () {
+    var API = 'https://defi-surfers-members.vercel.app/api/public/teaser';
+    function pctTxt(p) {
+      if (p === null || p === undefined) return '—';
+      return (p >= 0 ? '+' : '') + p.toLocaleString('pt-PT', { maximumFractionDigits: 1 }) + '%';
+    }
+    fetch(API).then(function (r) { return r.json(); }).then(function (d) {
+      if (!d || !d.ok || !d.top || !d.top.length) return;
+      document.getElementById('radar-total').textContent = d.totalAssets.toLocaleString('pt-PT');
+      document.getElementById('radar-bull').textContent = d.bull.toLocaleString('pt-PT');
+      document.getElementById('radar-bear').textContent = d.bear.toLocaleString('pt-PT');
+      document.getElementById('radar-stats').hidden = false;
+      document.getElementById('radar-rows').innerHTML = d.top.map(function (r, i) {
+        var up = r.trend === 'bullish';
+        var logo = r.logoUrl
+          ? '<img class="radar-logo" src="' + r.logoUrl + '" alt="" loading="lazy">'
+          : '<span class="radar-logo"></span>';
+        return '<tr>' +
+          '<td style="color:var(--text-faint)">' + (i + 1) + '</td>' +
+          '<td><span class="radar-asset">' + logo + '<span><strong>' + r.symbol.split('/')[0] + '</strong> <span class="radar-name">' + (r.name || '') + '</span></span></span></td>' +
+          '<td><span class="rchip ' + (up ? 'up' : 'down') + '">' + (up ? 'BULLISH' : 'BEARISH') + '</span></td>' +
+          '<td class="radar-pct ' + ((r.sinceFlipPct || 0) >= 0 ? 'up' : 'down') + '">' + pctTxt(r.sinceFlipPct) + '</td>' +
+          '</tr>';
+      }).join('');
+    }).catch(function () { /* skeletons ficam */ });
+  })();
+  </script>
 
   <section class="community" id="comunidade">
     <div class="community-inner">
@@ -3897,6 +4088,28 @@
         'final.okx.cta': 'Criar conta com bónus →',
         'ledger.bonus': 'Bónus $80',
         'ledger.cta': 'Comprar Ledger',
+        'radar.tag': 'Novo · Exclusivo de membros',
+        'radar.title': '📡 Radar do Swell — <span>3.350 ativos</span>, um só radar',
+        'radar.lead': 'O mesmo motor da <strong>Linha do Swell</strong>, a varrer cripto, ações dos EUA, ETFs, commodities e índices globais — flips bullish/bearish confirmados no fecho de cada vela. <strong>A Linha diz-te quando. O Radar diz-te onde.</strong>',
+        'radar.stats.total': 'ativos no radar',
+        'radar.th.asset': 'Ativo',
+        'radar.th.delta': 'Δ desde flip',
+        'radar.lock': '+3.340 ativos, watchlist pessoal e alertas — no Radar completo',
+        'radar.live': 'Dados reais · atualização diária ao fecho das velas',
+        'radar.plan1.name': 'Radar · Mensal',
+        'radar.plan1.note': 'sem fidelização',
+        'radar.plan1.f': '<li>Acesso completo aos 3.350 ativos</li><li>Watchlist pessoal + alertas Telegram</li><li>Acumula Crédito Surfer para a comunidade</li>',
+        'radar.plan2.badge': 'Poupa 32%',
+        'radar.plan2.name': 'Radar · Anual',
+        'radar.plan2.note': '≈ 40€/mês · 12 meses pelo preço de 8',
+        'radar.plan2.f': '<li>Tudo do plano mensal</li><li>Watchlist pessoal + alertas Telegram</li><li>Acumula Crédito Surfer para a comunidade</li>',
+        'radar.plan3.badge': 'Melhor valor',
+        'radar.plan3.name': 'DeFi Surfers · Vitalício',
+        'radar.plan3.note': 'pagamento único · membros não pagam Radar. Nunca.',
+        'radar.plan3.f': '<li><strong>Radar do Swell vitalício</strong></li><li>Linha do Swell (indicador TradingView)</li><li>+30h de conteúdo prático DeFi</li><li>Telegram + Discord privados · calls semanais</li><li>Abre apenas em janelas — vagas limitadas</li>',
+        'radar.cta': 'Falar com a equipa',
+        'radar.cta3': 'Quero ser DeFi Surfer',
+        'radar.paynote': 'Pagamento em USDC/USDT · adesão fechada diretamente com a equipa no Telegram',
         'community.tag': 'Membership · DeFi Surfers',
         'community.title': 'Os airdrops <span>chegam mais cedo</span> aos DeFi Surfers.',
         'community.lead': 'Esta página é a <strong>vitrine pública</strong>. Os <strong>DeFi Surfers</strong> — a maior e melhor comunidade de DeFi e airdrops em Portugal — recebem os airdrops <strong>antes de aparecerem aqui</strong>, com tempo para entrar no momento certo, quando os pontos valem mais e a competição é menor.',
@@ -3992,6 +4205,28 @@
         'final.okx.cta': 'Create account with bonus →',
         'ledger.bonus': '$80 Bonus',
         'ledger.cta': 'Buy Ledger',
+        'radar.tag': 'New · Members only',
+        'radar.title': '📡 Swell Radar — <span>3,350 assets</span>, one radar',
+        'radar.lead': 'The same engine as the <strong>Swell Line</strong>, scanning crypto, US stocks, ETFs, commodities and global indices — bullish/bearish flips confirmed at every candle close. <strong>The Line tells you when. The Radar tells you where.</strong>',
+        'radar.stats.total': 'assets on radar',
+        'radar.th.asset': 'Asset',
+        'radar.th.delta': 'Δ since flip',
+        'radar.lock': '+3,340 assets, personal watchlist and alerts — in the full Radar',
+        'radar.live': 'Real data · updated daily at candle close',
+        'radar.plan1.name': 'Radar · Monthly',
+        'radar.plan1.note': 'no lock-in',
+        'radar.plan1.f': '<li>Full access to 3,350 assets</li><li>Personal watchlist + Telegram alerts</li><li>Builds Surfer Credit towards the community</li>',
+        'radar.plan2.badge': 'Save 32%',
+        'radar.plan2.name': 'Radar · Annual',
+        'radar.plan2.note': '≈ €40/month · 12 months for the price of 8',
+        'radar.plan2.f': '<li>Everything in monthly</li><li>Personal watchlist + Telegram alerts</li><li>Builds Surfer Credit towards the community</li>',
+        'radar.plan3.badge': 'Best value',
+        'radar.plan3.name': 'DeFi Surfers · Lifetime',
+        'radar.plan3.note': 'one-time payment · members never pay for the Radar. Ever.',
+        'radar.plan3.f': '<li><strong>Lifetime Swell Radar</strong></li><li>Swell Line (TradingView indicator)</li><li>+30h of hands-on DeFi content</li><li>Private Telegram + Discord · weekly calls</li><li>Opens only in windows — limited spots</li>',
+        'radar.cta': 'Talk to the team',
+        'radar.cta3': 'I want to be a DeFi Surfer',
+        'radar.paynote': 'Payment in USDC/USDT · access closed directly with the team on Telegram',
         'community.tag': 'Membership · DeFi Surfers',
         'community.title': 'Airdrops <span>arrive earlier</span> for DeFi Surfers.',
         'community.lead': 'This page is the <strong>public showcase</strong>. <strong>DeFi Surfers</strong> — the largest and best DeFi and airdrops community in Portugal — receive airdrops <strong>before they appear here</strong>, with time to enter at the right moment, when points are worth more and competition is lower.',
@@ -4087,6 +4322,28 @@
         'final.okx.cta': 'Crear cuenta con bono →',
         'ledger.bonus': 'Bono $80',
         'ledger.cta': 'Comprar Ledger',
+        'radar.tag': 'Nuevo · Solo miembros',
+        'radar.title': '📡 Radar del Swell — <span>3.350 activos</span>, un solo radar',
+        'radar.lead': 'El mismo motor de la <strong>Línea del Swell</strong>, escaneando cripto, acciones de EE.UU., ETFs, materias primas e índices globales — flips bullish/bearish confirmados al cierre de cada vela. <strong>La Línea te dice cuándo. El Radar te dice dónde.</strong>',
+        'radar.stats.total': 'activos en el radar',
+        'radar.th.asset': 'Activo',
+        'radar.th.delta': 'Δ desde flip',
+        'radar.lock': '+3.340 activos, watchlist personal y alertas — en el Radar completo',
+        'radar.live': 'Datos reales · actualización diaria al cierre de las velas',
+        'radar.plan1.name': 'Radar · Mensual',
+        'radar.plan1.note': 'sin permanencia',
+        'radar.plan1.f': '<li>Acceso completo a los 3.350 activos</li><li>Watchlist personal + alertas Telegram</li><li>Acumula Crédito Surfer para la comunidad</li>',
+        'radar.plan2.badge': 'Ahorra 32%',
+        'radar.plan2.name': 'Radar · Anual',
+        'radar.plan2.note': '≈ 40€/mes · 12 meses por el precio de 8',
+        'radar.plan2.f': '<li>Todo lo del plan mensual</li><li>Watchlist personal + alertas Telegram</li><li>Acumula Crédito Surfer para la comunidad</li>',
+        'radar.plan3.badge': 'Mejor valor',
+        'radar.plan3.name': 'DeFi Surfers · Vitalicio',
+        'radar.plan3.note': 'pago único · los miembros no pagan el Radar. Nunca.',
+        'radar.plan3.f': '<li><strong>Radar del Swell vitalicio</strong></li><li>Línea del Swell (indicador TradingView)</li><li>+30h de contenido práctico DeFi</li><li>Telegram + Discord privados · calls semanales</li><li>Abre solo en ventanas — plazas limitadas</li>',
+        'radar.cta': 'Hablar con el equipo',
+        'radar.cta3': 'Quiero ser DeFi Surfer',
+        'radar.paynote': 'Pago en USDC/USDT · acceso cerrado directamente con el equipo en Telegram',
         'community.tag': 'Membresía · DeFi Surfers',
         'community.title': 'Los airdrops <span>llegan antes</span> a los DeFi Surfers.',
         'community.lead': 'Esta página es el <strong>escaparate público</strong>. Los <strong>DeFi Surfers</strong> — la comunidad de DeFi y airdrops más grande y mejor de Portugal — reciben los airdrops <strong>antes de aparecer aquí</strong>, con tiempo para entrar en el momento adecuado, cuando los puntos valen más y la competencia es menor.',
