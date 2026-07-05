@@ -3,6 +3,8 @@ import type { UniverseAsset } from "./universe";
 import { getBinanceCandles } from "./providers/binance";
 import { getBybitCandles } from "./providers/bybit";
 import { getCoinGeckoCandles } from "./providers/coingecko";
+import { getGateCandles } from "./providers/gateio";
+import { getMexcCandles } from "./providers/mexc";
 import { getOkxCandles } from "./providers/okx";
 import { getTwelveDataCandles } from "./providers/twelvedata";
 
@@ -44,6 +46,16 @@ export async function getCandlesForAsset(
   if (asset.source === "bybit") {
     if (!asset.bybitSymbol) throw new Error(`${asset.symbol}: sem bybitSymbol`);
     return getBybitCandles(asset.bybitSymbol, timeframe, limit);
+  }
+
+  if (asset.source === "mexc") {
+    if (!asset.mexcSymbol) throw new Error(`${asset.symbol}: sem mexcSymbol`);
+    return getMexcCandles(asset.mexcSymbol, timeframe, limit);
+  }
+
+  if (asset.source === "gate") {
+    if (!asset.gatePair) throw new Error(`${asset.symbol}: sem gatePair`);
+    return getGateCandles(asset.gatePair, timeframe, limit);
   }
 
   // twelvedata

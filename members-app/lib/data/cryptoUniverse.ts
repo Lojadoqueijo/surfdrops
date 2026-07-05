@@ -2,9 +2,9 @@ import { UNIVERSE, type UniverseAsset } from "./universe";
 
 // Universo cripto DINÂMICO (DEFI_SURFERS_UXUI/decisão 2026-07-05):
 //   top 500 do CoinGecko (market cap, rank, nome, logo — 2 chamadas grátis)
-//   ∩ pares USDT ativos na Binance, OKX ou Bybit (prioridade nessa ordem;
-//   as velas vêm sempre de uma exchange — o OHLC grátis do CoinGecko dá
-//   velas de 4 dias em históricos longos e não serve o motor calibrado).
+//   ∩ pares USDT ativos na Binance, OKX, Bybit, MEXC ou Gate (prioridade
+//   nessa ordem; as velas vêm sempre de uma exchange — o OHLC grátis do
+//   CoinGecko dá velas de 4 dias em históricos longos e não serve o motor).
 // Resultado típico: ~250-350 ativos com mcap real. Fallback: lista estática.
 
 const STABLES = new Set([
@@ -45,12 +45,14 @@ export async function getCryptoUniverse(): Promise<UniverseAsset[]> {
   if (cache && Date.now() - cache.at < CACHE_MS) return cache.assets;
 
   try {
-    const [infoRes, okxRes, bybitRes, cg1Res, cg2Res] = await Promise.all([
+    const [infoRes, okxRes, bybitRes, mexcRes, gateRes, cg1Res, cg2Res] = await Promise.all([
       fetch("https://api.binance.com/api/v3/exchangeInfo", { cache: "no-store" }),
       fetch("https://www.okx.com/api/v5/public/instruments?instType=SPOT", { cache: "no-store" }),
       fetch("https://api.bybit.com/v5/market/instruments-info?category=spot&limit=1000", {
         cache: "no-store",
       }),
+      fetch("https://api.mexc.com/api/v3/exchangeInfo", { cache: "no-store" }),
+      fetch("https://api.gateio.ws/api/v4/spot/currency_pairs", { cache: "no-store" }),
       fetch(
         "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1",
         { cache: "no-store" }
@@ -100,6 +102,42 @@ export async function getCryptoUniverse(): Promise<UniverseAsset[]> {
         /* segue sem Bybit */
       }
     }
+    const mexcBases = new Set<string>();
+    if (mexcRes.ok) {
+      try {
+        const mexc = (await mexcRes.json()) as {
+          symbols?: Array<{
+            baseAsset: string;
+            quoteAsset: string;
+            isSpotTradingAllowed?: boolean;
+            status: string;
+          }>;
+        };
+        for (const s of mexc.symbols ?? []) {
+          // status "1" = a negociar (a MEXC usa códigos numéricos em string)
+          if (s.quoteAsset === "USDT" && s.isSpotTradingAllowed !== false && s.status === "1") {
+            mexcBases.add(s.baseAsset.toUpperCase());
+          }
+        }
+      } catch {
+        /* segue sem MEXC */
+      }
+    }
+    const gateBases = new Set<string>();
+    if (gateRes.ok) {
+      try {
+        const gate = (await gateRes.json()) as Array<{
+          base: string;
+          quote: string;
+          trade_status: string;
+        }>;
+        for (const p of gate) {
+          if (p.quote === "USDT" && p.trade_status === "tradable") gateBases.add(p.base.toUpperCase());
+        }
+      } catch {
+        /* segue sem Gate */
+      }
+    }
 
     const seen = new Set<string>();
     const assets: UniverseAsset[] = [];
@@ -108,11 +146,14 @@ export async function getCryptoUniverse(): Promise<UniverseAsset[]> {
       if (!sym || seen.has(sym)) continue;
       if (STABLES.has(sym) || WRAPPED.has(sym)) continue;
 
-      // Prioridade de fonte de velas: Binance → OKX → Bybit.
-      let exchange: { source: "binance" | "okx" | "bybit"; tv: string } | null = null;
+      // Prioridade de fonte de velas: Binance → OKX → Bybit → MEXC → Gate.
+      let exchange: { source: "binance" | "okx" | "bybit" | "mexc" | "gate"; tv: string } | null =
+        null;
       if (binanceBases.has(sym)) exchange = { source: "binance", tv: `BINANCE:${sym}USDT` };
       else if (okxBases.has(sym)) exchange = { source: "okx", tv: `OKX:${sym}USDT` };
       else if (bybitBases.has(sym)) exchange = { source: "bybit", tv: `BYBIT:${sym}USDT` };
+      else if (mexcBases.has(sym)) exchange = { source: "mexc", tv: `MEXC:${sym}USDT` };
+      else if (gateBases.has(sym)) exchange = { source: "gate", tv: `GATEIO:${sym}USDT` };
       if (!exchange) continue;
 
       seen.add(sym);
@@ -135,6 +176,8 @@ export async function getCryptoUniverse(): Promise<UniverseAsset[]> {
         binanceSymbol: exchange.source === "binance" ? `${sym}USDT` : undefined,
         okxInstId: exchange.source === "okx" ? `${sym}-USDT` : undefined,
         bybitSymbol: exchange.source === "bybit" ? `${sym}USDT` : undefined,
+        mexcSymbol: exchange.source === "mexc" ? `${sym}USDT` : undefined,
+        gatePair: exchange.source === "gate" ? `${sym}_USDT` : undefined,
         coingeckoId: c.id,
       });
     }
@@ -147,7 +190,7 @@ export async function getCryptoUniverse(): Promise<UniverseAsset[]> {
       return acc;
     }, {});
     console.log(
-      `[cryptoUniverse] ${assets.length} ativos (top 500 CG ∩ Binance/OKX/Bybit USDT): ${JSON.stringify(bySource)}`
+      `[cryptoUniverse] ${assets.length} ativos (top 500 CG ∩ 5 exchanges USDT): ${JSON.stringify(bySource)}`
     );
     return assets;
   } catch (err) {
