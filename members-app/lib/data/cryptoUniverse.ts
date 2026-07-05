@@ -10,8 +10,8 @@ import { UNIVERSE, type UniverseAsset } from "./universe";
 const STABLES = new Set([
   "USDT", "USDC", "DAI", "FDUSD", "TUSD", "BUSD", "USDE", "PYUSD", "USDS",
   "USD1", "USDP", "GUSD", "EURC", "EURT", "USDD", "FRAX", "LUSD", "XAUT", "PAXG",
-  // apanhados quando o universo passou a incluir OKX/Bybit:
-  "USDY", "RLUSD", "USD0", "USDF", "USDTB", "SUSDE", "SUSDS", "EURS", "USDG",
+  // apanhados quando o universo passou a incluir OKX/Bybit/MEXC/Gate:
+  "USDY", "RLUSD", "USD0", "USDF", "USDTB", "SUSDE", "SUSDS", "EURS", "USDG", "CUSD",
 ]);
 const WRAPPED = new Set([
   "WBTC", "WETH", "WBETH", "STETH", "WSTETH", "CBBTC", "WEETH", "RETH",
@@ -145,6 +145,10 @@ export async function getCryptoUniverse(): Promise<UniverseAsset[]> {
       const sym = (c.symbol || "").toUpperCase();
       if (!sym || seen.has(sym)) continue;
       if (STABLES.has(sym) || WRAPPED.has(sym)) continue;
+      // Ações tokenizadas (Ondo "Tokenized Stock", xStocks) não são cripto —
+      // as ações reais já vivem na tab "Ações" via Twelve Data.
+      const nameLower = (c.name || "").toLowerCase();
+      if (nameLower.includes("tokenized") || nameLower.includes("xstock")) continue;
 
       // Prioridade de fonte de velas: Binance → OKX → Bybit → MEXC → Gate.
       let exchange: { source: "binance" | "okx" | "bybit" | "mexc" | "gate"; tv: string } | null =
