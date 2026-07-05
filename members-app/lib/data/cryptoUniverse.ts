@@ -10,6 +10,8 @@ import { UNIVERSE, type UniverseAsset } from "./universe";
 const STABLES = new Set([
   "USDT", "USDC", "DAI", "FDUSD", "TUSD", "BUSD", "USDE", "PYUSD", "USDS",
   "USD1", "USDP", "GUSD", "EURC", "EURT", "USDD", "FRAX", "LUSD", "XAUT", "PAXG",
+  // apanhados quando o universo passou a incluir OKX/Bybit:
+  "USDY", "RLUSD", "USD0", "USDF", "USDTB", "SUSDE", "SUSDS", "EURS", "USDG",
 ]);
 const WRAPPED = new Set([
   "WBTC", "WETH", "WBETH", "STETH", "WSTETH", "CBBTC", "WEETH", "RETH",
