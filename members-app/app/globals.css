@@ -53,6 +53,7 @@ a:hover { text-decoration: underline; }
 .term-head { margin-bottom: 16px; }
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .topbar .brand { margin-bottom: 0; }
+.brand-sub { text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; }
 .logout {
   border: 1px solid var(--border); border-radius: 999px; background: var(--panel);
   color: var(--muted); font-size: 12px; font-weight: 600; padding: 7px 14px; white-space: nowrap;

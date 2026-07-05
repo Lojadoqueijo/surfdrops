@@ -24,10 +24,12 @@ export default async function LoginPage({
   return (
     <main className="container login-page">
       <div className="brand">
-        <h1>🌊 DeFi Surfers</h1>
-        <span className="tag">área de membros</span>
+        <h1>📡 Radar do Swell</h1>
+        <span className="tag">by DeFi Surfers</span>
       </div>
-      <p className="muted">Screener de tendências multi-setor — acesso exclusivo a membros.</p>
+      <p className="muted">
+        3.350 ativos varridos pelo motor da Linha do Swell — acesso exclusivo a membros.
+      </p>
 
       {error && <p className="login-error">{MESSAGES[error] ?? "Erro no login."}</p>}
 
@@ -41,7 +43,7 @@ export default async function LoginPage({
       </div>
 
       <div className="note join-note">
-        <p>Ainda não és membro? O acesso ao terminal faz parte da comunidade DeFi Surfers.</p>
+        <p>Ainda não és membro? O Radar do Swell faz parte da comunidade DeFi Surfers.</p>
         <a
           className="btn-telegram"
           href={TELEGRAM_EQUIPA}

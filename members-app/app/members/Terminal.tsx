@@ -392,7 +392,8 @@ export default function Terminal({
       <header className="term-head">
         <div className="topbar">
           <div className="brand">
-            <h1>🌊 DeFi Surfers</h1>
+            <h1>📡 Radar do Swell</h1>
+            <span className="tag brand-sub">DeFi Surfers</span>
           </div>
           <nav className="tabs">
             {TABS.map((c) => (
