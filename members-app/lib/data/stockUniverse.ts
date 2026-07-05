@@ -56,11 +56,11 @@ function parseCsvLine(line: string): string[] {
 }
 
 // Instrumentos que não são ações comuns — filtrados pelo nome no diretório.
-// "\bfund\b"/"closed-end" apanha os closed-end funds (não levam flag ETF e
-// entravam no top 3000 na 1ª corrida: PIMCO/Eaton Vance/Gabelli etc.);
-// REITs ficam (usam "Trust", não "Fund").
+// "\bfund\b"/"closed-end"/"term trust" apanha os closed-end funds (não levam
+// flag ETF e entravam no top 3000: PIMCO/Eaton Vance/Gabelli/BlackRock "Term
+// Trust" etc.); REITs ficam (usam "Trust" sozinho, não "Fund"/"Term Trust").
 const NAME_EXCLUDES =
-  /\bwarrant|\bright(s)?\b|\bunit(s)?\b|preferred|preference|depositary|\bnotes?\b|debenture|% |\bfund\b|closed[- ]end|\betn\b/i;
+  /\bwarrant|\bright(s)?\b|\bunit(s)?\b|preferred|preference|depositary|\bnotes?\b|debenture|% |\bfund\b|closed[- ]end|term trust|\betn\b/i;
 
 function cleanName(raw: string): string {
   return raw

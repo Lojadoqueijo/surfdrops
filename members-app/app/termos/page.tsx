@@ -15,12 +15,19 @@ export default function TermosPage() {
       </div>
 
       <div className="terms-box">
-        <h2>Termos de Utilização da Plataforma de Membros</h2>
-        <p className="muted">
-          Lê com atenção. O acesso à plataforma depende da aceitação integral destes Termos.
-        </p>
+        <div className="terms-tldr">
+          <h2>Termos de Utilização — o essencial</h2>
+          <ul>
+            <li>A Plataforma é <b>estritamente educativa e informativa</b>.</li>
+            <li><b>Nada</b> aqui é recomendação de compra/venda nem aconselhamento financeiro.</li>
+            <li>Os dados vêm de terceiros e são apresentados <b>&quot;tal como estão&quot;</b>.</li>
+            <li>As decisões e o <b>risco</b> (incluindo perda total) são exclusivamente teus.</li>
+            <li>Aplica-se a <b>lei portuguesa</b>. Ao aceitar, confirmas que leste os termos completos abaixo.</li>
+          </ul>
+        </div>
 
-        <h3>1. O que esta plataforma é (e o que não é)</h3>
+        <div className="terms-scroll">
+          <h3>1. O que esta plataforma é (e o que não é)</h3>
         <p>
           A plataforma de membros DeFi Surfers (&quot;Plataforma&quot;) é uma ferramenta de{" "}
           <b>visualização de dados de mercado e de conteúdo educativo</b>, disponibilizada como um
@@ -106,6 +113,7 @@ export default function TermosPage() {
           </a>
           ).
         </p>
+        </div>
 
         <form method="POST" action="/api/terms/accept" className="terms-actions">
           <button type="submit" className="btn-accept">

@@ -202,8 +202,6 @@ export default function Terminal({
   const [trendFilter, setTrendFilter] = useState<Set<TrendTag>>(new Set());
   const [category, setCategory] = useState<string>("");
   const [timeFilter, setTimeFilter] = useState<string>("any");
-  const [alignedOnly, setAlignedOnly] = useState(false);
-  const [cheapOnly, setCheapOnly] = useState(false);
   const [signalFilter, setSignalFilter] = useState<string>("any");
   // Ordenação por defeito: ranking de market cap (como o terminal do Ivan).
   const [sortKey, setSortKey] = useState<SortKey>("rank");
@@ -274,12 +272,6 @@ export default function Terminal({
       const max = timeFilter === "today" ? 1.5 : timeFilter === "week" ? 7 : 31;
       out = out.filter((r) => daysSince(r.lastFlipDate) <= max);
     }
-    if (alignedOnly) {
-      out = out.filter((r) => r.estado === "ALIGNED BULL" || r.estado === "ALIGNED BEAR");
-    }
-    if (cheapOnly) {
-      out = out.filter((r) => r.cheapZone);
-    }
     if (signalFilter === "bottom") {
       out = out.filter((r) => r.dotBottom || r.bullDiv);
     } else if (signalFilter === "top") {
@@ -302,18 +294,7 @@ export default function Terminal({
       }
     };
     return [...out].sort((a, b) => (val(a) - val(b)) * dir);
-  }, [
-    classRows,
-    search,
-    trendFilter,
-    category,
-    timeFilter,
-    alignedOnly,
-    cheapOnly,
-    signalFilter,
-    sortKey,
-    sortDir,
-  ]);
+  }, [classRows, search, trendFilter, category, timeFilter, signalFilter, sortKey, sortDir]);
 
   // Stats sobre o conjunto FILTRADO (como no terminal do Ivan: com o filtro
   // bearish ativo, "BULLISH 0 (0%)").
@@ -339,6 +320,19 @@ export default function Terminal({
       const next = new Set(prev);
       if (next.has(t)) next.delete(t);
       else next.add(t);
+      // Ativar um trend ordena por maiores movimentos desde o flip: BULLISH →
+      // maiores ganhos primeiro; BEARISH → maiores quedas primeiro. Sem chips
+      // ativos, volta ao ranking por market cap.
+      if (next.size === 0) {
+        setSortKey("rank");
+        setSortDir("asc");
+      } else if (next.has("BULLISH") && !next.has("BEARISH")) {
+        setSortKey("sinceFlipPct");
+        setSortDir("desc");
+      } else if (next.has("BEARISH") && !next.has("BULLISH")) {
+        setSortKey("sinceFlipPct");
+        setSortDir("asc");
+      }
       return next;
     });
   }
@@ -465,7 +459,7 @@ export default function Terminal({
         <div className="topbar">
           <div className="brand">
             <h1>📡 Radar do Swell</h1>
-            <span className="tag brand-sub">DeFi Surfers</span>
+            <span className="tag brand-sub">by DeFi Surfers</span>
           </div>
           <nav className="tabs">
             {TABS.map((c) => (
@@ -500,7 +494,7 @@ export default function Terminal({
             )}
             <div className="profile-txt">
               <span className="profile-name">{user?.name || "DeFi Surfer"}</span>
-              <span className="profile-sub">membro DeFi Surfer</span>
+              <span className="profile-sub">DeFi Surfer</span>
             </div>
           </div>
           <div className="stat">
@@ -525,24 +519,11 @@ export default function Terminal({
               {pulse.bear}
             </span>
           </div>
-          <div className="stat upd">
-            <span className="stat-k">Última atualização</span>
-            <span className="stat-v small-v">{new Date(updatedAt).toLocaleString("pt-PT")}</span>
-          </div>
+          <span className="upd-note">
+            Última atualização: {new Date(updatedAt).toLocaleString("pt-PT")}
+          </span>
         </div>
       </header>
-
-      <div className="searchbar">
-        <input
-          className="search"
-          placeholder="Pesquisar nome ou símbolo…"
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-        />
-      </div>
 
       <div className="controls">
         <div className="trend-chips">
@@ -556,26 +537,6 @@ export default function Terminal({
             </button>
           ))}
         </div>
-        <button
-          className={`tchip t-aligned ${alignedOnly ? "on" : ""}`}
-          title="Weekly e Daily na mesma direção — a única zona onde a estratégia age"
-          onClick={() => {
-            setAlignedOnly((v) => !v);
-            setPage(1);
-          }}
-        >
-          ⚡ Alinhados
-        </button>
-        <button
-          className={`tchip t-cheap ${cheapOnly ? "on" : ""}`}
-          title="Preço abaixo da média de 200 semanas — zona histórica de fundo"
-          onClick={() => {
-            setCheapOnly((v) => !v);
-            setPage(1);
-          }}
-        >
-          💎 Zona barata
-        </button>
         <select
           value={timeFilter}
           onChange={(e) => {
@@ -613,6 +574,15 @@ export default function Terminal({
             </option>
           ))}
         </select>
+        <input
+          className="search"
+          placeholder="Pesquisar nome ou símbolo…"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
+        />
       </div>
 
       <div className="term-body">
@@ -842,7 +812,7 @@ function FragmentRow({
         <td className="asset">
           <AssetLogo logoUrl={r.logoUrl} symbol={r.symbol} />
           <span className="asset-txt">
-            <span className="asset-name">{r.name}</span>
+            <span className="asset-name" title={r.name}>{r.name}</span>
             <span className="asset-sym muted">{r.symbol}</span>
           </span>
           {fresh && <span className="badge-new">FLIP RECENTE</span>}
