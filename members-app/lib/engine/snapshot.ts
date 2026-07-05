@@ -47,6 +47,10 @@ export function buildAssetSnapshot(params: {
   const weeklyStates = computeSwellLine(weeklyCandles);
   const last = weeklyStates[weeklyStates.length - 1];
 
+  // Ativo demasiado recente para o motor semanal (menos velas do que o ATR
+  // precisa → linha ainda NaN): excluir em vez de gravar valores inválidos.
+  if (!Number.isFinite(last.swellLevel)) return null;
+
   const weeklySeries = trendDirectionSeries(weeklyCandles);
   const dailySeries = dailyCandles.length > 0 ? trendDirectionSeries(dailyCandles) : [];
   const weeklyTrend: TrendDir = weeklySeries.length > 0 ? weeklySeries[weeklySeries.length - 1] : null;
