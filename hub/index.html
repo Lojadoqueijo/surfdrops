@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeFi Surfers — A maior comunidade de DeFi em Portugal</title>
+<meta name="description" content="3 anos a surfar ciclos: +30h de conteúdo prático DeFi, Telegram e Discord privados, Linha do Swell e Radar do Swell (3.350 ativos). Educação e ferramentas, em português.">
+<meta property="og:title" content="DeFi Surfers — Surfa o ciclo completo">
+<meta property="og:description" content="A maior comunidade de DeFi em Portugal. Método, ferramentas e tribo — yield, airdrops, privacidade e leitura de mercado.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a1220;
+    --bg-deep: #060a14;
+    --bg-elev: #111c30;
+    --bg-card: #142036;
+    --border: #1f2d44;
+    --border-bright: #2d4060;
+    --text: #e8edf5;
+    --text-dim: #8b97ad;
+    --text-faint: #5a6680;
+    --accent: #00ff9d;
+    --accent-dim: #00b87a;
+    --accent-blue: #4a9eff;
+    --warn: #ffb547;
+    --hot: #ff5e5e;
+    --gradient-1: linear-gradient(135deg, #00ff9d 0%, #00d4ff 100%);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    line-height: 1.65;
+    background-image:
+      radial-gradient(ellipse 1200px 800px at 15% 0%, rgba(0,255,157,0.10) 0%, transparent 50%),
+      radial-gradient(ellipse 1000px 700px at 85% 25%, rgba(74,158,255,0.08) 0%, transparent 50%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+    background-attachment: fixed;
+  }
+  a { color: var(--accent-blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+  /* ---- nav ---- */
+  .nav { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 18px 0; flex-wrap: wrap; }
+  .nav-logo { font-size: 17px; font-weight: 800; letter-spacing: 0.5px; color: var(--text); }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .nav-links a { color: var(--text-dim); font-size: 12.5px; font-weight: 600; }
+  .nav-links a:hover { color: var(--text); text-decoration: none; }
+  .nav-btn {
+    border: 1px solid var(--border-bright); border-radius: 999px; padding: 8px 16px;
+    color: var(--text) !important; font-weight: 700;
+  }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent) !important; }
+  .nav-btn.solid { background: var(--gradient-1); color: #04140a !important; border: none; }
+
+  /* ---- hero ---- */
+  .hero { text-align: center; padding: 72px 0 30px; }
+  .hero-tag {
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent-dim);
+    border-radius: 999px; padding: 6px 16px; margin-bottom: 22px;
+  }
+  h1 { font-size: clamp(30px, 5.4vw, 52px); line-height: 1.15; max-width: 820px; margin: 0 auto 18px; }
+  h1 span { color: var(--accent); }
+  .hero-sub { color: var(--text-dim); font-size: 15px; max-width: 680px; margin: 0 auto 30px; }
+  .hero-ctas { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; border-radius: 12px;
+    padding: 15px 26px; font-weight: 800; font-size: 14px; font-family: inherit; cursor: pointer;
+  }
+  .btn-primary { background: var(--gradient-1); color: #04140a; }
+  .btn-primary:hover { text-decoration: none; filter: brightness(1.1); }
+  .btn-ghost { border: 1px solid var(--border-bright); color: var(--text); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+  .hero-stats { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; margin-top: 46px; }
+  .hstat { text-align: center; }
+  .hstat-v { display: block; font-size: 30px; font-weight: 800; }
+  .hstat-v.up { color: var(--accent); }
+  .hstat-v.down { color: var(--hot); }
+  .hstat-k { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-faint); }
+
+  /* ---- secções ---- */
+  section { padding: 60px 0 0; }
+  .sec-head { text-align: center; max-width: 720px; margin: 0 auto 34px; }
+  .sec-head h2 { font-size: clamp(22px, 3.6vw, 32px); line-height: 1.25; margin-bottom: 10px; }
+  .sec-head h2 span { color: var(--accent); }
+  .sec-head p { color: var(--text-dim); }
+
+  /* ---- pilares ---- */
+  .pillars { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .pillar { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px 22px; }
+  .pillar.hot { border-color: var(--accent); box-shadow: 0 0 30px rgba(0,255,157,0.1); }
+  .pillar-ico { font-size: 26px; margin-bottom: 12px; display: block; }
+  .pillar h3 { font-size: 15px; margin-bottom: 8px; }
+  .pillar h3 em { font-style: normal; font-size: 10px; font-weight: 800; letter-spacing: 1px; color: #04140a; background: var(--accent); border-radius: 5px; padding: 2px 7px; vertical-align: middle; margin-left: 6px; }
+  .pillar p { color: var(--text-dim); font-size: 12.5px; }
+
+  /* ---- radar ao vivo ---- */
+  .radar-table-wrap {
+    position: relative; max-width: 760px; margin: 0 auto;
+    background: var(--bg-elev); border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+  }
+  .radar-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .radar-table th {
+    padding: 10px 14px; text-align: left; font-size: 10px; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--text-faint); border-bottom: 1px solid var(--border);
+  }
+  .radar-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .radar-asset { display: flex; align-items: center; gap: 9px; }
+  .radar-logo { width: 22px; height: 22px; border-radius: 50%; background: #ffffff14; flex-shrink: 0; }
+  .radar-name { color: var(--text-dim); font-size: 11px; }
+  .rchip { font-size: 10.5px; font-weight: 800; letter-spacing: 0.5px; border-radius: 6px; padding: 3px 9px; }
+  .rchip.up { color: var(--accent); background: rgba(0,255,157,0.1); border: 1px solid rgba(0,255,157,0.35); }
+  .rchip.down { color: var(--hot); background: rgba(255,94,94,0.1); border: 1px solid rgba(255,94,94,0.35); }
+  .radar-pct.up { color: var(--accent); font-weight: 700; }
+  .radar-pct.down { color: var(--hot); font-weight: 700; }
+  .radar-skel td span { display: inline-block; height: 12px; border-radius: 6px; background: var(--border); animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.9; } }
+  .radar-fade {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 150px;
+    background: linear-gradient(180deg, transparent 0%, var(--bg) 90%);
+    display: flex; align-items: flex-end; justify-content: center; padding-bottom: 18px;
+  }
+  .radar-lock {
+    display: inline-flex; align-items: center; gap: 8px; background: var(--bg-card);
+    border: 1px solid var(--border-bright); border-radius: 999px; padding: 9px 18px;
+    font-size: 12px; font-weight: 700;
+  }
+  .radar-note { text-align: center; color: var(--text-faint); font-size: 11px; margin-top: 12px; }
+
+  /* ---- preços ---- */
+  .plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; align-items: stretch; }
+  .plan { position: relative; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 26px 22px 22px; display: flex; flex-direction: column; }
+  .plan.best { border-color: var(--accent); box-shadow: 0 0 34px rgba(0,255,157,0.12); }
+  .plan-badge {
+    position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+    background: var(--accent); color: #04140a; font-size: 10px; font-weight: 800;
+    letter-spacing: 1px; text-transform: uppercase; border-radius: 999px; padding: 4px 12px; white-space: nowrap;
+  }
+  .plan-badge.soft { background: var(--bg-elev); color: var(--accent-blue); border: 1px solid var(--accent-blue); }
+  .plan-name { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; }
+  .plan-price { font-size: 30px; font-weight: 800; margin-bottom: 2px; }
+  .plan-price span { font-size: 13px; color: var(--text-dim); font-weight: 600; }
+  .plan-price s { font-size: 15px; color: var(--text-faint); margin-right: 8px; font-weight: 600; }
+  .plan-note { font-size: 11px; color: var(--text-faint); margin-bottom: 14px; }
+  .plan ul { list-style: none; margin: 0 0 18px; font-size: 12.5px; color: var(--text-dim); display: grid; gap: 7px; flex: 1; }
+  .plan ul li::before { content: '▸ '; color: var(--accent); }
+  .plan-btn { display: block; text-align: center; border-radius: 10px; padding: 12px 0; font-weight: 800; font-size: 13px; border: 1px solid var(--border-bright); color: var(--text); }
+  .plan-btn:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+  .plan.best .plan-btn { background: var(--gradient-1); color: #04140a; border: none; }
+  .credit-note {
+    max-width: 760px; margin: 22px auto 0; text-align: center; font-size: 12px; color: var(--text-dim);
+    border: 1px dashed var(--border-bright); border-radius: 12px; padding: 14px 18px;
+  }
+  .credit-note b { color: var(--accent); }
+
+  /* ---- como funciona ---- */
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; counter-reset: step; }
+  .step { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 14px; padding: 22px 20px; }
+  .step::before {
+    counter-increment: step; content: counter(step);
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: 50%; margin-bottom: 12px;
+    background: var(--gradient-1); color: #04140a; font-weight: 800; font-size: 14px;
+  }
+  .step h3 { font-size: 13.5px; margin-bottom: 6px; }
+  .step p { color: var(--text-dim); font-size: 12px; }
+
+  /* ---- FAQ ---- */
+  .faq { max-width: 760px; margin: 0 auto; display: grid; gap: 10px; }
+  .faq details { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+  .faq summary { cursor: pointer; font-weight: 700; font-size: 13.5px; }
+  .faq summary::marker { color: var(--accent); }
+  .faq p { color: var(--text-dim); font-size: 12.5px; margin-top: 10px; }
+
+  /* ---- CTA final + footer ---- */
+  .final { text-align: center; padding: 70px 0 30px; }
+  .final h2 { font-size: clamp(24px, 4vw, 36px); margin-bottom: 12px; }
+  .final h2 span { color: var(--accent); }
+  .final p { color: var(--text-dim); max-width: 560px; margin: 0 auto 26px; }
+  footer { border-top: 1px solid var(--border); margin-top: 70px; padding: 28px 0 40px; }
+  .foot { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; color: var(--text-faint); font-size: 11.5px; }
+  .foot-links { display: flex; gap: 18px; flex-wrap: wrap; }
+  .foot-links a { color: var(--text-dim); }
+  .disclaimer { color: var(--text-faint); font-size: 11px; max-width: 860px; margin-top: 16px; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav class="nav">
+    <a class="nav-logo" href="#">🌊 DeFi<span>Surfers</span></a>
+    <div class="nav-links">
+      <a href="#pilares">O que ganhas</a>
+      <a href="#radar">Radar</a>
+      <a href="#precos">Planos</a>
+      <a href="#faq">FAQ</a>
+      <a class="nav-btn" href="https://surfdrops.vercel.app" target="_blank" rel="noopener">Airdrops grátis</a>
+      <a class="nav-btn solid" href="https://defi-surfers-members.vercel.app/login">Entrar</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <span class="hero-tag">3 anos · a maior comunidade de DeFi em Portugal</span>
+    <h1>Surfa o ciclo completo.<br>Com <span>método</span>, ferramentas e tribo.</h1>
+    <p class="hero-sub">
+      Yield, airdrops, privacidade e leitura de mercado — em português e sem promessas mágicas.
+      Estruturas que continuam a gerar mesmo quando o mercado cai, e um radar que te avisa quando o mar muda.
+    </p>
+    <div class="hero-ctas">
+      <a class="btn btn-primary" href="https://t.me/surfistacrypto" target="_blank" rel="noopener">🌊 Quero ser DeFi Surfer</a>
+      <a class="btn btn-ghost" href="#radar">Ver o Radar ao vivo ↓</a>
+    </div>
+    <div class="hero-stats" id="hero-stats" hidden>
+      <div class="hstat"><span class="hstat-v" id="st-total">—</span><span class="hstat-k">ativos no radar</span></div>
+      <div class="hstat"><span class="hstat-v up" id="st-bull">—</span><span class="hstat-k">bullish agora</span></div>
+      <div class="hstat"><span class="hstat-v down" id="st-bear">—</span><span class="hstat-k">bearish agora</span></div>
+    </div>
+  </header>
+
+  <section id="pilares">
+    <div class="sec-head">
+      <h2>Não é um curso. É um <span>sistema completo</span>.</h2>
+      <p>Cinco peças que trabalham juntas — aprendes, aplicas, e tens as ferramentas e a tribo ao lado em cada decisão.</p>
+    </div>
+    <div class="pillars">
+      <div class="pillar">
+        <span class="pillar-ico">📚</span>
+        <h3>+30h de conteúdo prático</h3>
+        <p>Protocolos DeFi do zero ao avançado: lending &amp; borrowing, liquidity providing, money legos, juros compostos, gestão de risco. A operar protocolos reais — não teoria.</p>
+      </div>
+      <div class="pillar">
+        <span class="pillar-ico">🌊</span>
+        <h3>Telegram privado</h3>
+        <p>Centenas de DeFi Surfers e os melhores estrategas de DeFi e airdrops. Alphas, insights e oportunidades em tempo real, tudo em língua portuguesa.</p>
+      </div>
+      <div class="pillar">
+        <span class="pillar-ico">🎧</span>
+        <h3>Discord + calls semanais</h3>
+        <p>Tira-dúvidas ao vivo, discussão de novos protocolos, análise de estratégias em conjunto e farming de airdrops em equipa, passo a passo.</p>
+      </div>
+      <div class="pillar">
+        <span class="pillar-ico">📈</span>
+        <h3>Linha do Swell</h3>
+        <p>Indicador privado no TradingView, usado para saber quando proteger capital e quando te posicionares. Flips confirmados no fecho da vela — sem ruído intradiário.</p>
+      </div>
+      <div class="pillar hot">
+        <span class="pillar-ico">📡</span>
+        <h3>Radar do Swell <em>NOVO</em></h3>
+        <p>O mesmo motor da Linha, a varrer <strong>3.350 ativos</strong>: cripto, ações dos EUA, ETFs, commodities e índices globais. A Linha diz-te quando. O Radar diz-te onde.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="radar">
+    <div class="sec-head">
+      <h2>O Radar, <span>ao vivo</span>. Agora.</h2>
+      <p>Isto não é uma imagem — são os dados reais do terminal de membros, atualizados ao fecho de cada vela.</p>
+    </div>
+    <div class="radar-table-wrap">
+      <table class="radar-table">
+        <thead><tr><th>#</th><th>Ativo</th><th>Trend</th><th>Δ desde flip</th></tr></thead>
+        <tbody id="radar-rows">
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:130px"></span></td><td><span style="width:64px"></span></td><td><span style="width:44px"></span></td></tr>
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:110px"></span></td><td><span style="width:64px"></span></td><td><span style="width:52px"></span></td></tr>
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:140px"></span></td><td><span style="width:64px"></span></td><td><span style="width:40px"></span></td></tr>
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:120px"></span></td><td><span style="width:64px"></span></td><td><span style="width:48px"></span></td></tr>
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:135px"></span></td><td><span style="width:64px"></span></td><td><span style="width:44px"></span></td></tr>
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:115px"></span></td><td><span style="width:64px"></span></td><td><span style="width:50px"></span></td></tr>
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:125px"></span></td><td><span style="width:64px"></span></td><td><span style="width:42px"></span></td></tr>
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:105px"></span></td><td><span style="width:64px"></span></td><td><span style="width:46px"></span></td></tr>
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:132px"></span></td><td><span style="width:64px"></span></td><td><span style="width:38px"></span></td></tr>
+          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:118px"></span></td><td><span style="width:64px"></span></td><td><span style="width:54px"></span></td></tr>
+        </tbody>
+      </table>
+      <div class="radar-fade">
+        <span class="radar-lock">🔒 +3.340 ativos, watchlist pessoal e alertas — no Radar completo</span>
+      </div>
+    </div>
+    <p class="radar-note">Dados reais · atualização diária ao fecho das velas · login com o teu Discord de membro</p>
+  </section>
+
+  <section id="precos">
+    <div class="sec-head">
+      <h2>Escolhe como <span>entras na água</span>.</h2>
+      <p>O Radar está sempre aberto. A comunidade completa abre em janelas — com vagas limitadas.</p>
+    </div>
+    <div class="plans">
+      <div class="plan">
+        <div class="plan-name">Radar · Mensal</div>
+        <div class="plan-price">59€<span>/mês</span></div>
+        <div class="plan-note">sem fidelização</div>
+        <ul>
+          <li>Acesso completo aos 3.350 ativos</li>
+          <li>Watchlist pessoal + alertas Telegram</li>
+          <li>Acumula Crédito Surfer para a comunidade</li>
+        </ul>
+        <a class="plan-btn" href="https://t.me/surfistacrypto" target="_blank" rel="noopener">Falar com a equipa</a>
+      </div>
+      <div class="plan">
+        <span class="plan-badge soft">Poupa 32%</span>
+        <div class="plan-name">Radar · Anual</div>
+        <div class="plan-price">479€<span>/ano</span></div>
+        <div class="plan-note">≈ 40€/mês · 12 meses pelo preço de 8</div>
+        <ul>
+          <li>Tudo do plano mensal</li>
+          <li>Watchlist pessoal + alertas Telegram</li>
+          <li>Acumula Crédito Surfer para a comunidade</li>
+        </ul>
+        <a class="plan-btn" href="https://t.me/surfistacrypto" target="_blank" rel="noopener">Falar com a equipa</a>
+      </div>
+      <div class="plan best">
+        <span class="plan-badge">Melhor valor</span>
+        <div class="plan-name">DeFi Surfers · Vitalício</div>
+        <div class="plan-price"><s>993,84€</s>795,07€</div>
+        <div class="plan-note">pagamento único · membros não pagam Radar. Nunca.</div>
+        <ul>
+          <li><strong>Radar do Swell vitalício</strong></li>
+          <li>Linha do Swell (indicador TradingView)</li>
+          <li>+30h de conteúdo prático DeFi</li>
+          <li>Telegram + Discord privados · calls semanais</li>
+          <li>Abre apenas em janelas — vagas limitadas</li>
+        </ul>
+        <a class="plan-btn" href="https://t.me/surfistacrypto" target="_blank" rel="noopener">Quero ser DeFi Surfer</a>
+      </div>
+    </div>
+    <p class="credit-note">
+      💳 <b>Crédito Surfer:</b> o que pagares de Radar nos últimos 12 meses desconta na entrada da
+      comunidade (até 397€). Assinar o Radar nunca é dinheiro perdido — é um adiantamento da tribo.
+    </p>
+  </section>
+
+  <section id="como">
+    <div class="sec-head">
+      <h2>Como funciona a <span>adesão</span></h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <h3>Fala com a equipa</h3>
+        <p>Manda mensagem no Telegram (@surfistacrypto). Dizemos-te condições, vagas e próximos passos.</p>
+      </div>
+      <div class="step">
+        <h3>Pagamento em USDC/USDT</h3>
+        <p>Pagamento exclusivamente em stablecoins — on-chain, como deve ser.</p>
+      </div>
+      <div class="step">
+        <h3>Recebes o cargo</h3>
+        <p>Cargo DeFi Surfer no Discord + acesso ao Telegram privado, entregues na hora.</p>
+      </div>
+      <div class="step">
+        <h3>Entras na água</h3>
+        <p>Login no Radar com o teu Discord, Linha do Swell no TradingView, e a tribo à tua espera.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="sec-head">
+      <h2>Perguntas <span>diretas</span></h2>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>Isto é aconselhamento financeiro?</summary>
+        <p>Não. Os DeFi Surfers são uma comunidade de educação e ferramentas de análise. Nada aqui é recomendação de compra ou venda — os indicadores são cálculos mecânicos sobre dados históricos, iguais para todos. As decisões, e o risco, são sempre teus. DeFi e cripto têm risco real de perda total.</p>
+      </details>
+      <details>
+        <summary>Preciso de experiência em DeFi?</summary>
+        <p>Não. O conteúdo vai do zero ao avançado, e as calls semanais existem exatamente para tirar dúvidas. Precisas de vontade de aprender a operar por ti — soberania não se delega.</p>
+      </details>
+      <details>
+        <summary>Porque é que a comunidade só abre em janelas?</summary>
+        <p>Para entrar gente com qualidade e ser possível dar onboarding a sério. Entre janelas, podes assinar o Radar (sempre aberto) e acumular Crédito Surfer para quando abrir.</p>
+      </details>
+      <details>
+        <summary>E se eu só quiser o Radar?</summary>
+        <p>Podes — mensal ou anual, sem fidelização. Mas faz as contas: um ano de mensal (708€) quase paga a comunidade inteira (795,07€), que inclui o Radar para sempre, a Linha do Swell, o curso e a tribo. É por isso que existe o Crédito Surfer.</p>
+      </details>
+      <details>
+        <summary>Como pago?</summary>
+        <p>USDC ou USDT. A adesão fecha-se diretamente com a equipa no Telegram — sem intermediários, sem cartões, sem burocracia.</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="final">
+    <h2>2026 não vai ser fácil.<br>Vai ser <span>lucrativo para quem souber</span>.</h2>
+    <p>Para quem monta estruturas, não para quem reage tarde. Surfa o ciclo completo — com método e tribo, garantindo soberania e sem pedir autorização.</p>
+    <a class="btn btn-primary" href="https://t.me/surfistacrypto" target="_blank" rel="noopener">🌊 Falar com a equipa no Telegram</a>
+  </section>
+
+  <footer>
+    <div class="foot">
+      <span>🌊 DeFi Surfers · desde 2023</span>
+      <div class="foot-links">
+        <a href="https://surfdrops.vercel.app" target="_blank" rel="noopener">Surf Drops (airdrops grátis)</a>
+        <a href="https://defi-surfers-members.vercel.app/login">Radar do Swell (membros)</a>
+        <a href="https://t.me/surfistacrypto" target="_blank" rel="noopener">Telegram</a>
+        <a href="https://www.youtube.com/@surfistacrypto" target="_blank" rel="noopener">YouTube</a>
+      </div>
+    </div>
+    <p class="disclaimer">
+      Material estritamente educativo e informativo. Nada nesta página constitui recomendação de compra
+      ou venda de qualquer ativo, nem aconselhamento financeiro, fiscal ou jurídico. Criptoativos e DeFi
+      envolvem risco real de perda total do capital. Referências a desempenho passado são ilustrativas e
+      não representam resultados típicos ou garantidos. Faz sempre a tua própria investigação (DYOR).
+    </p>
+  </footer>
+</div>
+
+<script>
+// Números e tabela ao vivo — mesmo endpoint público do teaser do Surf Drops.
+(function () {
+  var API = 'https://defi-surfers-members.vercel.app/api/public/teaser';
+  function pctTxt(p) {
+    if (p === null || p === undefined) return '—';
+    return (p >= 0 ? '+' : '') + p.toLocaleString('pt-PT', { maximumFractionDigits: 1 }) + '%';
+  }
+  fetch(API).then(function (r) { return r.json(); }).then(function (d) {
+    if (!d || !d.ok || !d.top || !d.top.length) return;
+    document.getElementById('st-total').textContent = d.totalAssets.toLocaleString('pt-PT');
+    document.getElementById('st-bull').textContent = d.bull.toLocaleString('pt-PT');
+    document.getElementById('st-bear').textContent = d.bear.toLocaleString('pt-PT');
+    document.getElementById('hero-stats').hidden = false;
+    document.getElementById('radar-rows').innerHTML = d.top.map(function (r, i) {
+      var up = r.trend === 'bullish';
+      var logo = r.logoUrl
+        ? '<img class="radar-logo" src="' + r.logoUrl + '" alt="" loading="lazy">'
+        : '<span class="radar-logo"></span>';
+      return '<tr>' +
+        '<td style="color:var(--text-faint)">' + (i + 1) + '</td>' +
+        '<td><span class="radar-asset">' + logo + '<span><strong>' + r.symbol.split('/')[0] + '</strong> <span class="radar-name">' + (r.name || '') + '</span></span></span></td>' +
+        '<td><span class="rchip ' + (up ? 'up' : 'down') + '">' + (up ? 'BULLISH' : 'BEARISH') + '</span></td>' +
+        '<td class="radar-pct ' + ((r.sinceFlipPct || 0) >= 0 ? 'up' : 'down') + '">' + pctTxt(r.sinceFlipPct) + '</td>' +
+        '</tr>';
+    }).join('');
+  }).catch(function () { /* skeletons ficam */ });
+})();
+</script>
+</body>
+</html>
