@@ -20,6 +20,7 @@ export async function GET(req: NextRequest) {
       prefs: sub
         ? { flips: sub.flips, signals: sub.signals, digest: sub.digest }
         : null,
+      watchlist: sub?.watchlist ?? [],
     },
     { headers: { "Cache-Control": "private, no-store" } }
   );

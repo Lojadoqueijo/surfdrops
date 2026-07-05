@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ASSET_CLASSES,
   type AssetClass,
@@ -211,9 +211,15 @@ export default function Terminal({
   const [expanded, setExpanded] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
-  // Watchlist pessoal, persistida no browser (a versão por membro no Supabase
-  // + alertas de flip é a fase seguinte).
+  // Watchlist pessoal. Fonte da verdade = servidor (tabela alert_subs), com o
+  // localStorage como cache otimista para UX instantânea e fallback offline.
+  // No arranque: carrega o cache local (instantâneo) e, quando o servidor
+  // responde, funde por UNIÃO (local ∪ servidor) — assim os corações seguem o
+  // membro entre dispositivos/domínios sem nunca perder marcações locais.
   const [watchlist, setWatchlist] = useState<Set<string>>(new Set());
+  // Só sincronizamos para o servidor DEPOIS da hidratação inicial — senão o
+  // estado local (possivelmente vazio) apagaria a watchlist do servidor.
+  const hydratedRef = useRef(false);
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(WATCHLIST_STORAGE_KEY) ?? "[]");
@@ -386,8 +392,16 @@ export default function Terminal({
       const r = await fetch("/api/alerts/status");
       if (!r.ok) return;
       const d = await r.json();
-      if (d?.ok) {
-        setAlertStatus({ botAvailable: d.botAvailable, linked: d.linked, username: d.username });
+      if (!d?.ok) return;
+      setAlertStatus({ botAvailable: d.botAvailable, linked: d.linked, username: d.username });
+      // Hidratação inicial da watchlist (uma vez): funde local ∪ servidor. As
+      // chamadas seguintes (ex.: após ligar o Telegram) só atualizam o estado
+      // do bot e NÃO voltam a mexer na watchlist.
+      if (!hydratedRef.current) {
+        if (Array.isArray(d.watchlist)) {
+          setWatchlist((local) => new Set([...local, ...(d.watchlist as string[])]));
+        }
+        hydratedRef.current = true;
       }
     } catch {
       /* sem estado → mantém placeholder */
@@ -415,10 +429,13 @@ export default function Terminal({
     }
   }
 
-  // Sincroniza preferências + watchlist para o servidor quando ligado, para o
-  // cron saber a quem e sobre o quê enviar.
+  // Sincroniza preferências + watchlist para o servidor (fonte da verdade
+  // entre dispositivos). Corre para qualquer sessão válida — mesmo sem o
+  // Telegram ligado, para a watchlist ficar guardada — mas só DEPOIS da
+  // hidratação, para não sobrescrever o servidor com o estado local inicial.
+  // O endpoint exige sessão; sem sessão (dev/mock) o 401 é ignorado.
   useEffect(() => {
-    if (!alertStatus?.linked) return;
+    if (!hydratedRef.current) return;
     fetch("/api/alerts/sync", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -429,7 +446,7 @@ export default function Terminal({
         watchlist: [...watchlist],
       }),
     }).catch(() => {});
-  }, [prefs, watchlist, alertStatus?.linked]);
+  }, [prefs, watchlist]);
 
   function setSort(key: SortKey) {
     setPage(1);
