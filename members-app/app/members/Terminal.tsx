@@ -495,8 +495,16 @@ export default function Terminal({
           <div className="panel trade-panel">
             <h3>Negociar</h3>
             <p className="muted small">
-              Links de corretoras (com as tuas vantagens de referral) aparecem aqui em breve.
+              Abre conta com os links da comunidade e garante as vantagens de referral.
             </p>
+            <a
+              className="trade-btn"
+              href="https://my.okx.com/en-eu/welcome-rewards?channelID=94234435"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Criar conta na OKX ↗
+            </a>
             <div className="trade-slot">Bybit · em breve</div>
             <div className="trade-slot">Pionex · em breve</div>
           </div>
@@ -581,14 +589,32 @@ function FragmentRow({
         <td className="num">{fmtPrice(r.price, r.currency)}</td>
         <td className="num muted">{fmtMarketCap(r.marketCap)}</td>
         <td className="col-links" onClick={(e) => e.stopPropagation()}>
-          <a href={tvHref} target="_blank" rel="noopener noreferrer" title="Abrir no TradingView">
-            TV
-          </a>
-          {yfHref && (
-            <a href={yfHref} target="_blank" rel="noopener noreferrer" title="Abrir no Yahoo Finance">
-              YF
+          <div className="links-stack">
+            <a
+              href={tvHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Abrir gráfico no TradingView"
+              className="link-ico"
+            >
+              <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" aria-hidden="true">
+                <rect x="1.5" y="8" width="3" height="6.5" rx="0.8" />
+                <rect x="6.5" y="4.5" width="3" height="10" rx="0.8" />
+                <rect x="11.5" y="1.5" width="3" height="13" rx="0.8" />
+              </svg>
             </a>
-          )}
+            {yfHref && (
+              <a
+                href={yfHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Abrir no Yahoo Finance"
+                className="link-ico yf-mark"
+              >
+                y!
+              </a>
+            )}
+          </div>
         </td>
       </tr>
       {isOpen && (

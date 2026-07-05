@@ -1,7 +1,9 @@
 import type { Candle } from "../engine/types";
 import type { UniverseAsset } from "./universe";
 import { getBinanceCandles } from "./providers/binance";
+import { getBybitCandles } from "./providers/bybit";
 import { getCoinGeckoCandles } from "./providers/coingecko";
+import { getOkxCandles } from "./providers/okx";
 import { getTwelveDataCandles } from "./providers/twelvedata";
 
 export type Timeframe = "1day" | "1week";
@@ -32,6 +34,16 @@ export async function getCandlesForAsset(
       }
       throw err;
     }
+  }
+
+  if (asset.source === "okx") {
+    if (!asset.okxInstId) throw new Error(`${asset.symbol}: sem okxInstId`);
+    return getOkxCandles(asset.okxInstId, timeframe, limit);
+  }
+
+  if (asset.source === "bybit") {
+    if (!asset.bybitSymbol) throw new Error(`${asset.symbol}: sem bybitSymbol`);
+    return getBybitCandles(asset.bybitSymbol, timeframe, limit);
   }
 
   // twelvedata
