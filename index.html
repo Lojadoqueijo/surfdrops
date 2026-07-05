@@ -2122,9 +2122,8 @@
   .radar-skel td span { display: inline-block; height: 12px; border-radius: 6px; background: var(--border); animation: radarPulse 1.4s ease-in-out infinite; }
   @keyframes radarPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.9; } }
   .radar-fade {
-    position: absolute; left: 0; right: 0; bottom: 0; height: 160px;
-    background: linear-gradient(180deg, transparent 0%, var(--bg) 90%);
-    display: flex; align-items: flex-end; justify-content: center; padding-bottom: 18px; pointer-events: none;
+    display: flex; justify-content: center; padding: 14px 12px 16px;
+    border-top: 1px dashed var(--border-bright); text-align: center;
   }
   .radar-lock {
     display: inline-flex; align-items: center; gap: 8px; background: var(--bg-card);
@@ -2766,17 +2765,10 @@
           <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:130px"></span></td><td><span style="width:64px"></span></td><td><span style="width:44px"></span></td></tr>
           <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:110px"></span></td><td><span style="width:64px"></span></td><td><span style="width:52px"></span></td></tr>
           <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:140px"></span></td><td><span style="width:64px"></span></td><td><span style="width:40px"></span></td></tr>
-          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:120px"></span></td><td><span style="width:64px"></span></td><td><span style="width:48px"></span></td></tr>
-          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:135px"></span></td><td><span style="width:64px"></span></td><td><span style="width:44px"></span></td></tr>
-          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:115px"></span></td><td><span style="width:64px"></span></td><td><span style="width:50px"></span></td></tr>
-          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:125px"></span></td><td><span style="width:64px"></span></td><td><span style="width:42px"></span></td></tr>
-          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:105px"></span></td><td><span style="width:64px"></span></td><td><span style="width:46px"></span></td></tr>
-          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:132px"></span></td><td><span style="width:64px"></span></td><td><span style="width:38px"></span></td></tr>
-          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:118px"></span></td><td><span style="width:64px"></span></td><td><span style="width:54px"></span></td></tr>
         </tbody>
       </table>
       <div class="radar-fade">
-        <span class="radar-lock">🔒 <span data-i18n="radar.lock">+3.340 ativos, watchlist pessoal e alertas — no Radar completo</span></span>
+        <span class="radar-lock">🔒 <span data-i18n="radar.lock">+3.450 ativos, watchlist pessoal e alertas — no Radar completo</span></span>
       </div>
     </div>
     <p class="radar-live-note" id="radar-updated" data-i18n="radar.live">Dados reais · atualização diária ao fecho das velas</p>
@@ -4094,7 +4086,7 @@
         'radar.stats.total': 'ativos no radar',
         'radar.th.asset': 'Ativo',
         'radar.th.delta': 'Δ desde flip',
-        'radar.lock': '+3.340 ativos, watchlist pessoal e alertas — no Radar completo',
+        'radar.lock': '+3.450 ativos, watchlist pessoal e alertas — no Radar completo',
         'radar.live': 'Dados reais · atualização diária ao fecho das velas',
         'radar.plan1.name': 'Radar · Mensal',
         'radar.plan1.note': 'sem fidelização',
@@ -4211,7 +4203,7 @@
         'radar.stats.total': 'assets on radar',
         'radar.th.asset': 'Asset',
         'radar.th.delta': 'Δ since flip',
-        'radar.lock': '+3,340 assets, personal watchlist and alerts — in the full Radar',
+        'radar.lock': '+3,450 assets, personal watchlist and alerts — in the full Radar',
         'radar.live': 'Real data · updated daily at candle close',
         'radar.plan1.name': 'Radar · Monthly',
         'radar.plan1.note': 'no lock-in',
@@ -4328,7 +4320,7 @@
         'radar.stats.total': 'activos en el radar',
         'radar.th.asset': 'Activo',
         'radar.th.delta': 'Δ desde flip',
-        'radar.lock': '+3.340 activos, watchlist personal y alertas — en el Radar completo',
+        'radar.lock': '+3.450 activos, watchlist personal y alertas — en el Radar completo',
         'radar.live': 'Datos reales · actualización diaria al cierre de las velas',
         'radar.plan1.name': 'Radar · Mensual',
         'radar.plan1.note': 'sin permanencia',
