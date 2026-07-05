@@ -164,6 +164,17 @@ function EstadoChip({ estado }: { estado: TerminalRow["estado"] }) {
 
 type SortKey = "rank" | "sinceFlipPct" | "since" | "price" | "marketCap";
 
+// Preferências de alertas Telegram (guardadas no browser até o bot de envio
+// estar ligado — ver painel "Alertas · Telegram" na tab Watchlist).
+const ALERTS_STORAGE_KEY = "ds_alert_prefs";
+interface AlertPrefs {
+  flips: boolean; // flip semanal bull/bear num ativo da watchlist
+  signals: boolean; // avisos de possível topo/fundo e divergências
+  digest: boolean; // resumo diário da watchlist
+  telegram: string; // @username ou nº do Telegram
+}
+const DEFAULT_PREFS: AlertPrefs = { flips: true, signals: false, digest: false, telegram: "" };
+
 export default function Terminal({
   rows,
   updatedAt,
@@ -178,6 +189,9 @@ export default function Terminal({
   const [trendFilter, setTrendFilter] = useState<Set<TrendTag>>(new Set());
   const [category, setCategory] = useState<string>("");
   const [timeFilter, setTimeFilter] = useState<string>("any");
+  const [alignedOnly, setAlignedOnly] = useState(false);
+  const [cheapOnly, setCheapOnly] = useState(false);
+  const [signalFilter, setSignalFilter] = useState<string>("any");
   // Ordenação por defeito: ranking de market cap (como o terminal do Ivan).
   const [sortKey, setSortKey] = useState<SortKey>("rank");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
@@ -241,6 +255,17 @@ export default function Terminal({
       const max = timeFilter === "today" ? 1.5 : timeFilter === "week" ? 7 : 31;
       out = out.filter((r) => daysSince(r.lastFlipDate) <= max);
     }
+    if (alignedOnly) {
+      out = out.filter((r) => r.estado === "ALIGNED BULL" || r.estado === "ALIGNED BEAR");
+    }
+    if (cheapOnly) {
+      out = out.filter((r) => r.cheapZone);
+    }
+    if (signalFilter === "bottom") {
+      out = out.filter((r) => r.dotBottom || r.bullDiv);
+    } else if (signalFilter === "top") {
+      out = out.filter((r) => r.dotTop || r.bearDiv);
+    }
 
     const dir = sortDir === "asc" ? 1 : -1;
     const val = (r: TerminalRow): number => {
@@ -258,7 +283,18 @@ export default function Terminal({
       }
     };
     return [...out].sort((a, b) => (val(a) - val(b)) * dir);
-  }, [classRows, search, trendFilter, category, timeFilter, sortKey, sortDir]);
+  }, [
+    classRows,
+    search,
+    trendFilter,
+    category,
+    timeFilter,
+    alignedOnly,
+    cheapOnly,
+    signalFilter,
+    sortKey,
+    sortDir,
+  ]);
 
   // Stats sobre o conjunto FILTRADO (como no terminal do Ivan: com o filtro
   // bearish ativo, "BULLISH 0 (0%)").
@@ -286,6 +322,31 @@ export default function Terminal({
       else next.add(t);
       return next;
     });
+  }
+
+  // Preferências de alertas Telegram (persistidas no browser).
+  const [prefs, setPrefs] = useState<AlertPrefs>(DEFAULT_PREFS);
+  const [prefsSaved, setPrefsSaved] = useState(false);
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(ALERTS_STORAGE_KEY) ?? "null");
+      if (saved && typeof saved === "object") setPrefs({ ...DEFAULT_PREFS, ...saved });
+    } catch {
+      /* preferências corrompidas → defaults */
+    }
+  }, []);
+  function savePrefs() {
+    try {
+      localStorage.setItem(ALERTS_STORAGE_KEY, JSON.stringify(prefs));
+      setPrefsSaved(true);
+      setTimeout(() => setPrefsSaved(false), 2500);
+    } catch {
+      /* armazenamento indisponível */
+    }
+  }
+  function setPref<K extends keyof AlertPrefs>(k: K, v: AlertPrefs[K]) {
+    setPrefsSaved(false);
+    setPrefs((p) => ({ ...p, [k]: v }));
   }
 
   function setSort(key: SortKey) {
@@ -390,6 +451,26 @@ export default function Terminal({
             </button>
           ))}
         </div>
+        <button
+          className={`tchip t-aligned ${alignedOnly ? "on" : ""}`}
+          title="Weekly e Daily na mesma direção — a única zona onde a estratégia age"
+          onClick={() => {
+            setAlignedOnly((v) => !v);
+            setPage(1);
+          }}
+        >
+          ⚡ Alinhados
+        </button>
+        <button
+          className={`tchip t-cheap ${cheapOnly ? "on" : ""}`}
+          title="Preço abaixo da média de 200 semanas — zona histórica de fundo"
+          onClick={() => {
+            setCheapOnly((v) => !v);
+            setPage(1);
+          }}
+        >
+          💎 Zona barata
+        </button>
         <select
           value={timeFilter}
           onChange={(e) => {
@@ -401,6 +482,17 @@ export default function Terminal({
           <option value="today">Flip: hoje</option>
           <option value="week">Flip: esta semana</option>
           <option value="month">Flip: este mês</option>
+        </select>
+        <select
+          value={signalFilter}
+          onChange={(e) => {
+            setSignalFilter(e.target.value);
+            setPage(1);
+          }}
+        >
+          <option value="any">Sinais: todos</option>
+          <option value="bottom">Sinais: possível fundo</option>
+          <option value="top">Sinais: possível topo</option>
         </select>
         <select
           value={category}
@@ -429,16 +521,16 @@ export default function Terminal({
                 <th className="col-heart"></th>
                 <th>Ativo</th>
                 <th>Trend</th>
-                <th className="num sortable" onClick={() => setSort("sinceFlipPct")}>
+                <th className="num sortable col-delta" onClick={() => setSort("sinceFlipPct")}>
                   Δ desde flip{sortArrow("sinceFlipPct")}
                 </th>
-                <th className="num sortable" onClick={() => setSort("since")}>
+                <th className="num sortable col-tempo" onClick={() => setSort("since")}>
                   Tempo{sortArrow("since")}
                 </th>
                 <th className="num sortable" onClick={() => setSort("price")}>
                   Preço{sortArrow("price")}
                 </th>
-                <th className="num sortable" onClick={() => setSort("marketCap")}>
+                <th className="num sortable col-mcap" onClick={() => setSort("marketCap")}>
                   Mkt Cap{sortArrow("marketCap")}
                 </th>
                 <th className="col-links"></th>
@@ -492,6 +584,60 @@ export default function Terminal({
         </div>
 
         <aside className="side">
+          {activeClass === "Watchlist" && (
+            <div className="panel alerts-panel">
+              <h3>Alertas · Telegram</h3>
+              <p className="muted small">
+                Recebe no Telegram os eventos dos ativos que marcaste com ♥.
+              </p>
+              <label className="alert-opt">
+                <input
+                  type="checkbox"
+                  checked={prefs.flips}
+                  onChange={(e) => setPref("flips", e.target.checked)}
+                />
+                <span>
+                  <b>Flips semanais</b>
+                  <em>quando um ativo vira bullish/bearish no fecho</em>
+                </span>
+              </label>
+              <label className="alert-opt">
+                <input
+                  type="checkbox"
+                  checked={prefs.signals}
+                  onChange={(e) => setPref("signals", e.target.checked)}
+                />
+                <span>
+                  <b>Avisos de topo/fundo</b>
+                  <em>dots Daily-vs-Weekly e divergências</em>
+                </span>
+              </label>
+              <label className="alert-opt">
+                <input
+                  type="checkbox"
+                  checked={prefs.digest}
+                  onChange={(e) => setPref("digest", e.target.checked)}
+                />
+                <span>
+                  <b>Resumo diário</b>
+                  <em>estado da watchlist, uma mensagem por dia</em>
+                </span>
+              </label>
+              <input
+                className="alert-input"
+                placeholder="@teu_username no Telegram"
+                value={prefs.telegram}
+                onChange={(e) => setPref("telegram", e.target.value)}
+              />
+              <button className="trade-btn btn-save" onClick={savePrefs}>
+                {prefsSaved ? "Guardado ✓" : "Guardar preferências"}
+              </button>
+              <p className="muted small alerts-note">
+                🔧 Envio em preparação — as tuas escolhas ficam guardadas e ativam-se
+                automaticamente quando o bot da comunidade estiver ligado.
+              </p>
+            </div>
+          )}
           <div className="panel trade-panel">
             <h3>Negociar</h3>
             <p className="muted small">
@@ -582,12 +728,12 @@ function FragmentRow({
         <td>
           <span className={`chip ${TREND_CLASS[tag]}`}>{tag}</span>
         </td>
-        <td className={`num ${(r.sinceFlipPct ?? 0) >= 0 ? "bull" : "bear"}`}>
+        <td className={`num col-delta ${(r.sinceFlipPct ?? 0) >= 0 ? "bull" : "bear"}`}>
           {fmtPct(r.sinceFlipPct)}
         </td>
-        <td className="num muted">{fmtSince(r.lastFlipDate)}</td>
+        <td className="num muted col-tempo">{fmtSince(r.lastFlipDate)}</td>
         <td className="num">{fmtPrice(r.price, r.currency)}</td>
-        <td className="num muted">{fmtMarketCap(r.marketCap)}</td>
+        <td className="num muted col-mcap">{fmtMarketCap(r.marketCap)}</td>
         <td className="col-links" onClick={(e) => e.stopPropagation()}>
           <div className="links-stack">
             <a

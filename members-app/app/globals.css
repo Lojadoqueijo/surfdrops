@@ -118,6 +118,8 @@ a:hover { text-decoration: underline; }
 .tchip.t-bull.on { border-color: var(--green); color: var(--green); background: rgba(34,197,94,0.12); }
 .tchip.t-bear.on { border-color: var(--red); color: var(--red); background: rgba(239,68,68,0.12); }
 .tchip.t-warm.on { border-color: var(--amber); color: var(--amber); background: rgba(245,166,35,0.12); }
+.tchip.t-aligned.on { border-color: var(--purple); color: #c4b5fd; background: rgba(139,92,246,0.14); }
+.tchip.t-cheap.on { border-color: var(--aqua); color: var(--aqua); background: rgba(34,211,238,0.12); }
 
 .term-body { display: flex; gap: 18px; align-items: flex-start; }
 .table-wrap {
@@ -141,7 +143,7 @@ a:hover { text-decoration: underline; }
 
 .term-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 .term-table th, .term-table td {
-  padding: 12px 12px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap;
+  padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap;
 }
 .term-table th {
   color: var(--muted); font-weight: 700; font-size: 10.5px; text-transform: uppercase;
@@ -175,15 +177,18 @@ a:hover { text-decoration: underline; }
 .pagination button:hover:not(:disabled) { border-color: var(--purple); }
 .pagination button:disabled { opacity: 0.35; cursor: default; }
 .page-info { color: var(--muted); font-size: 12px; }
+/* Ícones TV/Yahoo empilhados mas compactos: 2×15px + gap cabem na altura da
+   célula do ativo (logo 26px) sem engordar as linhas. */
 .col-links { text-align: right; }
-.links-stack { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; }
+.links-stack { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; vertical-align: middle; }
 .link-ico {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 22px; height: 20px; border-radius: 5px;
+  width: 20px; height: 15px; border-radius: 4px;
   border: 1px solid var(--border); color: var(--muted); line-height: 1;
 }
+.link-ico svg { width: 10px; height: 10px; }
 .link-ico:hover { color: var(--purple); border-color: var(--purple); text-decoration: none; }
-.yf-mark { font-size: 10px; font-weight: 800; font-style: italic; letter-spacing: -0.5px; }
+.yf-mark { font-size: 9px; font-weight: 800; font-style: italic; letter-spacing: -0.5px; }
 
 .asset { display: flex; align-items: center; gap: 10px; }
 .logo { width: 26px; height: 26px; border-radius: 50%; object-fit: contain; background: #ffffff12; flex-shrink: 0; }
@@ -234,6 +239,32 @@ a:hover { text-decoration: underline; }
 
 .disclaimer { margin-top: 22px; color: var(--muted); font-size: 11.5px; }
 
+/* ---- Painel Alertas · Telegram (tab Watchlist) ---- */
+.alerts-panel { border-color: rgba(42, 171, 238, 0.35); }
+.alert-opt {
+  display: flex; align-items: flex-start; gap: 9px; margin: 10px 0; cursor: pointer;
+}
+.alert-opt input { margin-top: 2px; accent-color: var(--purple); cursor: pointer; }
+.alert-opt span { display: flex; flex-direction: column; line-height: 1.35; }
+.alert-opt b { font-size: 12px; }
+.alert-opt em { font-style: normal; font-size: 10.5px; color: var(--muted); }
+.alert-input {
+  width: 100%; margin-top: 6px; padding: 9px 12px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--bg); color: var(--text);
+  font-family: inherit; font-size: 12.5px;
+}
+.alert-input:focus { outline: none; border-color: var(--aqua); }
+.btn-save { border: none; width: 100%; cursor: pointer; font-family: inherit; background: #2aabee; }
+.btn-save:hover { background: #1e96d6; }
+.alerts-note { margin-bottom: 0; }
+
+/* ---- Colunas responsivas: esconder as secundárias antes de a tabela partir ---- */
+@media (max-width: 1080px) {
+  .term-table .col-mcap { display: none; }
+}
+@media (max-width: 940px) {
+  .term-table .col-tempo { display: none; }
+}
 @media (max-width: 820px) {
   .term-body { flex-direction: column; }
   .side { width: 100%; flex-direction: row; flex-wrap: wrap; }
@@ -242,6 +273,11 @@ a:hover { text-decoration: underline; }
   .topbar { flex-wrap: wrap; }
   .tabs { display: flex; overflow-x: auto; order: 3; width: 100%; }
   .pulse { gap: 20px; }
+}
+@media (max-width: 640px) {
+  .term-table .col-delta { display: none; }
+  .term-table th, .term-table td { padding: 8px 8px; }
+  .stat-v { font-size: 18px; }
 }
 
 /* ---- Página de login ---- */
