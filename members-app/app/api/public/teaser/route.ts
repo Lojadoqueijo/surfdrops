@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { readLatestSnapshots } from "@/lib/data/supabase";
 
-// Teaser PÚBLICO do Radar do Swell — alimenta a secção de venda no Surf Drops.
-// Deliberadamente limitado: top 10 cripto por market cap + contagens globais.
-// O resto do universo (3k+ ativos, watchlist, alertas, alvos, avisos) fica
-// atrás do login — isto é a amostra que faz o produto vender-se sozinho.
+// Teaser PÚBLICO do Radar do Swell — alimenta as secções de venda no Surf
+// Drops e no hub. Deliberadamente limitado a 3 exemplos curados (decisão
+// 2026-07-05): Bitcoin primeiro (referência que toda a gente conhece), depois
+// o MAIOR flip bullish e o MAIOR flip bearish do universo inteiro — prova de
+// que a ferramenta funciona nos dois sentidos. O resto (3k+ ativos, watchlist,
+// alertas) fica atrás do login.
 // CORS aberto: é informação pública por natureza (dados de mercado agregados).
 
 export const revalidate = 3600; // mesma cadência da página de membros
@@ -16,10 +18,18 @@ export async function GET() {
   }
 
   const bull = db.rows.filter((r) => r.trend === "bullish").length;
-  const top = db.rows
-    .filter((r) => r.sector.startsWith("Cripto") && (r.marketCap ?? 0) > 0)
-    .sort((a, b) => (b.marketCap ?? 0) - (a.marketCap ?? 0))
-    .slice(0, 10)
+
+  const candidates = db.rows.filter((r) => r.sinceFlipPct !== null);
+  const btc = candidates.find((r) => r.symbol === "BTC/USD");
+  const bestBull = candidates
+    .filter((r) => r.trend === "bullish" && r.symbol !== "BTC/USD")
+    .sort((a, b) => (b.sinceFlipPct ?? 0) - (a.sinceFlipPct ?? 0))[0];
+  const bestBear = candidates
+    .filter((r) => r.trend === "bearish" && r.symbol !== "BTC/USD")
+    .sort((a, b) => (a.sinceFlipPct ?? 0) - (b.sinceFlipPct ?? 0))[0];
+
+  const top = [btc, bestBull, bestBear]
+    .filter((r): r is NonNullable<typeof r> => Boolean(r))
     .map((r) => ({
       symbol: r.symbol,
       name: r.name,
