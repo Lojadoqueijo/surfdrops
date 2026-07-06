@@ -131,6 +131,27 @@ function parseSp500(text: string): {
   return { bySymbol };
 }
 
+// Overlay temático CURADO (decisão 2026-07-06): temas de mercado que os
+// traders procuram e que NÃO são setores GICS oficiais (IA, Semis, Quantum,
+// Cripto-expostas, Defesa, EV). Lista à mão — zero custo/API; só manutenção
+// humana ocasional quando o mercado muda. Etiqueta → tickers (formato Yahoo).
+const STOCK_THEMES: Record<string, string[]> = {
+  IA: ["NVDA", "AMD", "AVGO", "SMCI", "PLTR", "MSFT", "GOOGL", "GOOG", "META", "MRVL", "ARM", "MU", "TSM", "DELL", "ANET", "VRT", "CRWD", "SNOW", "NOW", "AI", "PATH", "PLNT", "IBM", "ORCL", "ADBE"],
+  Semis: ["NVDA", "AMD", "AVGO", "MU", "MRVL", "ARM", "TSM", "QCOM", "INTC", "TXN", "ADI", "KLAC", "LRCX", "AMAT", "ASML", "NXPI", "ON", "MCHP", "MPWR", "SWKS", "TER", "ENTG", "QRVO", "SMCI"],
+  "Cripto-expostas": ["COIN", "MSTR", "MARA", "RIOT", "CLSK", "HUT", "BITF", "HOOD", "GLXY", "CIFR", "WULF", "BTDR", "CORZ", "BTBT", "IREN", "SQ", "XYZ", "PYPL"],
+  Quantum: ["IONQ", "RGTI", "QBTS", "QUBT", "ARQQ", "LAES"],
+  Defesa: ["LMT", "RTX", "NOC", "GD", "BA", "LHX", "HII", "LDOS", "KTOS", "AVAV", "PLTR", "AXON", "HWM"],
+  "Veículos elétricos": ["TSLA", "RIVN", "LCID", "NIO", "LI", "XPEV", "BYDDY", "GM", "F"],
+};
+
+function stockThemesFor(symbol: string): string[] {
+  const out: string[] = [];
+  for (const [label, tickers] of Object.entries(STOCK_THEMES)) {
+    if (tickers.includes(symbol)) out.push(label);
+  }
+  return out;
+}
+
 function makeAsset(
   symbol: string,
   yahoo: string,
@@ -145,7 +166,7 @@ function makeAsset(
     yahooSymbol: yahoo,
     name,
     sector: "Ações — EUA",
-    categories: gicsSector ? [gicsSector] : [],
+    categories: [...(gicsSector ? [gicsSector] : []), ...stockThemesFor(symbol)],
     currency: "USD",
     country: "US",
     logoUrl: `https://assets.parqet.com/logos/symbol/${encodeURIComponent(yahoo)}?format=png`,
