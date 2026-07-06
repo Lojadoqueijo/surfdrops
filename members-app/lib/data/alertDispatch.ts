@@ -6,12 +6,15 @@ import { sendMessage, telegramConfigured } from "../telegram";
 // Envia alertas Telegram dos flips recentes para os membros ligados que têm
 // o ativo na watchlist. Chamado no fim do cron, depois de persistir.
 //
-// "Flip recente" = flip semanal cuja data cai nos últimos 8 dias (uma vela
-// semanal nova). A dedup por (membro, símbolo, flip_at) no alert_log garante
-// que cada flip só gera um alerta por membro, mesmo com o cron a correr todos
-// os dias sobre o mesmo flip.
+// "Flip recente" = flip semanal cuja data-ÂNCORA cai nos últimos N dias.
+// ATENÇÃO (auditoria 2026-07-06): o flip_at é a âncora da vela semanal
+// (segunda-feira), não o dia do fecho — um flip confirmado no fecho já nasce
+// com ~7 dias de idade. Janela de 12 dias dá folga para atrasos do scheduler
+// (ex.: cron falhado + recuperação no dia seguinte) sem perder alertas; a
+// dedup por (membro, símbolo, flip_at) no alert_log garante que cada flip só
+// gera um alerta por membro, por mais corridas que aconteçam.
 
-const RECENT_DAYS = 8;
+const RECENT_DAYS = 12;
 
 function daysSince(iso: string | null): number {
   if (!iso) return Infinity;
