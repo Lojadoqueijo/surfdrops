@@ -17,6 +17,8 @@ on:
     - cron: "50 21 * * 1-5" # ações fatias 0-2 (top 1500), dias úteis
     - cron: "15 22 * * 1-5" # ações fatias 3-5 (1501-3000), dias úteis
     - cron: "45 22 * * 1-5" # ETFs/commodities/índices (batch 2), dias úteis
+    - cron: "0 3 * * *"     # VIGIA: frescura dos dados (falha → email do GitHub)
+    - cron: "30 23 * * 1-5" # VIGIA: pós-fecho das ações, dias úteis
   workflow_dispatch: {} # corrida manual = refresh COMPLETO (recuperação)
 
 jobs:
@@ -30,6 +32,14 @@ jobs:
             curl -sS --max-time 320 "https://app.defisurfers.xyz/api/cron/refresh?$1" || true
             echo
           }
+          vigia() {
+            # /api/public/health: ok=false quando alguma classe excede o limiar
+            # (cripto 26h; ações/ETFs 80h). Falhar o job faz o GitHub enviar
+            # email ao dono do repo — monitorização sem custos.
+            H=$(curl -sS --max-time 60 "https://app.defisurfers.xyz/api/public/health")
+            echo "$H"
+            echo "$H" | grep -q '"ok":true' || { echo "::error::Dados do Radar OBSOLETOS — correr o workflow manualmente (Run workflow) para recuperar"; exit 1; }
+          }
           case "${{ github.event.schedule }}" in
             "25 0 * * *")
               call "batch=0" ;;
@@ -39,6 +49,8 @@ jobs:
               call "batch=1&slice=3"; call "batch=1&slice=4"; call "batch=1&slice=5" ;;
             "45 22 * * 1-5")
               call "batch=2" ;;
+            "0 3 * * *"|"30 23 * * 1-5")
+              vigia ;;
             *)
               # workflow_dispatch: recuperação total, tudo em sequência
               call "batch=0"
