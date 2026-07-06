@@ -40,6 +40,9 @@ export async function getYahooCandles(
   let lastErr: unknown = null;
   for (let attempt = 0; attempt < 2; attempt++) {
     const host = HOSTS[attempt % HOSTS.length];
+    // Jitter de 50-200ms: dessincroniza os workers paralelos (evita rajadas
+    // síncronas de 12 pedidos que convidam o rate-limit do endpoint não-oficial).
+    await new Promise((r) => setTimeout(r, 50 + Math.random() * 150));
     try {
       const res = await fetch(`${host}${path}`, {
         headers: { "User-Agent": UA },

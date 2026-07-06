@@ -91,17 +91,15 @@ export async function readLatestSnapshots(): Promise<
   if (!supabase) return null;
 
   const since = new Date(Date.now() - 4 * 86_400_000).toISOString().slice(0, 10);
-  // Paginação obrigatória: o PostgREST corta a 1000 linhas por pedido e o
-  // universo (3k+ ações × 4 dias) ultrapassa isso largamente.
+  // RPC latest_snapshots (DISTINCT ON symbol): só a linha mais recente por
+  // ativo dentro da janela — ~3,5k linhas em vez de ~15k. Corta o egress do
+  // Supabase ~4× (era o limite matemático mais próximo de rebentar no plano
+  // grátis). Paginação mantida: o PostgREST corta a 1000 por pedido.
   const PAGE = 1000;
   const data: Record<string, unknown>[] = [];
   for (let from = 0; from < 40_000; from += PAGE) {
     const { data: page, error } = await supabase
-      .from("snapshots")
-      .select("*")
-      .gte("date", since)
-      .order("date", { ascending: false })
-      .order("symbol", { ascending: true })
+      .rpc("latest_snapshots", { since })
       .range(from, from + PAGE - 1);
     if (error) {
       console.error("[supabase] leitura de snapshots falhou:", error.message);
@@ -157,6 +155,33 @@ export async function readLatestSnapshots(): Promise<
     });
   }
   return { rows, updatedAt };
+}
+
+/**
+ * Cache do último universo dinâmico BOM (cripto/ações) — contingência para
+ * quando os fornecedores de listas falham (CoinGecko 429, crumb do Yahoo
+ * bloqueado, NASDAQ Trader em baixo). Sem isto, a falha do builder colapsava
+ * o universo para a lista estática (33 criptos / 503 ações alfabéticas).
+ */
+export async function saveUniverseCache(cls: string, assets: unknown[]): Promise<void> {
+  const supabase = getSupabase();
+  if (!supabase || assets.length === 0) return;
+  const { error } = await supabase
+    .from("universe_cache")
+    .upsert({ class: cls, assets, updated_at: new Date().toISOString() }, { onConflict: "class" });
+  if (error) console.error(`[supabase] universe_cache save ${cls}:`, error.message);
+}
+
+export async function loadUniverseCache<T>(cls: string): Promise<T[] | null> {
+  const supabase = getSupabase();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("universe_cache")
+    .select("assets, updated_at")
+    .eq("class", cls)
+    .maybeSingle();
+  if (error || !data) return null;
+  return (data.assets as T[]) ?? null;
 }
 
 /**

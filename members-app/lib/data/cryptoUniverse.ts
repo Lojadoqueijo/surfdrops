@@ -1,3 +1,4 @@
+import { loadUniverseCache, saveUniverseCache } from "./supabase";
 import { UNIVERSE, type UniverseAsset } from "./universe";
 
 // Universo cripto DINÂMICO (DEFI_SURFERS_UXUI/decisão 2026-07-05):
@@ -196,9 +197,17 @@ export async function getCryptoUniverse(): Promise<UniverseAsset[]> {
     console.log(
       `[cryptoUniverse] ${assets.length} ativos (top 500 CG ∩ 5 exchanges USDT): ${JSON.stringify(bySource)}`
     );
+    // Contingência: guarda o último universo BOM no Supabase.
+    await saveUniverseCache("cripto", assets);
     return assets;
   } catch (err) {
-    console.error("[cryptoUniverse] falhou, a usar lista estática:", err);
+    console.error("[cryptoUniverse] build falhou, a tentar cache do último universo bom:", err);
+    const cached = await loadUniverseCache<UniverseAsset>("cripto");
+    if (cached && cached.length >= 50) {
+      console.log(`[cryptoUniverse] a usar cache (${cached.length} ativos)`);
+      return cached;
+    }
+    console.error("[cryptoUniverse] sem cache utilizável — lista estática");
     return staticCryptoUniverse();
   }
 }

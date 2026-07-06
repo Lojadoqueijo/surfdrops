@@ -9,7 +9,9 @@ import { readLatestSnapshots } from "@/lib/data/supabase";
 // alertas) fica atrás do login.
 // CORS aberto: é informação pública por natureza (dados de mercado agregados).
 
-export const revalidate = 3600; // mesma cadência da página de membros
+// 4h: os dados só mudam 1x/dia por classe (crons); revalidar de hora a hora
+// era egress do Supabase desperdiçado (a leitura completa custa ~3,5MB).
+export const revalidate = 14400;
 
 export async function GET() {
   const db = await readLatestSnapshots();

@@ -1,3 +1,4 @@
+import { loadUniverseCache, saveUniverseCache } from "./supabase";
 import { UNIVERSE, type UniverseAsset } from "./universe";
 import { getYahooMarketCaps } from "./yahooQuote";
 
@@ -200,9 +201,17 @@ export async function getStockUniverse(): Promise<UniverseAsset[]> {
     console.log(
       `[stockUniverse] ${assets.length} ações (de ${unique.length} candidatas; ${mcaps.size} com mcap)`
     );
+    // Contingência: guarda o último universo BOM no Supabase.
+    await saveUniverseCache("acoes", assets);
     return assets;
   } catch (err) {
-    console.error("[stockUniverse] top-3000 falhou, fallback S&P 500:", err);
+    console.error("[stockUniverse] top-3000 falhou, a tentar cache do último universo bom:", err);
+    const cached = await loadUniverseCache<UniverseAsset>("acoes");
+    if (cached && cached.length >= 1000) {
+      console.log(`[stockUniverse] a usar cache (${cached.length} ações)`);
+      return cached;
+    }
+    console.error("[stockUniverse] sem cache utilizável — fallback S&P 500");
     try {
       return await sp500Fallback();
     } catch (err2) {
