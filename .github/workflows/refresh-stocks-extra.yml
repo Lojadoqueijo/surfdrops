@@ -1,22 +1,47 @@
-# Fatias 3-5 do lote de ações (top 3000 EUA): o Vercel Hobby só permite 5
-# cron jobs e estão todos ocupados — o GitHub Actions cobre o resto.
-# Corre depois do fecho de Wall Street (20:00 UTC verão / 21:00 inverno),
-# em sequência para não martelar o Yahoo.
-name: Refresh stocks (fatias 3-5)
+# Agendador PRINCIPAL do Radar do Swell (todos os lotes de dados).
+# Motivo (2026-07-06): os cron jobs do Vercel Hobby falharam a primeira
+# execução agendada (janela "flexível" de 1h largamente excedida — dados
+# ficaram 12h obsoletos numa segunda-feira, o dia dos flips semanais).
+# O GitHub Actions passa a fonte primária de agendamento; os crons do Vercel
+# ficam como backup redundante — os endpoints são idempotentes (upsert de
+# snapshots, flip_events com chave única, dedup de alertas), portanto correr
+# em duplicado é inofensivo.
+#
+# Horários (UTC): cripto diário após o fecho da vela 00:00; ações/ETFs/índices
+# em dias úteis após o fecho de Wall Street (20:00 verão / 21:00 inverno).
+name: Radar — refresh agendado
 
 on:
   schedule:
-    - cron: "15 22 * * 1-5"
-  workflow_dispatch: {}
+    - cron: "25 0 * * *"    # cripto (batch 0), todos os dias
+    - cron: "50 21 * * 1-5" # ações fatias 0-2 (top 1500), dias úteis
+    - cron: "15 22 * * 1-5" # ações fatias 3-5 (1501-3000), dias úteis
+    - cron: "45 22 * * 1-5" # ETFs/commodities/índices (batch 2), dias úteis
+  workflow_dispatch: {} # corrida manual = refresh COMPLETO (recuperação)
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
-      - name: Chamar fatias 3-5
+      - name: Chamar os lotes do horário
         run: |
-          for s in 3 4 5; do
-            echo "== slice $s =="
-            curl -sS --max-time 320 "https://defi-surfers-members.vercel.app/api/cron/refresh?batch=1&slice=$s" || true
+          call() {
+            echo "== $1 =="
+            curl -sS --max-time 320 "https://app.defisurfers.xyz/api/cron/refresh?$1" || true
             echo
-          done
+          }
+          case "${{ github.event.schedule }}" in
+            "25 0 * * *")
+              call "batch=0" ;;
+            "50 21 * * 1-5")
+              call "batch=1&slice=0"; call "batch=1&slice=1"; call "batch=1&slice=2" ;;
+            "15 22 * * 1-5")
+              call "batch=1&slice=3"; call "batch=1&slice=4"; call "batch=1&slice=5" ;;
+            "45 22 * * 1-5")
+              call "batch=2" ;;
+            *)
+              # workflow_dispatch: recuperação total, tudo em sequência
+              call "batch=0"
+              for s in 0 1 2 3 4 5; do call "batch=1&slice=$s"; done
+              call "batch=2" ;;
+          esac
