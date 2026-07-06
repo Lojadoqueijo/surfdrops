@@ -177,17 +177,6 @@ function EstadoChip({ estado }: { estado: TerminalRow["estado"] }) {
 
 type SortKey = "rank" | "sinceFlipPct" | "since" | "price" | "marketCap";
 
-// Preferências de alertas Telegram (guardadas no browser até o bot de envio
-// estar ligado — ver painel "Alertas · Telegram" na tab Watchlist).
-const ALERTS_STORAGE_KEY = "ds_alert_prefs";
-interface AlertPrefs {
-  flips: boolean; // flip semanal bull/bear num ativo da watchlist
-  signals: boolean; // avisos de possível topo/fundo e divergências
-  digest: boolean; // resumo diário da watchlist
-  telegram: string; // @username ou nº do Telegram
-}
-const DEFAULT_PREFS: AlertPrefs = { flips: true, signals: false, digest: false, telegram: "" };
-
 export default function Terminal({
   rows,
   updatedAt,
@@ -351,28 +340,6 @@ export default function Terminal({
       });
   }, []);
 
-  // Preferências de alertas Telegram (persistidas no browser).
-  const [prefs, setPrefs] = useState<AlertPrefs>(DEFAULT_PREFS);
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(ALERTS_STORAGE_KEY) ?? "null");
-      if (saved && typeof saved === "object") setPrefs({ ...DEFAULT_PREFS, ...saved });
-    } catch {
-      /* preferências corrompidas → defaults */
-    }
-  }, []);
-  function setPref<K extends keyof AlertPrefs>(k: K, v: AlertPrefs[K]) {
-    setPrefs((p) => {
-      const next = { ...p, [k]: v };
-      try {
-        localStorage.setItem(ALERTS_STORAGE_KEY, JSON.stringify(next));
-      } catch {
-        /* armazenamento indisponível */
-      }
-      return next;
-    });
-  }
-
   // Estado da ligação Telegram: bot disponível? membro ligado?
   const [alertStatus, setAlertStatus] = useState<{
     botAvailable: boolean;
@@ -423,24 +390,26 @@ export default function Terminal({
     }
   }
 
-  // Sincroniza preferências + watchlist para o servidor (fonte da verdade
-  // entre dispositivos). Corre para qualquer sessão válida — mesmo sem o
-  // Telegram ligado, para a watchlist ficar guardada — mas só DEPOIS da
-  // hidratação, para não sobrescrever o servidor com o estado local inicial.
-  // O endpoint exige sessão; sem sessão (dev/mock) o 401 é ignorado.
+  // Sincroniza a watchlist para o servidor (fonte da verdade entre
+  // dispositivos). Corre para qualquer sessão válida — mesmo sem o Telegram
+  // ligado — mas só DEPOIS da hidratação, para não sobrescrever o servidor
+  // com o estado local inicial. Sem sessão (dev/mock) o 401 é ignorado.
+  // Decisão 2026-07-06: UMA só notificação (flip da watchlist) — sem menu de
+  // preferências; ligar o Telegram É a preferência. signals/digest ficam
+  // false na BD até existirem como funcionalidades reais.
   useEffect(() => {
     if (!hydratedRef.current) return;
     fetch("/api/alerts/sync", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        flips: prefs.flips,
-        signals: prefs.signals,
-        digest: prefs.digest,
+        flips: true,
+        signals: false,
+        digest: false,
         watchlist: [...watchlist],
       }),
     }).catch(() => {});
-  }, [prefs, watchlist]);
+  }, [watchlist]);
 
   function setSort(key: SortKey) {
     setPage(1);
@@ -663,45 +632,12 @@ export default function Terminal({
             <div className="panel alerts-panel">
               <h3>Alertas · Telegram</h3>
               <p className="muted small">
-                Recebe no Telegram os eventos dos ativos que marcaste com ♥.
+                Um ativo com ♥ vira bullish ou bearish no fecho da vela semanal → recebes a
+                mensagem no Telegram. Simples assim.
               </p>
-              <label className="alert-opt">
-                <input
-                  type="checkbox"
-                  checked={prefs.flips}
-                  onChange={(e) => setPref("flips", e.target.checked)}
-                />
-                <span>
-                  <b>Flips semanais</b>
-                  <em>quando um ativo vira bullish/bearish no fecho</em>
-                </span>
-              </label>
-              <label className="alert-opt">
-                <input
-                  type="checkbox"
-                  checked={prefs.signals}
-                  onChange={(e) => setPref("signals", e.target.checked)}
-                />
-                <span>
-                  <b>Avisos de topo/fundo</b>
-                  <em>dots Daily-vs-Weekly e divergências</em>
-                </span>
-              </label>
-              <label className="alert-opt">
-                <input
-                  type="checkbox"
-                  checked={prefs.digest}
-                  onChange={(e) => setPref("digest", e.target.checked)}
-                />
-                <span>
-                  <b>Resumo diário</b>
-                  <em>estado da watchlist, uma mensagem por dia</em>
-                </span>
-              </label>
               {alertStatus && !alertStatus.botAvailable ? (
                 <p className="muted small alerts-note">
-                  🔧 O bot de alertas está a ser configurado. As tuas escolhas ficam guardadas e
-                  ativam-se assim que estiver pronto.
+                  🔧 O bot de alertas está a ser configurado — fica ativo em breve.
                 </p>
               ) : alertStatus?.linked ? (
                 <>
@@ -709,8 +645,7 @@ export default function Terminal({
                     ✅ Telegram ligado{alertStatus.username ? ` · @${alertStatus.username}` : ""}
                   </div>
                   <p className="muted small alerts-note">
-                    Recebes um alerta sempre que um ativo com ♥ vira bullish/bearish no fecho da vela.
-                    Envia <b>/stop</b> ao bot para desligar.
+                    Envia <b>/stop</b> ao bot para desligar a qualquer momento.
                   </p>
                 </>
               ) : (
@@ -719,7 +654,7 @@ export default function Terminal({
                     {linking ? "A abrir o Telegram…" : "🔗 Ligar Telegram"}
                   </button>
                   <p className="muted small alerts-note">
-                    Liga uma vez e recebes no Telegram os flips dos ativos que marcaste com ♥.
+                    Liga uma vez e está feito — sem configurações.
                   </p>
                 </>
               )}
