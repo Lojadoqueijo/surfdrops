@@ -238,6 +238,14 @@ export const UNIVERSE: UniverseAsset[] = [
   yh("NATGAS", "Gás Natural", 186, { sector: "Commodities", categories: ["Energia"], tv: "NYMEX:NG1!", yahoo: "NG=F", country: null }),
   yh("WHEAT", "Trigo", 187, { sector: "Commodities", categories: ["Agrícolas"], tv: "CBOT:ZW1!", yahoo: "ZW=F", country: null }),
   yh("CORN", "Milho", 188, { sector: "Commodities", categories: ["Agrícolas"], tv: "CBOT:ZC1!", yahoo: "ZC=F", country: null }),
+  yh("PALLADIUM", "Paládio", 189, { sector: "Commodities", categories: ["Metais"], tv: "NYMEX:PA1!", yahoo: "PA=F", country: null }),
+  yh("SOYBEAN", "Soja", 189, { sector: "Commodities", categories: ["Agrícolas"], tv: "CBOT:ZS1!", yahoo: "ZS=F", country: null }),
+  yh("SUGAR", "Açúcar", 189, { sector: "Commodities", categories: ["Agrícolas"], tv: "ICEUS:SB1!", yahoo: "SB=F", country: null }),
+  yh("COFFEE", "Café", 189, { sector: "Commodities", categories: ["Agrícolas"], tv: "ICEUS:KC1!", yahoo: "KC=F", country: null }),
+  yh("COCOA", "Cacau", 189, { sector: "Commodities", categories: ["Agrícolas"], tv: "ICEUS:CC1!", yahoo: "CC=F", country: null }),
+  yh("COTTON", "Algodão", 189, { sector: "Commodities", categories: ["Agrícolas"], tv: "ICEUS:CT1!", yahoo: "CT=F", country: null }),
+  yh("GASOLINE", "Gasolina", 189, { sector: "Commodities", categories: ["Energia"], tv: "NYMEX:RB1!", yahoo: "RB=F", country: null }),
+  yh("HEATOIL", "Fuelóleo de aquecimento", 189, { sector: "Commodities", categories: ["Energia"], tv: "NYMEX:HO1!", yahoo: "HO=F", country: null }),
 
   // --- Índices globais (Yahoo) ---
   yh("SPX", "S&P 500", 190, { sector: "Índices", categories: ["América"], tv: "SP:SPX", yahoo: "^GSPC", twelveSymbol: "SPX" }),
@@ -255,7 +263,19 @@ export const UNIVERSE: UniverseAsset[] = [
   yh("HSI", "Hang Seng", 202, { sector: "Índices", categories: ["Ásia"], tv: "TVC:HSI", yahoo: "^HSI", currency: "HKD", country: "HK" }),
   yh("SSE", "Shanghai Composite", 203, { sector: "Índices", categories: ["Ásia"], tv: "SSE:000001", yahoo: "000001.SS", currency: "CNY", country: "CN" }),
   yh("SENSEX", "BSE Sensex", 204, { sector: "Índices", categories: ["Ásia"], tv: "BSE:SENSEX", yahoo: "^BSESN", currency: "INR", country: "IN" }),
-  yh("IBOV", "Ibovespa", 205, { sector: "Índices", categories: ["América"], tv: "INDEX:IBOV", yahoo: "^BVSP", currency: "BRL", country: "BR" }),
+  yh("NIFTY", "Nifty 50 (Índia)", 205, { sector: "Índices", categories: ["Ásia"], tv: "NSE:NIFTY", yahoo: "^NSEI", currency: "INR", country: "IN" }),
+  yh("KOSPI", "KOSPI (Coreia)", 206, { sector: "Índices", categories: ["Ásia"], tv: "KRX:KOSPI", yahoo: "^KS11", currency: "KRW", country: "KR" }),
+  yh("TWII", "TAIEX (Taiwan)", 207, { sector: "Índices", categories: ["Ásia"], tv: "TWSE:TAIEX", yahoo: "^TWII", currency: "TWD", country: "TW" }),
+  yh("ASX", "ASX 200 (Austrália)", 208, { sector: "Índices", categories: ["Ásia"], tv: "ASX:XJO", yahoo: "^AXJO", currency: "AUD", country: "AU" }),
+  yh("STI", "Straits Times (Singapura)", 209, { sector: "Índices", categories: ["Ásia"], tv: "SGX:STI", yahoo: "^STI", currency: "SGD", country: "SG" }),
+  yh("JKSE", "IDX Composite (Indonésia)", 210, { sector: "Índices", categories: ["Ásia"], tv: "IDX:COMPOSITE", yahoo: "^JKSE", currency: "IDR", country: "ID" }),
+  yh("AEX", "AEX (Países Baixos)", 211, { sector: "Índices", categories: ["Europa"], tv: "EURONEXT:AEX", yahoo: "^AEX", currency: "EUR", country: "NL" }),
+  yh("SMI", "SMI (Suíça)", 212, { sector: "Índices", categories: ["Europa"], tv: "SIX:SMI", yahoo: "^SSMI", currency: "CHF", country: "CH" }),
+  yh("OMXS30", "OMX Estocolmo 30", 213, { sector: "Índices", categories: ["Europa"], tv: "OMXSTO:OMXS30", yahoo: "^OMX", currency: "SEK", country: "SE" }),
+  yh("FTSEMIB", "FTSE MIB (Itália)", 214, { sector: "Índices", categories: ["Europa"], tv: "MIL:FTSEMIB", yahoo: "FTSEMIB.MI", currency: "EUR", country: "IT" }),
+  yh("IBOV", "Ibovespa", 215, { sector: "Índices", categories: ["América"], tv: "INDEX:IBOV", yahoo: "^BVSP", currency: "BRL", country: "BR" }),
+  yh("TSX", "S&P/TSX (Canadá)", 216, { sector: "Índices", categories: ["América"], tv: "TSX:TSX", yahoo: "^GSPTSE", currency: "CAD", country: "CA" }),
+  yh("IPC", "IPC (México)", 217, { sector: "Índices", categories: ["América"], tv: "BMV:ME", yahoo: "^MXX", currency: "MXN", country: "MX" }),
 ];
 
 export const SECTORS = [...new Set(UNIVERSE.map((a) => a.sector))];

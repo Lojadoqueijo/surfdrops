@@ -2,7 +2,7 @@ import { loadUniverseCache, saveUniverseCache } from "./supabase";
 import { UNIVERSE, type UniverseAsset } from "./universe";
 
 // Universo cripto DINÂMICO (DEFI_SURFERS_UXUI/decisão 2026-07-05):
-//   top 500 do CoinGecko (market cap, rank, nome, logo — 2 chamadas grátis)
+//   top 750 do CoinGecko (market cap, rank, nome, logo — 3 chamadas grátis)
 //   ∩ pares USDT ativos na Binance, OKX, Bybit, MEXC ou Gate (prioridade
 //   nessa ordem; as velas vêm sempre de uma exchange — o OHLC grátis do
 //   CoinGecko dá velas de 4 dias em históricos longos e não serve o motor).
@@ -46,7 +46,12 @@ export async function getCryptoUniverse(): Promise<UniverseAsset[]> {
   if (cache && Date.now() - cache.at < CACHE_MS) return cache.assets;
 
   try {
-    const [infoRes, okxRes, bybitRes, mexcRes, gateRes, cg1Res, cg2Res] = await Promise.all([
+    const cgPage = (page: number) =>
+      fetch(
+        `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=${page}`,
+        { cache: "no-store" }
+      );
+    const [infoRes, okxRes, bybitRes, mexcRes, gateRes, cg1Res, cg2Res, cg3Res] = await Promise.all([
       fetch("https://api.binance.com/api/v3/exchangeInfo", { cache: "no-store" }),
       fetch("https://www.okx.com/api/v5/public/instruments?instType=SPOT", { cache: "no-store" }),
       fetch("https://api.bybit.com/v5/market/instruments-info?category=spot&limit=1000", {
@@ -54,14 +59,9 @@ export async function getCryptoUniverse(): Promise<UniverseAsset[]> {
       }),
       fetch("https://api.mexc.com/api/v3/exchangeInfo", { cache: "no-store" }),
       fetch("https://api.gateio.ws/api/v4/spot/currency_pairs", { cache: "no-store" }),
-      fetch(
-        "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1",
-        { cache: "no-store" }
-      ),
-      fetch(
-        "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=2",
-        { cache: "no-store" }
-      ),
+      cgPage(1),
+      cgPage(2),
+      cgPage(3), // top 750 (decisão 2026-07-06)
     ]);
     if (!infoRes.ok) throw new Error(`Binance exchangeInfo: HTTP ${infoRes.status}`);
     if (!cg1Res.ok) throw new Error(`CoinGecko markets p1: HTTP ${cg1Res.status}`);
@@ -69,6 +69,7 @@ export async function getCryptoUniverse(): Promise<UniverseAsset[]> {
     const info = (await infoRes.json()) as BinanceExchangeInfo;
     const cg1 = (await cg1Res.json()) as CoinGeckoMarket[];
     const cg2 = cg2Res.ok ? ((await cg2Res.json()) as CoinGeckoMarket[]) : [];
+    const cg3 = cg3Res.ok ? ((await cg3Res.json()) as CoinGeckoMarket[]) : [];
 
     const binanceBases = new Set(
       info.symbols
@@ -142,7 +143,7 @@ export async function getCryptoUniverse(): Promise<UniverseAsset[]> {
 
     const seen = new Set<string>();
     const assets: UniverseAsset[] = [];
-    for (const c of [...cg1, ...cg2]) {
+    for (const c of [...cg1, ...cg2, ...cg3]) {
       const sym = (c.symbol || "").toUpperCase();
       if (!sym || seen.has(sym)) continue;
       if (STABLES.has(sym) || WRAPPED.has(sym)) continue;
@@ -195,7 +196,7 @@ export async function getCryptoUniverse(): Promise<UniverseAsset[]> {
       return acc;
     }, {});
     console.log(
-      `[cryptoUniverse] ${assets.length} ativos (top 500 CG ∩ 5 exchanges USDT): ${JSON.stringify(bySource)}`
+      `[cryptoUniverse] ${assets.length} ativos (top 750 CG ∩ 5 exchanges USDT): ${JSON.stringify(bySource)}`
     );
     // Contingência: guarda o último universo BOM no Supabase.
     await saveUniverseCache("cripto", assets);

@@ -31,6 +31,24 @@ export interface PersistResult {
   error?: string;
 }
 
+/**
+ * Retenção: apaga snapshots com mais de `days` dias. A página só lê os últimos
+ * 4 dias; sem isto a tabela cresceria sem limite (~2,5 MB/dia → 500 MB do
+ * plano grátis em ~6 meses). Com prune a 14 dias, o storage fica ~capado a
+ * 14 × universo, a qualquer escala. flip_events é histórico e NÃO se toca.
+ */
+export async function pruneOldSnapshots(days = 14): Promise<PersistResult> {
+  const supabase = getSupabase();
+  if (!supabase) return { ok: true, skipped: true };
+  const cutoff = new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10);
+  const { error, count } = await supabase
+    .from("snapshots")
+    .delete({ count: "exact" })
+    .lt("date", cutoff);
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, count: count ?? undefined };
+}
+
 /** snapshots: upsert de 1 linha por (symbol, date=hoje). */
 export async function upsertSnapshots(snapshots: AssetSnapshot[]): Promise<PersistResult> {
   const supabase = getSupabase();

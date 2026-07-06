@@ -4,7 +4,12 @@ import { dispatchFlipAlerts } from "@/lib/data/alertDispatch";
 import { getCryptoUniverse } from "@/lib/data/cryptoUniverse";
 import { getSnapshots, getSnapshotsParallel } from "@/lib/data/getSnapshots";
 import { getStockUniverse, STOCK_SLICE_SIZE } from "@/lib/data/stockUniverse";
-import { appendFlipEvents, isSupabaseConfigured, upsertSnapshots } from "@/lib/data/supabase";
+import {
+  appendFlipEvents,
+  isSupabaseConfigured,
+  pruneOldSnapshots,
+  upsertSnapshots,
+} from "@/lib/data/supabase";
 import { UNIVERSE } from "@/lib/data/universe";
 
 // Cron diário (ver vercel.json + DEFI_SURFERS_PLANO.md §3.5/§6 item 4).
@@ -99,6 +104,11 @@ export async function GET(request: Request) {
       }
     : { snapshots: { ok: true, skipped: true }, flipEvents: { ok: true, skipped: true } };
 
+  // Retenção: só no lote diário da cripto (batch 0), para não repetir por
+  // fatia. Apaga snapshots > 14 dias — trava o crescimento do storage.
+  const pruned =
+    batchIndex === 0 && isSupabaseConfigured() ? await pruneOldSnapshots(14) : undefined;
+
   // Alertas Telegram dos flips recentes (no-op sem bot/Supabase).
   const alerts = await dispatchFlipAlerts(snapshots);
 
@@ -114,6 +124,7 @@ export async function GET(request: Request) {
     assets: snapshots.length,
     freshFlips: freshFlips.map((s) => ({ symbol: s.symbol, trend: s.trend })),
     persistence,
+    pruned,
     alerts,
     at: new Date().toISOString(),
   });
