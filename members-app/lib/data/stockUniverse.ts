@@ -28,24 +28,39 @@ export const STOCK_SLICE_SIZE = 500;
 let cache: { at: number; assets: UniverseAsset[] } | null = null;
 const CACHE_MS = 60 * 60 * 1000;
 
-// Ações CURADAS, fora do ranking por market cap — proxies de empresas que não
-// se compram diretamente. DXYZ (Destiny Tech100) é um fundo cotado cuja maior
-// posição é a SpaceX: a única via PÚBLICA de exposição à SpaceX com velas
-// reais (a SpaceX é privada, não tem ticker). São prependadas ao universo
-// (caem na fatia 0 do cron, sempre processada) com rankHint alto (aparecem no
-// fim da tabela, pois não têm mcap comparável).
+// Ações CURADAS, fora do ranking por market cap. Prependadas ao universo (caem
+// na fatia 0, sempre processada) com rankHint alto (fim da tabela).
+//   · SPCX = SpaceX REAL (IPO 2026-06, NasdaqGS). Recém-listada: só ~5 velas
+//     semanais, o motor (ATR Wilder-10) exclui-a até ter ~10 velas (~5 sem);
+//     entra em sinal sozinha quando amadurecer.
+//   · DXYZ = Destiny Tech100, fundo cotado com a SpaceX como maior posição —
+//     tem 120 velas e sinaliza JÁ; exposição a SpaceX enquanto a SPCX amadurece.
 const CURATED_STOCKS: UniverseAsset[] = [
+  {
+    symbol: "SPCX",
+    tvSymbol: "SPCX",
+    yahooSymbol: "SPCX",
+    name: "SpaceX",
+    sector: "Ações — EUA",
+    categories: ["SpaceX", "Recém-listadas / IPO"],
+    currency: "USD",
+    country: "US",
+    logoUrl: "https://assets.parqet.com/logos/symbol/SPCX?format=png",
+    rankHint: 9000,
+    marketCap: null,
+    source: "yahoo",
+  },
   {
     symbol: "DXYZ",
     tvSymbol: "DXYZ",
     yahooSymbol: "DXYZ",
-    name: "SpaceX (via Destiny Tech100 · DXYZ)",
+    name: "Destiny Tech100 (exposição a SpaceX)",
     sector: "Ações — EUA",
-    categories: ["SpaceX", "Pré-IPO / Privadas"],
+    categories: ["SpaceX"],
     currency: "USD",
     country: "US",
     logoUrl: "https://assets.parqet.com/logos/symbol/DXYZ?format=png",
-    rankHint: 9000,
+    rankHint: 9001,
     marketCap: null,
     source: "yahoo",
   },
