@@ -45,8 +45,15 @@ export async function GET() {
   // "Melhores performers desde o flip": os que mais subiram desde que a Linha
   // os virou bullish (maior sinceFlipPct positivo). Alimenta o Radar animado
   // do hub — prova viva de que o indicador apanha movimentos reais.
+  // Filtro de CREDIBILIDADE: só ativos com >= $1B de market cap. Sem ele, o
+  // topo enche-se de microcaps com ganhos absurdos (+4000%) e sem logo, que
+  // num teaser de vendas parecem pump-list e queimam confiança em vez de a
+  // construir. Assim mostra ganhos fortes MAS acreditáveis, de nomes reais.
+  const MIN_MCAP = 1e9;
   const movers = candidates
-    .filter((r) => r.trend === "bullish" && (r.sinceFlipPct ?? 0) > 0)
+    .filter(
+      (r) => r.trend === "bullish" && (r.sinceFlipPct ?? 0) > 0 && (r.marketCap ?? 0) >= MIN_MCAP
+    )
     .sort((a, b) => (b.sinceFlipPct ?? 0) - (a.sinceFlipPct ?? 0))
     .slice(0, 12)
     .map((r) => ({
