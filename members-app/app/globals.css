@@ -450,3 +450,65 @@ a:hover { text-decoration: underline; }
   background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.4);
   color: #fca5a5;
 }
+
+/* ---- Link para o Guia (painel "Como ler") ---- */
+.guia-link {
+  display: inline-block; margin-top: 10px; padding: 8px 12px; border-radius: 8px;
+  border: 1px solid var(--border); color: var(--text); font-size: 12px; font-weight: 700;
+}
+.guia-link:hover { border-color: var(--purple); color: var(--purple); text-decoration: none; }
+
+/* ---- Página do Guia (docs) ---- */
+.guia-page { max-width: 760px; line-height: 1.7; }
+.guia-head {
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
+  flex-wrap: wrap; margin-bottom: 8px;
+}
+.guia-actions { display: flex; gap: 10px; align-items: center; }
+.guia-back { font-size: 13px; color: var(--muted); }
+.guia-back:hover { color: var(--text); text-decoration: none; }
+.guia-print {
+  border: 1px solid var(--border); border-radius: 8px; background: var(--panel);
+  color: var(--text); font-family: inherit; font-size: 12px; font-weight: 700;
+  padding: 8px 12px; cursor: pointer;
+}
+.guia-print:hover { border-color: var(--purple); color: var(--purple); }
+.guia-toc {
+  display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 14px 0 26px;
+  padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel);
+}
+.guia-toc a { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+.guia-toc a:hover { color: var(--purple); text-decoration: none; }
+.guia-sec { margin: 0 0 30px; scroll-margin-top: 16px; }
+.guia-sec h2 { font-size: 18px; margin: 0 0 10px; color: #c4b5fd; }
+.guia-sec p { margin: 0 0 10px; color: var(--text); }
+.guia-list { margin: 0 0 10px; padding-left: 20px; }
+.guia-list li { margin-bottom: 6px; }
+.guia-note {
+  font-size: 13px; color: var(--muted); border-left: 2px solid var(--border);
+  padding-left: 12px; margin: 10px 0;
+}
+.guia-example {
+  font-size: 13.5px; background: var(--panel); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 16px; margin: 12px 0;
+}
+.guia-example ul { margin: 8px 0 0; padding-left: 20px; }
+.guia-example li { margin-bottom: 4px; }
+.guia-risco {
+  border: 1px solid rgba(245,166,35,0.4); border-radius: 12px; padding: 18px 20px;
+  background: rgba(245,166,35,0.05);
+}
+.guia-risco h2 { color: var(--amber); }
+
+/* Impressão: "Guardar PDF" limpa (esconde navegação, fundo branco). */
+@media print {
+  body { background: #fff !important; color: #000 !important; }
+  .guia-actions, .guia-toc, .guia-back, .guia-print { display: none !important; }
+  .guia-page { max-width: 100%; }
+  .guia-sec h2, .guia-head h1 { color: #000 !important; }
+  .guia-note, .guia-example, .guia-risco {
+    color: #333 !important; background: #fff !important; border-color: #ccc !important;
+  }
+  .guia-risco h2 { color: #000 !important; }
+  a { color: #000 !important; text-decoration: underline; }
+}

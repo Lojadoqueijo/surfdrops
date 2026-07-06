@@ -709,9 +709,16 @@ export default function Terminal({
           <details className="panel panel-details">
             <summary>Como ler</summary>
             <p className="muted small">
-              A regra de ouro: só se age em <b>ALINHADO</b>, com o flip confirmado no fecho da
-              vela. Clica numa linha para veres o stop (Next Flip), os alvos em ATR e os avisos
-              de topo/fundo.
+              Cada linha mostra a tendência semanal que o indicador identifica. <b>ALINHADO</b> = o
+              semanal e o diário concordam; <b>CONFLITO</b> = divergem. Toca numa linha para veres os
+              níveis do indicador: o <i>Next Flip</i> (onde a tendência inverteria), as referências em
+              ATR e os avisos de possível topo/fundo.
+            </p>
+            <a className="guia-link" href="/guia">
+              📖 Guia completo da Linha do Swell
+            </a>
+            <p className="muted small" style={{ marginTop: 8 }}>
+              Material educativo — não é recomendação nem aconselhamento financeiro.
             </p>
           </details>
         </aside>
