@@ -234,6 +234,34 @@
   }
   .radar-note { text-align: center; color: var(--text-faint); font-size: 11px; margin-top: 12px; }
 
+  /* ---- radar ao vivo: ticker vertical animado (melhores performers) ---- */
+  .radar-ticker-wrap {
+    position: relative; max-width: 620px; margin: 0 auto;
+    background: var(--bg-elev); border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+  }
+  .radar-ticker {
+    height: 296px; overflow: hidden; position: relative;
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 11%, #000 89%, transparent);
+    mask-image: linear-gradient(180deg, transparent, #000 11%, #000 89%, transparent);
+  }
+  .radar-track { display: flex; flex-direction: column; animation: radarscroll 26s linear infinite; }
+  .radar-ticker:hover .radar-track { animation-play-state: paused; }
+  @keyframes radarscroll { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+  .radar-row {
+    display: grid; grid-template-columns: 26px 26px 1fr auto; align-items: center; gap: 11px;
+    padding: 11px 20px; border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  }
+  .rr-rank { color: var(--text-faint); font-size: 11px; text-align: right; }
+  .rr-logo { width: 24px; height: 24px; border-radius: 50%; background: #ffffff14; object-fit: cover; }
+  .rr-name strong { color: var(--text); }
+  .rr-name span { color: var(--text-dim); font-size: 11px; margin-left: 5px; }
+  .rr-pct { color: var(--up); font-weight: 800; font-size: 14px; white-space: nowrap; }
+  .rr-pct::before { content: '▲'; font-size: 9px; margin-right: 4px; vertical-align: middle; }
+  .radar-row.radar-skel span { background: var(--border); border-radius: 6px; height: 13px; animation: pulse 1.4s ease-in-out infinite; }
+  .radar-row.radar-skel .rr-logo { height: 24px; }
+  @media (max-width: 640px) { .radar-ticker { height: 262px; } .radar-row { padding: 11px 14px; } }
+
   /* ---- preços ---- */
   .plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; align-items: stretch; }
   .plan { position: relative; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 26px 22px 22px; display: flex; flex-direction: column; }
@@ -346,6 +374,29 @@
     </div>
   </header>
 
+  <!-- ===================== RADAR AO VIVO (animado) ===================== -->
+  <section id="radar">
+    <div class="sec-head">
+      <h2>Os que mais <span>subiram desde o flip</span>. Ao vivo.</h2>
+      <p>Isto não é uma imagem. São os dados reais do terminal de membros: os ativos que mais subiram desde que a Linha os virou bullish. A Linha diz-te quando; o Radar diz-te onde.</p>
+    </div>
+    <div class="radar-ticker-wrap">
+      <div class="radar-ticker">
+        <div class="radar-track" id="radar-track">
+          <div class="radar-row radar-skel"><span class="rr-rank"></span><span class="rr-logo"></span><span class="rr-name"></span><span class="rr-pct"></span></div>
+          <div class="radar-row radar-skel"><span class="rr-rank"></span><span class="rr-logo"></span><span class="rr-name"></span><span class="rr-pct"></span></div>
+          <div class="radar-row radar-skel"><span class="rr-rank"></span><span class="rr-logo"></span><span class="rr-name"></span><span class="rr-pct"></span></div>
+          <div class="radar-row radar-skel"><span class="rr-rank"></span><span class="rr-logo"></span><span class="rr-name"></span><span class="rr-pct"></span></div>
+          <div class="radar-row radar-skel"><span class="rr-rank"></span><span class="rr-logo"></span><span class="rr-name"></span><span class="rr-pct"></span></div>
+        </div>
+      </div>
+      <div class="radar-fade">
+        <span class="radar-lock">🔒 +3.450 ativos, watchlist pessoal e alertas — no Radar completo</span>
+      </div>
+    </div>
+    <p class="radar-note">Dados reais · desde o flip da Linha · atualização diária ao fecho das velas · ilustrativo, não é recomendação</p>
+  </section>
+
   <!-- ===================== AUTORIDADE ===================== -->
   <section id="autoridade">
     <div class="author">
@@ -453,27 +504,6 @@
     </div>
   </section>
 
-  <!-- ===================== RADAR AO VIVO ===================== -->
-  <section id="radar">
-    <div class="sec-head">
-      <h2>O Radar, <span>ao vivo</span>. Agora.</h2>
-      <p>Isto não é uma imagem. São os dados reais do terminal de membros, atualizados ao fecho de cada vela. A Linha diz-te quando; o Radar diz-te onde.</p>
-    </div>
-    <div class="radar-table-wrap">
-      <table class="radar-table">
-        <thead><tr><th>#</th><th>Ativo</th><th>Trend</th><th>Δ desde flip</th></tr></thead>
-        <tbody id="radar-rows">
-          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:130px"></span></td><td><span style="width:64px"></span></td><td><span style="width:44px"></span></td></tr>
-          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:110px"></span></td><td><span style="width:64px"></span></td><td><span style="width:52px"></span></td></tr>
-          <tr class="radar-skel"><td><span style="width:14px"></span></td><td><span style="width:140px"></span></td><td><span style="width:64px"></span></td><td><span style="width:40px"></span></td></tr>
-        </tbody>
-      </table>
-      <div class="radar-fade">
-        <span class="radar-lock">🔒 +3.450 ativos, watchlist pessoal e alertas — no Radar completo</span>
-      </div>
-    </div>
-    <p class="radar-note">Dados reais · atualização diária ao fecho das velas · login com o teu Discord de membro</p>
-  </section>
 
   <!-- ===================== PREÇOS ===================== -->
   <section id="precos">
@@ -626,18 +656,25 @@
     document.getElementById('st-bull').textContent = d.bull.toLocaleString('pt-PT');
     document.getElementById('st-bear').textContent = d.bear.toLocaleString('pt-PT');
     document.getElementById('hero-stats').hidden = false;
-    document.getElementById('radar-rows').innerHTML = d.top.map(function (r, i) {
-      var up = r.trend === 'bullish';
-      var logo = r.logoUrl
-        ? '<img class="radar-logo" src="' + r.logoUrl + '" alt="" loading="lazy">'
-        : '<span class="radar-logo"></span>';
-      return '<tr>' +
-        '<td style="color:var(--text-faint)">' + (i + 1) + '</td>' +
-        '<td><span class="radar-asset">' + logo + '<span><strong>' + r.symbol.split('/')[0] + '</strong> <span class="radar-name">' + (r.name || '') + '</span></span></span></td>' +
-        '<td><span class="rchip ' + (up ? 'up' : 'down') + '">' + (up ? 'BULLISH' : 'BEARISH') + '</span></td>' +
-        '<td class="radar-pct ' + ((r.sinceFlipPct || 0) >= 0 ? 'up' : 'down') + '">' + pctTxt(r.sinceFlipPct) + '</td>' +
-        '</tr>';
-    }).join('');
+
+    // Radar animado: os melhores performers desde o flip (movers), com
+    // fallback para o teaser curado (top). A lista é renderizada DUAS vezes
+    // para o scroll vertical (translateY -50%) fazer loop sem salto.
+    var list = (d.movers && d.movers.length) ? d.movers : (d.top || []);
+    if (list.length) {
+      var rows = list.map(function (r, i) {
+        var logo = r.logoUrl
+          ? '<img class="rr-logo" src="' + r.logoUrl + '" alt="" loading="lazy" onerror="this.removeAttribute(\'src\')">'
+          : '<span class="rr-logo"></span>';
+        return '<div class="radar-row">' +
+          '<span class="rr-rank">' + (i + 1) + '</span>' +
+          logo +
+          '<span class="rr-name"><strong>' + r.symbol.split('/')[0] + '</strong><span>' + (r.name || '') + '</span></span>' +
+          '<span class="rr-pct">' + pctTxt(r.sinceFlipPct) + '</span>' +
+          '</div>';
+      }).join('');
+      document.getElementById('radar-track').innerHTML = rows + rows;
+    }
   }).catch(function () { /* skeletons ficam */ });
 })();
 </script>
