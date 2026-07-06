@@ -275,6 +275,27 @@ a:hover { text-decoration: underline; }
 }
 .alerts-note { margin-bottom: 0; }
 
+/* ---- Elementos com comportamento mobile (base = desktop) ---- */
+/* Botão "Filtros": só aparece no mobile; no desktop os selects fluem inline. */
+.filters-toggle { display: none; }
+.filters-extra { display: contents; }
+/* Links TV/Yahoo dentro do accordion (acessíveis quando saem da linha no mobile). */
+.detail-links { display: flex; gap: 10px; margin-top: 2px; flex-wrap: wrap; }
+.detail-link {
+  font-size: 12px; font-weight: 700; color: var(--muted);
+  border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px;
+}
+.detail-link:hover { color: var(--purple); border-color: var(--purple); text-decoration: none; }
+/* "Como ler" colapsável (recolhido por defeito no mobile — ver media query). */
+.panel-details { list-style: none; }
+.panel-details > summary {
+  cursor: pointer; font-size: 13px; font-weight: 700; letter-spacing: 0.5px; list-style: none;
+}
+.panel-details > summary::-webkit-details-marker { display: none; }
+.panel-details > summary::before { content: "▸ "; color: var(--purple); }
+.panel-details[open] > summary::before { content: "▾ "; }
+.panel-details p { margin: 10px 0 0; }
+
 /* ---- Colunas responsivas: esconder as secundárias antes de a tabela partir ---- */
 @media (max-width: 1080px) {
   .term-table .col-mcap { display: none; }
@@ -285,16 +306,81 @@ a:hover { text-decoration: underline; }
 @media (max-width: 820px) {
   .term-body { flex-direction: column; }
   .side { width: 100%; flex-direction: row; flex-wrap: wrap; }
-  .side .panel { flex: 1; min-width: 200px; }
+  .side .panel, .side .panel-details { flex: 1; min-width: 200px; }
   .upd-note { margin-left: 0; text-align: left; width: 100%; }
   .topbar { flex-wrap: wrap; }
-  .tabs { display: flex; overflow-x: auto; order: 3; width: 100%; }
-  .pulse { gap: 20px; }
+  .pulse { gap: 16px 20px; }
+  /* Tabs: faixa deslizante centrada com fade nas margens (pista de scroll). */
+  .tabs {
+    order: 3; width: 100%;
+    background: transparent; border: none; border-radius: 0; padding: 4px 0;
+    overflow-x: auto; scrollbar-width: none;
+    justify-content: safe center;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 22px, #000 calc(100% - 22px), transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 22px, #000 calc(100% - 22px), transparent);
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex: 0 0 auto; }
+  .tab.active { background: var(--purple); }
 }
+
+/* ---- MOBILE: tabela → lista de cartões; perfil e filtros compactados ---- */
 @media (max-width: 640px) {
-  .term-table .col-delta { display: none; }
-  .term-table th, .term-table td { padding: 8px 8px; }
+  /* Perfil na sua própria linha; estatísticas embrulham limpo por baixo. */
+  .profile { flex-basis: 100%; }
   .stat-v { font-size: 18px; }
+  .upd-note { order: 99; }
+
+  /* Filtros: pesquisa a toda a largura + Bullish/Bearish + botão "Filtros"; os
+     selects secundários ficam numa gaveta que abre por baixo. */
+  .controls { gap: 8px; }
+  .search { flex: 1 1 100%; margin-left: 0; order: -1; }
+  .trend-chips { flex: 1; }
+  .filters-toggle {
+    display: inline-block; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--panel); color: var(--text); font-family: inherit;
+    font-size: 12px; font-weight: 700; padding: 9px 14px; cursor: pointer;
+  }
+  .filters-extra { display: none; flex-basis: 100%; flex-direction: column; gap: 8px; }
+  .filters-extra.open { display: flex; }
+  .filters-extra select { width: 100%; }
+
+  /* Cada linha vira um cartão de 2 planos:
+       [♥] [logo Nome/Ticker] .......... [TREND]
+           +22,98%   $668,00   33sem                */
+  .term-table, .term-table tbody { display: block; }
+  .term-table thead { display: none; }
+  .term-table tbody tr:not(.detail-row) {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    grid-template-areas:
+      "heart asset asset trend"
+      "heart delta price tempo";
+    align-items: center;
+    column-gap: 10px;
+    row-gap: 2px;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .term-table tbody tr:not(.detail-row) > td { padding: 0; border: none; }
+  .term-table .col-rank,
+  .term-table .col-mcap,
+  .term-table .col-links { display: none; }
+  .col-heart { grid-area: heart; width: auto; }
+  .asset { grid-area: asset; }
+  .asset-name { max-width: 52vw; }
+  .col-trend { grid-area: trend; justify-self: end; }
+  .term-table .col-delta { grid-area: delta; display: block; text-align: left; font-size: 14px; font-weight: 800; }
+  .col-price { grid-area: price; text-align: left; font-size: 12px; }
+  .term-table .col-tempo { grid-area: tempo; display: block; text-align: right; font-size: 11px; }
+
+  /* Accordion a toda a largura. */
+  .detail-row, .detail-row > td { display: block; }
+  .detail-row > td { padding: 0 12px 14px; }
+  .detail-levels { gap: 14px 22px; }
+
+  /* "Como ler" recolhido por defeito no mobile. */
+  .panel-details { flex-basis: 100%; }
 }
 
 /* ---- Página de Termos (janela: TL;DR + scroll interno + rodapé fixo) ---- */

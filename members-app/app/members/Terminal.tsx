@@ -197,6 +197,8 @@ export default function Terminal({
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [filtersOpen, setFiltersOpen] = useState(false); // gaveta de filtros (mobile)
+  const tabsRef = useRef<HTMLElement | null>(null);
 
   // Watchlist pessoal. Fonte da verdade = servidor (tabela alert_subs), com o
   // localStorage como cache otimista para UX instantânea e fallback offline.
@@ -422,6 +424,15 @@ export default function Terminal({
 
   const sortArrow = (key: SortKey) => (sortKey === key ? (sortDir === "asc" ? " ↑" : " ↓") : "");
 
+  // Mobile: quando a classe ativa muda, centra a tab na faixa deslizante — a
+  // tab selecionada fica sempre visível mesmo quando as tabs transbordam.
+  useEffect(() => {
+    const strip = tabsRef.current;
+    if (!strip) return;
+    const active = strip.querySelector<HTMLElement>(`[data-tab="${activeClass}"]`);
+    active?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  }, [activeClass]);
+
   return (
     <main className="terminal">
       <header className="term-head">
@@ -430,10 +441,11 @@ export default function Terminal({
             <h1>📡 Radar do Swell</h1>
             <span className="tag brand-sub">by DeFi Surfers</span>
           </div>
-          <nav className="tabs">
+          <nav className="tabs" ref={tabsRef}>
             {TABS.map((c) => (
               <button
                 key={c}
+                data-tab={c}
                 className={c === activeClass ? "tab active" : "tab"}
                 onClick={() => {
                   setActiveClass(c);
@@ -515,6 +527,17 @@ export default function Terminal({
             </button>
           ))}
         </div>
+        <button
+          className="filters-toggle"
+          onClick={() => setFiltersOpen((v) => !v)}
+          aria-expanded={filtersOpen}
+        >
+          {(() => {
+            const n = (timeFilter !== "any" ? 1 : 0) + (signalFilter !== "any" ? 1 : 0) + (category ? 1 : 0);
+            return `⚙ Filtros${n ? ` (${n})` : ""}`;
+          })()}
+        </button>
+        <div className={`filters-extra ${filtersOpen ? "open" : ""}`}>
         <select
           value={timeFilter}
           onChange={(e) => {
@@ -552,6 +575,7 @@ export default function Terminal({
             </option>
           ))}
         </select>
+        </div>
       </div>
 
       <div className="term-body">
@@ -682,14 +706,14 @@ export default function Terminal({
               Criar conta na Bybit ↗
             </a>
           </div>
-          <div className="panel">
-            <h3>Como ler</h3>
+          <details className="panel panel-details">
+            <summary>Como ler</summary>
             <p className="muted small">
               A regra de ouro: só se age em <b>ALINHADO</b>, com o flip confirmado no fecho da
               vela. Clica numa linha para veres o stop (Next Flip), os alvos em ATR e os avisos
               de topo/fundo.
             </p>
-          </div>
+          </details>
         </aside>
       </div>
 
@@ -734,7 +758,7 @@ function FragmentRow({
   return (
     <>
       <tr className={`${isOpen ? "open" : ""} ${fresh ? "fresh" : ""}`} onClick={onToggle}>
-        <td className="muted">{i + 1}</td>
+        <td className="muted col-rank">{i + 1}</td>
         <td className="col-heart" onClick={(e) => e.stopPropagation()}>
           <button
             className={`heart ${watched ? "on" : ""}`}
@@ -754,14 +778,14 @@ function FragmentRow({
             {fresh && <span className="badge-new">FLIP RECENTE</span>}
           </div>
         </td>
-        <td>
+        <td className="col-trend">
           <span className={`chip ${TREND_CLASS[tag]}`}>{tag}</span>
         </td>
         <td className={`num col-delta ${(r.sinceFlipPct ?? 0) >= 0 ? "bull" : "bear"}`}>
           {fmtPct(r.sinceFlipPct)}
         </td>
         <td className="num muted col-tempo">{fmtSince(r.lastFlipDate)}</td>
-        <td className="num">{fmtPrice(r.price, r.currency)}</td>
+        <td className="num col-price">{fmtPrice(r.price, r.currency)}</td>
         <td className="num muted col-mcap">{fmtMarketCap(r.marketCap)}</td>
         <td className="col-links" onClick={(e) => e.stopPropagation()}>
           <div className="links-stack">
@@ -857,6 +881,18 @@ function FragmentRow({
                       {w.label}
                     </span>
                   ))
+                )}
+              </div>
+
+              {/* Links (TV/Yahoo): saem da linha no mobile, ficam aqui acessíveis. */}
+              <div className="detail-links" onClick={(e) => e.stopPropagation()}>
+                <a href={tvHref} target="_blank" rel="noopener noreferrer" className="detail-link">
+                  📈 TradingView
+                </a>
+                {yfHref && (
+                  <a href={yfHref} target="_blank" rel="noopener noreferrer" className="detail-link">
+                    y! Yahoo Finance
+                  </a>
                 )}
               </div>
             </div>
