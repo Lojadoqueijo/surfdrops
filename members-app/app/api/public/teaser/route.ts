@@ -42,6 +42,22 @@ export async function GET() {
       marketCap: r.marketCap,
     }));
 
+  // "Melhores performers desde o flip": os que mais subiram desde que a Linha
+  // os virou bullish (maior sinceFlipPct positivo). Alimenta o Radar animado
+  // do hub — prova viva de que o indicador apanha movimentos reais.
+  const movers = candidates
+    .filter((r) => r.trend === "bullish" && (r.sinceFlipPct ?? 0) > 0)
+    .sort((a, b) => (b.sinceFlipPct ?? 0) - (a.sinceFlipPct ?? 0))
+    .slice(0, 12)
+    .map((r) => ({
+      symbol: r.symbol,
+      name: r.name,
+      logoUrl: r.logoUrl,
+      trend: r.trend,
+      sinceFlipPct: r.sinceFlipPct,
+      price: r.price,
+    }));
+
   return NextResponse.json(
     {
       ok: true,
@@ -50,6 +66,7 @@ export async function GET() {
       bear: db.rows.length - bull,
       updatedAt: db.updatedAt,
       top,
+      movers,
     },
     {
       headers: {
