@@ -28,6 +28,29 @@ export const STOCK_SLICE_SIZE = 500;
 let cache: { at: number; assets: UniverseAsset[] } | null = null;
 const CACHE_MS = 60 * 60 * 1000;
 
+// Ações CURADAS, fora do ranking por market cap — proxies de empresas que não
+// se compram diretamente. DXYZ (Destiny Tech100) é um fundo cotado cuja maior
+// posição é a SpaceX: a única via PÚBLICA de exposição à SpaceX com velas
+// reais (a SpaceX é privada, não tem ticker). São prependadas ao universo
+// (caem na fatia 0 do cron, sempre processada) com rankHint alto (aparecem no
+// fim da tabela, pois não têm mcap comparável).
+const CURATED_STOCKS: UniverseAsset[] = [
+  {
+    symbol: "DXYZ",
+    tvSymbol: "DXYZ",
+    yahooSymbol: "DXYZ",
+    name: "SpaceX (via Destiny Tech100 · DXYZ)",
+    sector: "Ações — EUA",
+    categories: ["SpaceX", "Pré-IPO / Privadas"],
+    currency: "USD",
+    country: "US",
+    logoUrl: "https://assets.parqet.com/logos/symbol/DXYZ?format=png",
+    rankHint: 9000,
+    marketCap: null,
+    source: "yahoo",
+  },
+];
+
 export function staticStockUniverse(): UniverseAsset[] {
   return UNIVERSE.filter((a) => a.sector.startsWith("Ações"));
 }
@@ -136,6 +159,7 @@ function parseSp500(text: string): {
 // Cripto-expostas, Defesa, EV). Lista à mão — zero custo/API; só manutenção
 // humana ocasional quando o mercado muda. Etiqueta → tickers (formato Yahoo).
 const STOCK_THEMES: Record<string, string[]> = {
+  "Mag 7": ["AAPL", "MSFT", "GOOGL", "GOOG", "AMZN", "NVDA", "META", "TSLA"],
   IA: ["NVDA", "AMD", "AVGO", "SMCI", "PLTR", "MSFT", "GOOGL", "GOOG", "META", "MRVL", "ARM", "MU", "TSM", "DELL", "ANET", "VRT", "CRWD", "SNOW", "NOW", "AI", "PATH", "PLNT", "IBM", "ORCL", "ADBE"],
   Semis: ["NVDA", "AMD", "AVGO", "MU", "MRVL", "ARM", "TSM", "QCOM", "INTC", "TXN", "ADI", "KLAC", "LRCX", "AMAT", "ASML", "NXPI", "ON", "MCHP", "MPWR", "SWKS", "TER", "ENTG", "QRVO", "SMCI"],
   "Cripto-expostas": ["COIN", "MSTR", "MARA", "RIOT", "CLSK", "HUT", "BITF", "HOOD", "GLXY", "CIFR", "WULF", "BTDR", "CORZ", "BTBT", "IREN", "SQ", "XYZ", "PYPL"],
@@ -211,20 +235,25 @@ export async function getStockUniverse(): Promise<UniverseAsset[]> {
       .map((c) => ({ c, mcap: mcaps.get(c.yahoo) ?? 0 }))
       .filter((x) => x.mcap > 0)
       .sort((a, b) => b.mcap - a.mcap)
-      .slice(0, STOCK_TOP_N);
+      .slice(0, STOCK_TOP_N - CURATED_STOCKS.length);
 
     const assets = ranked.map((x, i) => {
       const sp = gics.get(x.c.symbol);
       return makeAsset(x.c.symbol, x.c.yahoo, sp?.name ?? x.c.name, i + 1, x.mcap, sp?.sector ?? null);
     });
 
-    cache = { at: Date.now(), assets };
+    // Curadas primeiro no array (→ fatia 0, sempre processada); dedupe caso
+    // uma já esteja no top por mcap. O total mantém-se em STOCK_TOP_N.
+    const existing = new Set(assets.map((a) => a.symbol));
+    const merged = [...CURATED_STOCKS.filter((c) => !existing.has(c.symbol)), ...assets];
+
+    cache = { at: Date.now(), assets: merged };
     console.log(
-      `[stockUniverse] ${assets.length} ações (de ${unique.length} candidatas; ${mcaps.size} com mcap)`
+      `[stockUniverse] ${merged.length} ações (de ${unique.length} candidatas; ${mcaps.size} com mcap; ${CURATED_STOCKS.length} curadas)`
     );
     // Contingência: guarda o último universo BOM no Supabase.
-    await saveUniverseCache("acoes", assets);
-    return assets;
+    await saveUniverseCache("acoes", merged);
+    return merged;
   } catch (err) {
     console.error("[stockUniverse] top-3000 falhou, a tentar cache do último universo bom:", err);
     const cached = await loadUniverseCache<UniverseAsset>("acoes");
