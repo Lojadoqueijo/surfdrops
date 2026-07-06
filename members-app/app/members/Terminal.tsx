@@ -810,12 +810,14 @@ function FragmentRow({
           </button>
         </td>
         <td className="asset">
-          <AssetLogo logoUrl={r.logoUrl} symbol={r.symbol} />
-          <span className="asset-txt">
-            <span className="asset-name" title={r.name}>{r.name}</span>
-            <span className="asset-sym muted">{r.symbol}</span>
-          </span>
-          {fresh && <span className="badge-new">FLIP RECENTE</span>}
+          <div className="asset-inner">
+            <AssetLogo logoUrl={r.logoUrl} symbol={r.symbol} />
+            <span className="asset-txt">
+              <span className="asset-name" title={r.name}>{r.name}</span>
+              <span className="asset-sym muted">{r.symbol}</span>
+            </span>
+            {fresh && <span className="badge-new">FLIP RECENTE</span>}
+          </div>
         </td>
         <td>
           <span className={`chip ${TREND_CLASS[tag]}`}>{tag}</span>

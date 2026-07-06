@@ -194,7 +194,9 @@ a:hover { text-decoration: underline; }
 .link-ico:hover { color: var(--purple); border-color: var(--purple); text-decoration: none; }
 .yf-mark { font-size: 9px; font-weight: 800; font-style: italic; letter-spacing: -0.5px; }
 
-.asset { display: flex; align-items: center; gap: 10px; }
+/* O flex vive num wrapper interno, NUNCA no <td> — um td display:flex sai do
+   fluxo table-cell e desalinha a border-bottom (linha separadora "quebrada"). */
+.asset-inner { display: flex; align-items: center; gap: 10px; }
 .logo { width: 26px; height: 26px; border-radius: 50%; object-fit: contain; background: #ffffff12; flex-shrink: 0; }
 .logo-ph {
   display: inline-flex; align-items: center; justify-content: center;
