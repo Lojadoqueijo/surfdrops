@@ -33,6 +33,56 @@ interface BinanceExchangeInfo {
   symbols: Array<{ symbol: string; status: string; baseAsset: string; quoteAsset: string }>;
 }
 
+// Temas cripto (decisão 2026-07-06): o filtro por categoria estava morto (só
+// "Crypto and Blockchain"). O CoinGecko tem 837 categorias e devolve as moedas
+// de cada uma numa só chamada — tocamos os temas que os membros procuram.
+// categoryId do CoinGecko → etiqueta no filtro.
+const CRYPTO_THEMES: Record<string, string> = {
+  "artificial-intelligence": "IA",
+  "meme-token": "Memes",
+  "decentralized-finance-defi": "DeFi",
+  "real-world-assets-rwa": "RWA",
+  gaming: "Gaming",
+  "layer-1": "Layer 1",
+  "layer-2": "Layer 2",
+};
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Mapa symbol(maiúsculas) → etiquetas de tema. Sequencial e tolerante a
+ * falhas: cada tema é uma chamada CoinGecko; se uma falhar (429), esse tema
+ * fica por marcar nesta corrida — as categorias são cosméticas, nunca partem
+ * o universo. Espaço de 300ms entre chamadas para respeitar o free tier.
+ */
+async function fetchCryptoThemes(): Promise<Map<string, string[]>> {
+  const map = new Map<string, string[]>();
+  for (const [categoryId, label] of Object.entries(CRYPTO_THEMES)) {
+    try {
+      const res = await fetch(
+        `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=${categoryId}&order=market_cap_desc&per_page=250&page=1`,
+        { cache: "no-store" }
+      );
+      if (!res.ok) {
+        console.warn(`[cryptoThemes] ${categoryId}: HTTP ${res.status}`);
+        continue;
+      }
+      const coins = (await res.json()) as Array<{ symbol: string }>;
+      for (const c of coins) {
+        const sym = (c.symbol || "").toUpperCase();
+        if (!sym) continue;
+        const cur = map.get(sym) ?? [];
+        cur.push(label);
+        map.set(sym, cur);
+      }
+    } catch (err) {
+      console.warn(`[cryptoThemes] ${categoryId} falhou:`, err);
+    }
+    await sleep(300);
+  }
+  return map;
+}
+
 // Cache em memória da instância (o cron corre 1x/dia; visitas à página não
 // chamam isto — a página lê snapshots do Supabase).
 let cache: { at: number; assets: UniverseAsset[] } | null = null;
@@ -189,6 +239,16 @@ export async function getCryptoUniverse(): Promise<UniverseAsset[]> {
     }
 
     if (assets.length < 50) throw new Error(`universo dinâmico suspeito: só ${assets.length} ativos`);
+
+    // Temas (IA/Memes/DeFi/RWA/...): melhor esforço, nunca partem o universo.
+    const themes = await fetchCryptoThemes();
+    if (themes.size > 0) {
+      for (const a of assets) {
+        const sym = a.symbol.split("/")[0];
+        const t = themes.get(sym);
+        if (t && t.length > 0) a.categories = [...a.categories, ...t];
+      }
+    }
 
     cache = { at: Date.now(), assets };
     const bySource = assets.reduce<Record<string, number>>((acc, a) => {
