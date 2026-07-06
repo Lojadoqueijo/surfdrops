@@ -1,5 +1,6 @@
 import { buildAssetSnapshot } from "../engine/snapshot";
 import type { AssetSnapshot } from "../engine/types";
+import { marketKindOf, onlyClosedCandles } from "./closedCandles";
 import { getCandlesForAsset, isThrottled } from "./provider";
 import { UNIVERSE, type UniverseAsset } from "./universe";
 
@@ -16,10 +17,15 @@ const THROTTLE_MS = 16_000;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export async function snapshotForAsset(asset: UniverseAsset): Promise<AssetSnapshot | null> {
-  const [weekly, daily] = await Promise.all([
+  const [weeklyRaw, dailyRaw] = await Promise.all([
     getCandlesForAsset(asset, "1week", WEEKLY_LIMIT),
     getCandlesForAsset(asset, "1day", DAILY_LIMIT),
   ]);
+  // REGRA NUCLEAR: o motor só vê velas FECHADAS (closedCandles.ts) — um flip
+  // só existe confirmado no fecho, para todos os ativos e fontes futuras.
+  const kind = marketKindOf(asset);
+  const weekly = onlyClosedCandles(weeklyRaw, "1week", kind);
+  const daily = onlyClosedCandles(dailyRaw, "1day", kind);
   return buildAssetSnapshot({
     symbol: asset.symbol,
     sector: asset.sector,
