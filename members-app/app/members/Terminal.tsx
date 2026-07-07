@@ -260,8 +260,21 @@ export default function Terminal({
       out = out.filter((r) => r.categories.includes(category));
     }
     if (timeFilter !== "any") {
-      const max = timeFilter === "today" ? 1.5 : timeFilter === "week" ? 7 : 31;
-      out = out.filter((r) => daysSince(r.lastFlipDate) <= max);
+      // Os flips SEMANAIS são datados pela ÂNCORA da vela (2ª feira) e só se
+      // confirmam no FECHO (~7 dias depois). Uma janela em dias corridos criava
+      // uma "zona morta" no início da semana: o flip do último fecho já com >7
+      // dias e a vela atual ainda por fechar → 0 resultados (mesma razão do
+      // RECENT_DAYS=12 dos alertas). Ancoramos por SEMANAS de calendário (UTC).
+      const now = new Date();
+      const dowFromMon = (now.getUTCDay() + 6) % 7; // 0 = 2ª feira
+      const thisMonday =
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) -
+        dowFromMon * 86_400_000;
+      const weeksBack = timeFilter === "week" ? 1 : 5; // "este mês" ≈ 5 semanas
+      const cutoff = thisMonday - weeksBack * 7 * 86_400_000;
+      out = out.filter(
+        (r) => r.lastFlipDate != null && new Date(r.lastFlipDate).getTime() >= cutoff
+      );
     }
     if (signalFilter === "bottom") {
       out = out.filter((r) => r.dotBottom || r.bullDiv);
@@ -546,8 +559,7 @@ export default function Terminal({
           }}
         >
           <option value="any">Flip: qualquer altura</option>
-          <option value="today">Flip: hoje</option>
-          <option value="week">Flip: esta semana</option>
+          <option value="week">Flip: último fecho</option>
           <option value="month">Flip: este mês</option>
         </select>
         <select
