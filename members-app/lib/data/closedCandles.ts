@@ -49,22 +49,43 @@ function sameDayCutoffUtc(ms: number): number {
   return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 21, 5, 0);
 }
 
-/** Devolve a série SEM a última vela quando esta ainda não fechou. */
+/** Uma vela específica já fechou? */
+function isCandleClosed(
+  candle: Candle,
+  timeframe: Timeframe,
+  kind: MarketKind,
+  now: number
+): boolean {
+  if (timeframe === "1week") {
+    return kind === "24_7"
+      ? now >= candle.time + 7 * 86_400_000
+      : now >= fridayCutoffUtc(candle.time);
+  }
+  return kind === "24_7" ? now >= candle.time + 86_400_000 : now >= sameDayCutoffUtc(candle.time);
+}
+
+/**
+ * Devolve a série SEM as velas finais que ainda não fecharam — corta em CADEIA,
+ * não só a última.
+ *
+ * Porquê em cadeia (bug corrigido 2026-07-07): o Yahoo, além da vela da
+ * semana/dia EM CURSO, ACRESCENTA ainda uma vela "ao vivo" datada ao instante
+ * atual (ex.: 3ª feira 18:46). A série acaba então com DUAS velas por fechar:
+ * a "ao vivo" e a da semana em curso (âncora 2ª feira). Cortar só a última
+ * deixava a vela da semana em curso entrar no motor → flips numa vela NÃO
+ * fechada (ex.: 31 ações a "flipar" à 2ª numa 3ª feira). A cripto (Binance) só
+ * tem 1 vela em curso no fim, por isso não era afetada. Cortar todas as finais
+ * não-fechadas trata TODAS as fontes, atuais e futuras.
+ */
 export function onlyClosedCandles(
   candles: Candle[],
   timeframe: Timeframe,
   kind: MarketKind,
   now: number = Date.now()
 ): Candle[] {
-  if (candles.length === 0) return candles;
-  const last = candles[candles.length - 1];
-
-  let closed: boolean;
-  if (timeframe === "1week") {
-    closed =
-      kind === "24_7" ? now >= last.time + 7 * 86_400_000 : now >= fridayCutoffUtc(last.time);
-  } else {
-    closed = kind === "24_7" ? now >= last.time + 86_400_000 : now >= sameDayCutoffUtc(last.time);
+  let end = candles.length;
+  while (end > 0 && !isCandleClosed(candles[end - 1], timeframe, kind, now)) {
+    end--;
   }
-  return closed ? candles : candles.slice(0, -1);
+  return end === candles.length ? candles : candles.slice(0, end);
 }
