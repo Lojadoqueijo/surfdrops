@@ -50,19 +50,6 @@ export interface SwellLineState {
 export type TrendDir = "bullish" | "bearish" | null;
 export type Estado = "ALIGNED BULL" | "ALIGNED BEAR" | "CONFLICT" | null;
 
-// Bundle da leitura DIÁRIA da mesma Linha do Swell (mesmo motor, velas 1d).
-// Espelha os campos-chave do flip semanal para a UI poder alternar timeframe.
-// null quando o ativo não tem velas diárias suficientes (linha ainda NaN).
-export interface DailyBundle {
-  trend: TrendDir;
-  nextFlip: number;
-  lastFlip: number | null;
-  lastFlipClose: number | null;
-  lastFlipDate: string | null; // ISO date do fecho diário onde ocorreu o flip
-  sinceFlipPct: number | null;
-  strength: number | null;
-}
-
 export interface AssetSnapshot {
   symbol: string;
   sector: string;
@@ -98,5 +85,4 @@ export interface AssetSnapshot {
   bullDiv: boolean;
   cheapZone: boolean;
   tp: TPTargets | null;
-  daily: DailyBundle | null; // leitura diária da Linha (para o toggle Semanal/Diário)
 }

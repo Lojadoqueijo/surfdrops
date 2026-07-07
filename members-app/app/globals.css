@@ -123,10 +123,6 @@ a:hover { text-decoration: underline; }
 .tchip.t-bear.on { border-color: var(--red); color: var(--red); background: rgba(239,68,68,0.12); }
 .tchip.t-warm.on { border-color: var(--amber); color: var(--amber); background: rgba(245,166,35,0.12); }
 
-/* Toggle Semanal/Diário — timeframe da Linha (separado dos chips de tendência). */
-.tf-toggle { display: flex; gap: 6px; padding-left: 10px; border-left: 1px solid var(--border); }
-.tf-toggle .tchip.on { border-color: var(--purple); color: var(--purple); background: rgba(139,92,246,0.14); }
-
 .term-body { display: flex; gap: 18px; align-items: flex-start; }
 .table-wrap {
   flex: 1; overflow-x: auto;

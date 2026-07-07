@@ -192,9 +192,6 @@ export default function Terminal({
   const [category, setCategory] = useState<string>("");
   const [timeFilter, setTimeFilter] = useState<string>("any");
   const [signalFilter, setSignalFilter] = useState<string>("any");
-  // Timeframe da leitura da Linha: semanal (default, o que os alertas usam) ou
-  // diário (vista só — os alertas ficam SEMPRE no semanal).
-  const [timeframe, setTimeframe] = useState<"weekly" | "daily">("weekly");
   // Ordenação por defeito: ranking de market cap (como o terminal do Ivan).
   const [sortKey, setSortKey] = useState<SortKey>("rank");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
@@ -249,26 +246,7 @@ export default function Terminal({
   }, [classRows]);
 
   const filtered = useMemo(() => {
-    // Vista DIÁRIA: troca os campos de flip (trend/next/desde/data) pelo bundle
-    // diário. Ativos sem leitura diária válida (linha ainda NaN) são excluídos,
-    // tal como o guard semanal. A vista semanal usa os campos originais.
-    let out: TerminalRow[] =
-      timeframe === "daily"
-        ? classRows.flatMap((r) =>
-            r.daily && r.daily.trend
-              ? [
-                  {
-                    ...r,
-                    trend: r.daily.trend as "bullish" | "bearish",
-                    sinceFlipPct: r.daily.sinceFlipPct,
-                    lastFlipDate: r.daily.lastFlipDate,
-                    nextFlip: r.daily.nextFlip,
-                    lastFlip: r.daily.lastFlip,
-                  },
-                ]
-              : []
-          )
-        : classRows;
+    let out = classRows;
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       out = out.filter(
@@ -282,28 +260,21 @@ export default function Terminal({
       out = out.filter((r) => r.categories.includes(category));
     }
     if (timeFilter !== "any") {
-      if (timeframe === "daily") {
-        // Diário: o flip é datado ao DIA do fecho (não a uma âncora semanal), por
-        // isso a janela em dias corridos é correta e "hoje" volta a fazer sentido.
-        const max = timeFilter === "today" ? 1.5 : timeFilter === "week" ? 7 : 31;
-        out = out.filter((r) => daysSince(r.lastFlipDate) <= max);
-      } else {
-        // Semanal: os flips são datados pela ÂNCORA da vela (2ª feira) e só se
-        // confirmam no FECHO (~7 dias depois). Uma janela em dias corridos criava
-        // uma "zona morta" no início da semana (flip do último fecho já com >7
-        // dias e vela atual por fechar → 0 resultados; mesma razão do
-        // RECENT_DAYS=12 dos alertas). Ancoramos por SEMANAS de calendário (UTC).
-        const now = new Date();
-        const dowFromMon = (now.getUTCDay() + 6) % 7; // 0 = 2ª feira
-        const thisMonday =
-          Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) -
-          dowFromMon * 86_400_000;
-        const weeksBack = timeFilter === "week" ? 1 : 5; // "este mês" ≈ 5 semanas
-        const cutoff = thisMonday - weeksBack * 7 * 86_400_000;
-        out = out.filter(
-          (r) => r.lastFlipDate != null && new Date(r.lastFlipDate).getTime() >= cutoff
-        );
-      }
+      // Os flips SEMANAIS são datados pela ÂNCORA da vela (2ª feira) e só se
+      // confirmam no FECHO (~7 dias depois). Uma janela em dias corridos criava
+      // uma "zona morta" no início da semana: o flip do último fecho já com >7
+      // dias e a vela atual ainda por fechar → 0 resultados (mesma razão do
+      // RECENT_DAYS=12 dos alertas). Ancoramos por SEMANAS de calendário (UTC).
+      const now = new Date();
+      const dowFromMon = (now.getUTCDay() + 6) % 7; // 0 = 2ª feira
+      const thisMonday =
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) -
+        dowFromMon * 86_400_000;
+      const weeksBack = timeFilter === "week" ? 1 : 5; // "este mês" ≈ 5 semanas
+      const cutoff = thisMonday - weeksBack * 7 * 86_400_000;
+      out = out.filter(
+        (r) => r.lastFlipDate != null && new Date(r.lastFlipDate).getTime() >= cutoff
+      );
     }
     if (signalFilter === "bottom") {
       out = out.filter((r) => r.dotBottom || r.bullDiv);
@@ -327,7 +298,7 @@ export default function Terminal({
       }
     };
     return [...out].sort((a, b) => (val(a) - val(b)) * dir);
-  }, [classRows, search, trendFilter, category, timeFilter, signalFilter, sortKey, sortDir, timeframe]);
+  }, [classRows, search, trendFilter, category, timeFilter, signalFilter, sortKey, sortDir]);
 
   // Stats sobre o conjunto FILTRADO (como no terminal do Ivan: com o filtro
   // bearish ativo, "BULLISH 0 (0%)").
@@ -569,27 +540,6 @@ export default function Terminal({
             </button>
           ))}
         </div>
-        <div className="tf-toggle" role="group" aria-label="Timeframe da Linha">
-          {(["weekly", "daily"] as const).map((tf) => (
-            <button
-              key={tf}
-              className={`tchip ${timeframe === tf ? "on" : ""}`}
-              onClick={() => {
-                setTimeframe(tf);
-                setPage(1);
-                setExpanded(null);
-                if (tf === "weekly" && timeFilter === "today") setTimeFilter("week");
-              }}
-              title={
-                tf === "weekly"
-                  ? "Flips da Linha semanal (base dos alertas)"
-                  : "Flips da Linha diária (só visualização)"
-              }
-            >
-              {tf === "weekly" ? "Semanal" : "Diário"}
-            </button>
-          ))}
-        </div>
         <button
           className="filters-toggle"
           onClick={() => setFiltersOpen((v) => !v)}
@@ -609,7 +559,6 @@ export default function Terminal({
           }}
         >
           <option value="any">Flip: qualquer altura</option>
-          {timeframe === "daily" && <option value="today">Flip: hoje</option>}
           <option value="week">Flip: esta semana</option>
           <option value="month">Flip: este mês</option>
         </select>
@@ -685,7 +634,6 @@ export default function Terminal({
                     watched={watchlist.has(r.symbol)}
                     onWatch={() => toggleWatch(r.symbol)}
                     onToggle={() => setExpanded(isOpen ? null : r.symbol)}
-                    timeframe={timeframe}
                   />
                 );
               })}
@@ -810,7 +758,6 @@ function FragmentRow({
   watched,
   onWatch,
   onToggle,
-  timeframe,
 }: {
   r: TerminalRow;
   i: number;
@@ -821,7 +768,6 @@ function FragmentRow({
   watched: boolean;
   onWatch: () => void;
   onToggle: () => void;
-  timeframe: "weekly" | "daily";
 }) {
   const tvHref = `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(r.tvSymbol)}`;
   const yfHref = r.yahooSymbol
@@ -893,12 +839,6 @@ function FragmentRow({
         <tr className="detail-row">
           <td colSpan={9}>
             <div className="detail">
-              {timeframe === "daily" && (
-                <p className="muted" style={{ margin: "0 0 10px", fontSize: 11 }}>
-                  Vista <b>diária</b>: o <i>Next Flip</i> e o “desde o flip” são da Linha diária. O
-                  estado, os avisos e as referências ATR abaixo continuam da leitura <b>semanal</b>.
-                </p>
-              )}
               <div className="detail-levels">
                 <div className="lvl">
                   <span className="lvl-k">Estado (Weekly/Daily)</span>
