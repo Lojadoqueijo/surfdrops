@@ -41,11 +41,26 @@ function fmtMarketCap(n: number | null): string {
   return `$${n.toLocaleString("pt-PT")}`;
 }
 
-function fmtSince(iso: string | null): string {
-  if (!iso) return "—";
-  const then = new Date(iso).getTime();
-  const now = Date.now();
-  let d = Math.max(0, Math.floor((now - then) / 86_400_000));
+// FECHO real da vela do flip (ms). `lastFlipDate` é a ABERTURA da vela (2ª
+// feira, âncora); o flip só é confirmado no FECHO, que DEPENDE da classe:
+//   · Cripto (24/7): fecha na 2ª feira seguinte 00:00 UTC → âncora + 7 dias.
+//   · Ações/ETFs/Commodities/Índices (horário de mercado): fecham na 6ª feira
+//     ~21:05 UTC da semana da vela → âncora + 4 dias (2ª→6ª).
+// Toda a IDADE (tempo desde o flip, tag "recente", ordenação) conta a partir
+// daqui — senão um flip de ações nasceria com ~8 dias (âncora) em vez de ~4.
+function flipCloseMs(lastFlipDate: string | null, assetClass: AssetClass): number | null {
+  if (!lastFlipDate) return null;
+  const t = new Date(lastFlipDate).getTime();
+  if (assetClass === "Cripto") return t + 7 * 86_400_000;
+  const d = new Date(t);
+  const daysToFri = (5 - d.getUTCDay() + 7) % 7; // âncora 2ª feira → 4
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + daysToFri, 21, 5, 0);
+}
+
+/** Idade legível a partir de um instante (ms) — ex.: "1sem 2d", "4d". */
+function fmtSince(ms: number | null): string {
+  if (ms === null) return "—";
+  let d = Math.max(0, Math.floor((Date.now() - ms) / 86_400_000));
   const years = Math.floor(d / 365);
   d -= years * 365;
   const weeks = Math.floor(d / 7);
@@ -55,23 +70,6 @@ function fmtSince(iso: string | null): string {
   if (weeks) parts.push(`${weeks}sem`);
   if (d || parts.length === 0) parts.push(`${d}d`);
   return parts.slice(0, 2).join(" ");
-}
-
-function daysSince(iso: string | null): number {
-  if (!iso) return Infinity;
-  return (Date.now() - new Date(iso).getTime()) / 86_400_000;
-}
-
-// "Flip recente": idade contada a partir do FECHO da vela do flip. A data do
-// flip (lastFlipDate) é a ABERTURA da vela (2ª feira), mas o flip só é real no
-// FECHO (~7 dias depois). A vela semanal dura ~7 dias, por isso fecho ≈
-// abertura + 7d. Devolve true enquanto passaram <= `days` dias desde o fecho —
-// idade 0 no dia do fecho, ao contrário da idade "crua" que nascia com ~7d.
-function freshSinceClose(lastFlipDate: string | null, days: number): boolean {
-  if (!lastFlipDate) return false;
-  const WEEK_MS = 7 * 86_400_000;
-  const closeMs = new Date(lastFlipDate).getTime() + WEEK_MS;
-  return Date.now() - closeMs <= days * 86_400_000;
 }
 
 // ---------------------------------------------------------------------------
@@ -302,7 +300,7 @@ export default function Terminal({
         case "sinceFlipPct":
           return r.sinceFlipPct ?? -Infinity;
         case "since":
-          return -daysSince(r.lastFlipDate); // mais recente primeiro quando desc
+          return flipCloseMs(r.lastFlipDate, r.assetClass) ?? -Infinity; // fecho mais recente primeiro (desc)
         case "price":
           return r.price;
         case "marketCap":
@@ -631,12 +629,11 @@ export default function Terminal({
             <tbody>
               {paged.map((r, i) => {
                 const tag = trendTag(r);
-                // "FLIP RECENTE": conta a idade a partir do FECHO de confirmação,
-                // não da abertura (a data do flip é a 2ª feira de abertura da vela,
-                // mas o flip só é real no fecho, ~7 dias depois). Vela semanal ≈ 7d,
-                // logo fecho ≈ abertura + 7d. Tag ligado no fecho (idade 0) e
-                // visível durante 2 semanas depois. (14 → 7 se quiseres 1 semana.)
-                const fresh = freshSinceClose(r.lastFlipDate, 14);
+                // "FLIP RECENTE": idade desde o FECHO da vela (flipCloseMs — cripto
+                // 2ª+7d, mercado 6ª 21:05). Ligado no fecho (idade 0), visível 2
+                // semanas depois. (14 → 7 se quiseres 1 semana.)
+                const closeMs = flipCloseMs(r.lastFlipDate, r.assetClass);
+                const fresh = closeMs !== null && Date.now() - closeMs <= 14 * 86_400_000;
                 const isOpen = expanded === r.symbol;
                 const warns = warningsFor(r);
                 return (
@@ -820,7 +817,7 @@ function FragmentRow({
         <td className={`num col-delta ${(r.sinceFlipPct ?? 0) >= 0 ? "bull" : "bear"}`}>
           {fmtPct(r.sinceFlipPct)}
         </td>
-        <td className="num muted col-tempo">{fmtSince(r.lastFlipDate)}</td>
+        <td className="num muted col-tempo">{fmtSince(flipCloseMs(r.lastFlipDate, r.assetClass))}</td>
         <td className="num col-price">{fmtPrice(r.price, r.currency)}</td>
         <td className="num muted col-mcap">{fmtMarketCap(r.marketCap)}</td>
         <td className="col-links" onClick={(e) => e.stopPropagation()}>
@@ -880,7 +877,7 @@ function FragmentRow({
                     {r.lastFlipDate && (
                       <span className="muted">
                         {" "}
-                        · {new Date(r.lastFlipDate).toLocaleDateString("pt-PT")}
+                        · {new Date(flipCloseMs(r.lastFlipDate, r.assetClass)!).toLocaleDateString("pt-PT")}
                       </span>
                     )}
                   </span>
