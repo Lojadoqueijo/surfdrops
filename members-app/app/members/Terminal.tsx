@@ -559,7 +559,7 @@ export default function Terminal({
           }}
         >
           <option value="any">Flip: qualquer altura</option>
-          <option value="week">Flip: último fecho</option>
+          <option value="week">Flip: esta semana</option>
           <option value="month">Flip: este mês</option>
         </select>
         <select
