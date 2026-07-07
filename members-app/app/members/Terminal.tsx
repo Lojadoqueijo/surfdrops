@@ -62,6 +62,18 @@ function daysSince(iso: string | null): number {
   return (Date.now() - new Date(iso).getTime()) / 86_400_000;
 }
 
+// "Flip recente": idade contada a partir do FECHO da vela do flip. A data do
+// flip (lastFlipDate) é a ABERTURA da vela (2ª feira), mas o flip só é real no
+// FECHO (~7 dias depois). A vela semanal dura ~7 dias, por isso fecho ≈
+// abertura + 7d. Devolve true enquanto passaram <= `days` dias desde o fecho —
+// idade 0 no dia do fecho, ao contrário da idade "crua" que nascia com ~7d.
+function freshSinceClose(lastFlipDate: string | null, days: number): boolean {
+  if (!lastFlipDate) return false;
+  const WEEK_MS = 7 * 86_400_000;
+  const closeMs = new Date(lastFlipDate).getTime() + WEEK_MS;
+  return Date.now() - closeMs <= days * 86_400_000;
+}
+
 // ---------------------------------------------------------------------------
 // Estados derivados
 // ---------------------------------------------------------------------------
@@ -619,12 +631,12 @@ export default function Terminal({
             <tbody>
               {paged.map((r, i) => {
                 const tag = trendTag(r);
-                // "FLIP RECENTE": a data do flip é a ABERTURA da vela (2ª feira),
-                // mas o flip só confirma no FECHO (~7 dias depois) — logo nasce já
-                // com ~7 dias de idade. Com 7 dias o tag caía quase de imediato
-                // (zona morta). 21 dias (3 velas semanais) → visível ~2 semanas
-                // reais depois do flip, e dispara sempre.
-                const fresh = daysSince(r.lastFlipDate) <= 21;
+                // "FLIP RECENTE": conta a idade a partir do FECHO de confirmação,
+                // não da abertura (a data do flip é a 2ª feira de abertura da vela,
+                // mas o flip só é real no fecho, ~7 dias depois). Vela semanal ≈ 7d,
+                // logo fecho ≈ abertura + 7d. Tag ligado no fecho (idade 0) e
+                // visível durante 2 semanas depois. (14 → 7 se quiseres 1 semana.)
+                const fresh = freshSinceClose(r.lastFlipDate, 14);
                 const isOpen = expanded === r.symbol;
                 const warns = warningsFor(r);
                 return (
