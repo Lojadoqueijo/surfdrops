@@ -619,7 +619,12 @@ export default function Terminal({
             <tbody>
               {paged.map((r, i) => {
                 const tag = trendTag(r);
-                const fresh = daysSince(r.lastFlipDate) <= 7;
+                // "FLIP RECENTE": a data do flip é a ABERTURA da vela (2ª feira),
+                // mas o flip só confirma no FECHO (~7 dias depois) — logo nasce já
+                // com ~7 dias de idade. Com 7 dias o tag caía quase de imediato
+                // (zona morta). 21 dias (3 velas semanais) → visível ~2 semanas
+                // reais depois do flip, e dispara sempre.
+                const fresh = daysSince(r.lastFlipDate) <= 21;
                 const isOpen = expanded === r.symbol;
                 const warns = warningsFor(r);
                 return (
