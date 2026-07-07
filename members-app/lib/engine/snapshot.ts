@@ -88,6 +88,28 @@ export function buildAssetSnapshot(params: {
     (dailyCandles.length > 0 ? dailyCandles[dailyCandles.length - 1].close : undefined) ??
     weeklyCandles[weeklyCandles.length - 1].close;
 
+  // Leitura DIÁRIA: a MESMA Linha do Swell sobre as velas 1d (que já são
+  // buscadas). Só se popula quando a linha diária é válida (velas suficientes
+  // p/ o ATR); caso contrário fica null e o toggle "Diário" exclui o ativo,
+  // tal como o guard semanal. Os alertas continuam a usar SÓ o semanal.
+  let daily: AssetSnapshot["daily"] = null;
+  if (dailyCandles.length > 0) {
+    const dailyStates = computeSwellLine(dailyCandles);
+    const dLast = dailyStates[dailyStates.length - 1];
+    if (Number.isFinite(dLast.swellLevel)) {
+      daily = {
+        trend: dLast.trend,
+        nextFlip: dLast.swellLevel,
+        lastFlip: dLast.lastFlipPrice,
+        lastFlipClose: dLast.lastFlipClose,
+        lastFlipDate:
+          dLast.lastFlipIndex !== null ? toIsoDate(dailyCandles[dLast.lastFlipIndex].time) : null,
+        sinceFlipPct: dLast.sinceFlipPct,
+        strength: dLast.strength,
+      };
+    }
+  }
+
   return {
     symbol,
     sector,
@@ -120,5 +142,6 @@ export function buildAssetSnapshot(params: {
     bullDiv: last.bullDiv,
     cheapZone: last.cheapZone,
     tp: last.tp,
+    daily,
   };
 }

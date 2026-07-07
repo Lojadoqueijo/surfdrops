@@ -73,6 +73,22 @@ alter table snapshots
   add column if not exists rank integer,
   add column if not exists categories jsonb;
 
+-- Migração 2026-07-07 (toggle Semanal/Diário): bundle da leitura DIÁRIA da Linha
+-- num único jsonb {trend, nextFlip, lastFlip, lastFlipClose, lastFlipDate,
+-- sinceFlipPct, strength}. Um jsonb em vez de 6 colunas = migração de 1 linha e
+-- a RPC (select *) inclui-o automaticamente.
+alter table snapshots add column if not exists daily jsonb;
+
+-- IMPORTANTE: a RPC latest_snapshots tem de devolver TODAS as colunas (incl.
+-- `daily`). Se foi criada como `returns setof snapshots`, já inclui a coluna nova
+-- sem mexer. Para garantir, (re)cria-a assim no SQL Editor do Supabase:
+--
+--   create or replace function latest_snapshots(since date)
+--   returns setof snapshots language sql stable as $$
+--     select distinct on (symbol) * from snapshots
+--     where date >= since order by symbol, date desc;
+--   $$;
+
 -- ==========================================================================
 -- Alertas Telegram (2026-07-06). O membro liga o Telegram uma vez (deep-link
 -- /start com código curto), guardamos o chat_id, e o cron envia alertas dos
