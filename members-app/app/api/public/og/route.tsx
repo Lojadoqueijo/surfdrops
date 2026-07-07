@@ -62,7 +62,7 @@ export async function GET() {
                   marginRight: 16,
                 }}
               >
-                ▲ {t}
+                {t}
               </div>
             ))}
           </div>
