@@ -791,7 +791,9 @@ function FragmentRow({
   return (
     <>
       <tr className={`${isOpen ? "open" : ""} ${fresh ? "fresh" : ""}`} onClick={onToggle}>
-        <td className="muted col-rank">{i + 1}</td>
+        {/* # = ranking real de market cap do ativo (rankHint), NÃO a posição
+            da linha — mantém-se estável ao filtrar/ordenar. 9999 = sem rank. */}
+        <td className="muted col-rank">{r.rankHint < 9999 ? r.rankHint : "—"}</td>
         <td className="col-heart" onClick={(e) => e.stopPropagation()}>
           <button
             className={`heart ${watched ? "on" : ""}`}

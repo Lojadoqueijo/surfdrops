@@ -225,10 +225,11 @@ export async function getCryptoUniverse(): Promise<UniverseAsset[]> {
         yahooSymbol: null, // tickers Yahoo de cripto têm colisões; curadoria fica para depois
         name: c.name,
         sector: "Cripto",
+        // "Crypto and Blockchain" era redundante na tab Cripto (tudo é cripto).
+        // Só "Majors" p/ o top 10; os temas (DeFi/IA/Privacidade/...) são
+        // acrescentados depois por fetchCryptoThemes.
         categories:
-          c.market_cap_rank !== null && c.market_cap_rank <= 10
-            ? ["Crypto and Blockchain", "Majors"]
-            : ["Crypto and Blockchain"],
+          c.market_cap_rank !== null && c.market_cap_rank <= 10 ? ["Majors"] : [],
         currency: "USD",
         country: null,
         logoUrl: c.image || null,
