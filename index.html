@@ -3750,7 +3750,7 @@
 
 <!-- === BARRA FIXA DE OFERTA DEFI SURFERS === -->
 <div class="ds-bar" id="dsBar" role="region" aria-label="Oferta pré-lançamento">
-  <span class="ds-bar-txt" data-i18n-html="ds.bar.txt"><b>Pré-lançamento DeFi Surfers</b> · -20% · vagas limitadas</span>
+  <span class="ds-bar-txt" data-i18n-html="ds.bar.txt"><b>Pré-lançamento DeFi Surfers</b> · -20% · fecha domingo à meia-noite</span>
   <button class="ds-bar-cta" id="dsBarCta" type="button" data-i18n="ds.bar.cta">Garantir vaga</button>
   <button class="ds-bar-x" id="dsBarX" type="button" aria-label="Fechar">×</button>
 </div>
@@ -3854,16 +3854,27 @@
     'use strict';
     var overlay = document.getElementById('dsModal');
     if (!overlay) return;
-    var SHOW_DELAY = 3000; // 3s após carregar
+    // Janela de pré-lançamento: fecha domingo à meia-noite (hora PT). Passado o
+    // prazo, o overlay de venda desaparece (sem barra nem exit-intent).
+    var DEADLINE = new Date('2026-07-13T00:00:00+01:00').getTime();
+    var windowOpen = Date.now() < DEADLINE;
+    var EXIT_KEY = 'ds_exit_shown';
     var exitUsed = false, exitArmed = false;
+    function exitRecently(){ try { return Date.now() - (+localStorage.getItem(EXIT_KEY) || 0) < 3 * 86400000; } catch (e) { return false; } }
     function openModal(){ overlay.classList.add('is-open'); overlay.setAttribute('aria-hidden','false'); document.body.classList.add('modal-open'); }
     function onExitIntent(e){
       if (exitUsed) return;
-      if (e.clientY <= 0 && !e.relatedTarget) { exitUsed = true; document.removeEventListener('mouseout', onExitIntent); openModal(); }
+      if (e.clientY <= 0 && !e.relatedTarget) {
+        exitUsed = true; document.removeEventListener('mouseout', onExitIntent);
+        try { localStorage.setItem(EXIT_KEY, String(Date.now())); } catch (e) {}
+        openModal();
+      }
     }
+    // Sem pop-up de venda à chegada: o modal aparece só (a) pelos CTAs da barra,
+    // (b) UMA vez por exit-intent, no máximo a cada 3 dias, e só com a janela aberta.
+    function armExit(){ if (windowOpen && !exitArmed && !exitUsed && !exitRecently()) { exitArmed = true; document.addEventListener('mouseout', onExitIntent); } }
     function closeModal(){
       overlay.classList.remove('is-open'); overlay.setAttribute('aria-hidden','true'); document.body.classList.remove('modal-open');
-      if (!exitArmed && !exitUsed) { exitArmed = true; document.addEventListener('mouseout', onExitIntent); } // 2ª oportunidade: reabre quando o rato sai da página
     }
     var x = document.getElementById('dsClose'); if (x) x.addEventListener('click', closeModal);
     var dd = document.getElementById('dsDismiss'); if (dd) dd.addEventListener('click', closeModal);
@@ -3890,11 +3901,11 @@
     var bar = document.getElementById('dsBar');
     var barCta = document.getElementById('dsBarCta');
     var barX = document.getElementById('dsBarX');
-    if (bar) document.body.classList.add('ds-bar-on');
+    if (bar) { if (windowOpen) { document.body.classList.add('ds-bar-on'); } else { bar.style.display = 'none'; } }
     if (barCta) barCta.addEventListener('click', openModal);
     if (barX && bar) barX.addEventListener('click', function(){ bar.style.display = 'none'; document.body.classList.remove('ds-bar-on'); });
 
-    setTimeout(openModal, SHOW_DELAY); // sempre (todos os carregamentos)
+    armExit(); // sem auto-abertura — só exit-intent (1x/3 dias, janela aberta) + CTAs da barra
   })();
 </script>
 
@@ -4160,7 +4171,7 @@
         'ds.cta': 'Garantir a minha vaga',
         'ds.note': 'A mensagem já vai copiada — é só colar e enviar. Falas comigo, sem bots.',
         'ds.dismiss': 'Agora não',
-        'ds.bar.txt': '<b>Pré-lançamento DeFi Surfers</b> · -20% · vagas limitadas',
+        'ds.bar.txt': '<b>Pré-lançamento DeFi Surfers</b> · -20% · fecha domingo à meia-noite',
         'ds.bar.cta': 'Garantir vaga',
       },
 
@@ -4277,7 +4288,7 @@
         'ds.cta': 'Secure my spot',
         'ds.note': 'The message is copied — just paste & send. You talk to me, no bots.',
         'ds.dismiss': 'Not now',
-        'ds.bar.txt': '<b>DeFi Surfers pre-launch</b> · -20% · limited spots',
+        'ds.bar.txt': '<b>DeFi Surfers pre-launch</b> · -20% · closes Sunday at midnight',
         'ds.bar.cta': 'Get my spot',
       },
 
@@ -4394,7 +4405,7 @@
         'ds.cta': 'Conseguir mi plaza',
         'ds.note': 'El mensaje ya va copiado — solo pega y envía. Hablas conmigo, sin bots.',
         'ds.dismiss': 'Ahora no',
-        'ds.bar.txt': '<b>Pre-lanzamiento DeFi Surfers</b> · -20% · plazas limitadas',
+        'ds.bar.txt': '<b>Pre-lanzamiento DeFi Surfers</b> · -20% · cierra el domingo a medianoche',
         'ds.bar.cta': 'Conseguir plaza',
       }
     };
