@@ -335,9 +335,9 @@
 </head>
 <body>
 
-<div class="announce">
-  <span class="dot"></span>Janela de entrada <b>aberta agora</b> — comunidade com <b>-20%</b>.
-  <a href="https://t.me/surfistacrypto" target="_blank" rel="noopener">Garante a tua vaga →</a>
+<div class="announce" id="announce">
+  <span class="dot"></span><span id="announce-text">Janela de entrada <b>aberta</b> — comunidade com <b>-20%</b>. Fecha domingo à meia-noite · <b id="countdown">…</b></span>
+  <a href="https://t.me/surfistacrypto" target="_blank" rel="noopener" id="announce-cta">Garante a tua vaga →</a>
 </div>
 
 <div class="wrap">
@@ -539,10 +539,10 @@
         <a class="plan-btn" href="https://t.me/surfistacrypto" target="_blank" rel="noopener">Falar no Telegram</a>
       </div>
       <div class="plan best">
-        <span class="plan-badge">Janela aberta · -20%</span>
+        <span class="plan-badge" id="plan-badge">Janela aberta · -20%</span>
         <div class="plan-name">DeFi Surfers · Vitalício</div>
-        <div class="plan-price"><s>993,84€</s>795,07€</div>
-        <div class="plan-note">pagamento único · preço normal 993,84€ · -20% só na janela atual</div>
+        <div class="plan-price" id="plan-price"><s>993,84€</s>795,07€</div>
+        <div class="plan-note" id="plan-note">pagamento único · preço normal 993,84€ · -20% só na janela atual</div>
         <ul>
           <li><strong>Radar do Swell vitalício</strong></li>
           <li>Conteúdos educativos completos (do zero ao avançado)</li>
@@ -646,6 +646,39 @@
 </div>
 
 <script>
+// Contagem regressiva da janela de entrada + fecho automático. Prazo: domingo à
+// meia-noite (fim de domingo), hora de Portugal (WEST = UTC+1 no verão). Quando
+// o prazo passa, a página reverte sozinha para o estado de "lista de espera"
+// (sem -20%, preço 993,84€) — sem ninguém ter de mexer.
+(function () {
+  var DEADLINE = new Date('2026-07-13T00:00:00+01:00').getTime();
+  var $ = function (id) { return document.getElementById(id); };
+  function fmtLeft(ms) {
+    var s = Math.floor(ms / 1000);
+    var d = Math.floor(s / 86400); s -= d * 86400;
+    var h = Math.floor(s / 3600); s -= h * 3600;
+    var m = Math.floor(s / 60);
+    if (d > 0) return d + 'd ' + h + 'h ' + m + 'm';
+    if (h > 0) return h + 'h ' + m + 'm';
+    return m + 'm';
+  }
+  function render() {
+    var left = DEADLINE - Date.now();
+    if (left > 0) {
+      var c = $('countdown'); if (c) c.textContent = fmtLeft(left);
+      return;
+    }
+    var t = $('announce-text');
+    if (t) t.innerHTML = 'Inscrições fechadas — entra na <b>lista de espera</b> para a próxima janela.';
+    var cta = $('announce-cta'); if (cta) cta.textContent = 'Lista de espera →';
+    var b = $('plan-badge'); if (b) b.textContent = 'Vagas limitadas';
+    var p = $('plan-price'); if (p) p.textContent = '993,84€';
+    var n = $('plan-note'); if (n) n.textContent = 'pagamento único · próxima janela por anunciar';
+  }
+  render();
+  setInterval(render, 30000);
+})();
+
 // Números e tabela ao vivo — mesmo endpoint público do teaser do Surf Drops.
 (function () {
   var API = 'https://app.defisurfers.xyz/api/public/teaser';
