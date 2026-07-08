@@ -25,4 +25,16 @@ o atributo `data-placeholder`.
 - Nota: quando chegarem +2/3, converter em tira (`.quotes`) ou usar screenshots dos
   comentários originais para máxima credibilidade.
 
+### 2 — @joao1989as · live YouTube · 2026-07-08
+> fantástico o poder da comunidade 💪
+
+- Fonte: comentário na live do dia.
+- Estado: **PUBLICADO** como print trabalhado (`.lp-card`, badge dourado estilo live).
+
 <!-- Próximos: colar aqui à medida que saem, mesmo formato. -->
+
+## Decisão de apresentação (2026-07-08)
+Placeholders (`data-placeholder`) MANTIDOS por decisão do utilizador. Os reais
+aparecem numa **tira de "prints trabalhados"** (`.live-proof` / `.lp-card`) que
+recria o visual do comentário da live (badge dourado + handle + ▶ YouTube), limpa
+e escalável, por cima dos placeholders. Cresce à medida que saem novos comentários.
