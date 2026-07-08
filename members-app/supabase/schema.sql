@@ -108,3 +108,19 @@ create table if not exists alert_log (
   sent_at timestamptz not null default now(),
   primary key (discord_id, symbol, flip_at)
 );
+
+-- ============================================================================
+-- ROW LEVEL SECURITY (fecha o aviso "rls_disabled_in_public" do Supabase).
+-- A app acede ao Supabase SÓ com a SERVICE_ROLE_KEY (server-side), que IGNORA
+-- RLS — logo o cron/leituras continuam a funcionar na mesma. Nenhum cliente usa
+-- a chave anon. Ativar RLS sem policies => deny total para anon/authenticated,
+-- fechando o acesso público direto via PostgREST. Idempotente.
+-- Cobre TODAS as tabelas do schema public (inclui universe_cache e futuras).
+-- ============================================================================
+do $$
+declare r record;
+begin
+  for r in select tablename from pg_tables where schemaname = 'public' loop
+    execute format('alter table public.%I enable row level security;', r.tablename);
+  end loop;
+end $$;
