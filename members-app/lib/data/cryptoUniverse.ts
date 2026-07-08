@@ -40,11 +40,17 @@ interface BinanceExchangeInfo {
 const CRYPTO_THEMES: Record<string, string> = {
   "artificial-intelligence": "IA",
   "meme-token": "Memes",
-  "decentralized-finance-defi": "DeFi",
+  "decentralized-finance-defi": "DeFi", // engloba DEX, lending, liquid staking, yield farming
   "real-world-assets-rwa": "RWA",
   gaming: "Gaming",
   "layer-1": "Layer 1",
   "layer-2": "Layer 2",
+  "privacy-coins": "Privacidade",
+  oracle: "Oráculos",
+  "ai-agents": "Agentes IA",
+  depin: "DePIN",
+  "decentralized-perpetuals": "Perpétuos",
+  "zero-knowledge-zk": "ZK",
 };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
