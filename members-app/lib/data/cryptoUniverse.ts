@@ -98,8 +98,8 @@ export function staticCryptoUniverse(): UniverseAsset[] {
   return UNIVERSE.filter((a) => a.source === "binance");
 }
 
-export async function getCryptoUniverse(): Promise<UniverseAsset[]> {
-  if (cache && Date.now() - cache.at < CACHE_MS) return cache.assets;
+export async function getCryptoUniverse(force = false): Promise<UniverseAsset[]> {
+  if (!force && cache && Date.now() - cache.at < CACHE_MS) return cache.assets;
 
   try {
     const cgPage = (page: number) =>

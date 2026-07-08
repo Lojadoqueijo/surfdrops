@@ -74,10 +74,22 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: `slice inválido: ${sliceParam}` }, { status: 400 });
   }
 
+  // ?fresh=1: fura a cache em memória do universo (1h) — para refresh manual
+  // depois de mudar temas/filtros ver o efeito já, sem esperar a expiração.
+  const fresh = searchParams.get("fresh") === "1";
+
   let snapshots;
+  // Histograma de categorias do universo cripto (observabilidade: confirmar
+  // pelo próprio endpoint que os temas entraram, sem adivinhar).
+  let cryptoCategories: Record<string, number> | undefined;
   if (batchIndex === 0) {
     // Cripto dinâmico, em paralelo (exchanges sem throttle).
-    snapshots = await getSnapshotsParallel(await getCryptoUniverse());
+    const universe = await getCryptoUniverse(fresh);
+    cryptoCategories = {};
+    for (const a of universe)
+      for (const cat of a.categories)
+        cryptoCategories[cat] = (cryptoCategories[cat] ?? 0) + 1;
+    snapshots = await getSnapshotsParallel(universe);
   } else if (batchIndex === 1) {
     // Ações dinâmicas via Yahoo — concorrência 6 por cortesia (não-oficial).
     const universe = await getStockUniverse();
@@ -120,8 +132,10 @@ export async function GET(request: Request) {
     ok: true,
     batch: batchIndex,
     slice,
+    forced: fresh,
     sectors: batchSectors,
     assets: snapshots.length,
+    cryptoCategories,
     freshFlips: freshFlips.map((s) => ({ symbol: s.symbol, trend: s.trend })),
     persistence,
     pruned,
