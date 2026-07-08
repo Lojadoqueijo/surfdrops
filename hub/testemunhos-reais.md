@@ -21,7 +21,8 @@ o atributo `data-placeholder`.
 > ontem o radar do swell valeu-me 12% numa posição short na oracle. winwin
 
 - Fonte: comentário na live do dia.
-- Estado: recolhido, por publicar (esperar mais 2-3 para montar a tira).
-- Nota: tenho screenshot do comentário — usar versão imagem para máxima credibilidade.
+- Estado: **PUBLICADO** — em destaque único (`.quote-feat`) no bloco de prova social.
+- Nota: quando chegarem +2/3, converter em tira (`.quotes`) ou usar screenshots dos
+  comentários originais para máxima credibilidade.
 
 <!-- Próximos: colar aqui à medida que saem, mesmo formato. -->

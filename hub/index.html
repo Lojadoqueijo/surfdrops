@@ -204,6 +204,12 @@
   .quote-nm { font-size: 12.5px; font-weight: 700; }
   .quote-nm span { display: block; color: var(--text-faint); font-weight: 500; font-size: 11px; }
   .proof-note { text-align: center; color: var(--text-faint); font-size: 12px; margin-top: 22px; }
+  .quotes-real { display: flex; justify-content: center; }
+  .quote-feat { max-width: 660px; text-align: center; padding: 26px 28px 20px; }
+  .quote-src { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-faint); margin-bottom: 14px; }
+  .quote-src b { color: #ff4d4d; font-weight: 700; }
+  .quote-feat blockquote { color: var(--text); font-size: 18px; line-height: 1.5; font-weight: 600; margin: 0 0 18px; }
+  .quote-feat .quote-by { justify-content: center; }
 
   /* ---- pilares ---- */
   .pillars { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
@@ -461,25 +467,16 @@
       <div class="pstat"><span class="pstat-v">+30h</span><span class="pstat-k">de conteúdo incluído</span></div>
     </div>
 
-    <!-- ⚠️⚠️ PLACEHOLDER — testemunhos de EXEMPLO, só para o design. ⚠️⚠️
-         SUBSTITUIR por frases REAIS de membros (mensagens do Telegram / comentários
-         do YouTube) antes de tratar isto como afirmação pública a sério.
-         Marcados com data-placeholder="true" para localizar depressa. -->
-    <div class="quotes" data-placeholder="true">
-      <div class="quote">
-        <p>&ldquo;Entrei sem perceber nada de DeFi. Um ano depois tenho rendimento a entrar todos os meses e finalmente durmo descansado nas quedas. Os conteúdos e as calls valeram cada cêntimo.&rdquo;</p>
-        <div class="quote-by"><span class="quote-av">T</span><span class="quote-nm">Tiago M.<span>Membro desde 2023</span></span></div>
-      </div>
-      <div class="quote">
-        <p>&ldquo;Aqui não se vende hype. Ensinam-te a fazer com as tuas mãos e a proteger o que constróis. Foi a melhor decisão financeira que tomei nos últimos anos.&rdquo;</p>
-        <div class="quote-by"><span class="quote-av">S</span><span class="quote-nm">Sofia R.<span>Membro desde 2024</span></span></div>
-      </div>
-      <div class="quote">
-        <p>&ldquo;A Linha do Swell tirou-me a ansiedade de estar colado ao gráfico. Sei quando proteger e quando entrar. Sozinho nunca lá tinha chegado.&rdquo;</p>
-        <div class="quote-by"><span class="quote-av">R</span><span class="quote-nm">Ricardo P.<span>Membro desde 2023</span></span></div>
-      </div>
+    <!-- Testemunhos REAIS de membros. Cofre em hub/testemunhos-reais.md.
+         Começa com 1 real em destaque; cresce para tira (.quotes) quando houver 3-4. -->
+    <div class="quotes-real">
+      <figure class="quote quote-feat">
+        <span class="quote-src"><b>▶</b> Comentário na live · YouTube</span>
+        <blockquote>&ldquo;ontem o radar do swell valeu-me 12% numa posição short na Oracle. winwin&rdquo;</blockquote>
+        <figcaption class="quote-by"><span class="quote-av">T</span><span class="quote-nm">@trowabarton7258<span>Membro da comunidade</span></span></figcaption>
+      </figure>
     </div>
-    <p class="proof-note">Testemunhos de membros da comunidade. Resultados variam e dependem de cada pessoa. DeFi tem risco real.</p>
+    <p class="proof-note">Testemunho real de um membro, partilhado publicamente numa live. Experiências individuais &mdash; resultados passados não garantem resultados futuros. Material educativo, não é recomendação. DeFi tem risco real.</p>
   </section>
 
   <!-- ===================== A COMUNIDADE / PILARES ===================== -->
