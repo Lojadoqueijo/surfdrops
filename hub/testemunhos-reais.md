@@ -31,6 +31,12 @@ o atributo `data-placeholder`.
 - Fonte: comentário na live do dia.
 - Estado: **PUBLICADO** como print trabalhado (`.lp-card`, badge dourado estilo live).
 
+### 3 — Rogério · live YouTube · 2026-07-08
+> Os DeFi Surfers mudaram a minha vida. Nunca pensei que a comunidade fosse tão completa em tantos sectores.
+
+- Fonte: comentário na live do dia.
+- Estado: **PUBLICADO** como print trabalhado (`.lp-card`).
+
 <!-- Próximos: colar aqui à medida que saem, mesmo formato. -->
 
 ## Decisão de apresentação (2026-07-08)
