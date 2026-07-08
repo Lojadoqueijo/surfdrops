@@ -55,25 +55,49 @@ const CRYPTO_THEMES: Record<string, string> = {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+// Uma categoria do CoinGecko, com retry em 429 (o IP partilhado da Vercel é
+// limitado pelo free tier). Até 3 tentativas com backoff 2s/4s. Se uma chave
+// COINGECKO_DEMO_API_KEY estiver definida, usa o header dedicado (30 req/min,
+// muito mais fiável que o IP partilhado).
+async function fetchThemeCoins(categoryId: string): Promise<Array<{ symbol: string }> | null> {
+  const key = process.env.COINGECKO_DEMO_API_KEY;
+  const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=${categoryId}&order=market_cap_desc&per_page=250&page=1`;
+  const opts: RequestInit = {
+    cache: "no-store",
+    headers: key ? { "x-cg-demo-api-key": key } : undefined,
+  };
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const res = await fetch(url, opts);
+      if (res.status === 429) {
+        await sleep(2000 * (attempt + 1));
+        continue;
+      }
+      if (!res.ok) {
+        console.warn(`[cryptoThemes] ${categoryId}: HTTP ${res.status}`);
+        return null;
+      }
+      return (await res.json()) as Array<{ symbol: string }>;
+    } catch (err) {
+      console.warn(`[cryptoThemes] ${categoryId} falhou (tentativa ${attempt + 1}):`, err);
+      await sleep(1500);
+    }
+  }
+  console.warn(`[cryptoThemes] ${categoryId}: 429 persistente após 3 tentativas`);
+  return null;
+}
+
 /**
  * Mapa symbol(maiúsculas) → etiquetas de tema. Sequencial e tolerante a
- * falhas: cada tema é uma chamada CoinGecko; se uma falhar (429), esse tema
- * fica por marcar nesta corrida — as categorias são cosméticas, nunca partem
- * o universo. Espaço de 300ms entre chamadas para respeitar o free tier.
+ * falhas: cada tema é uma chamada CoinGecko; se uma falhar, esse tema fica por
+ * marcar nesta corrida — as categorias são cosméticas, nunca partem o universo.
+ * Espaço de 1,5s entre chamadas + retry no 429 para aguentar o IP partilhado.
  */
 async function fetchCryptoThemes(): Promise<Map<string, string[]>> {
   const map = new Map<string, string[]>();
   for (const [categoryId, label] of Object.entries(CRYPTO_THEMES)) {
-    try {
-      const res = await fetch(
-        `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=${categoryId}&order=market_cap_desc&per_page=250&page=1`,
-        { cache: "no-store" }
-      );
-      if (!res.ok) {
-        console.warn(`[cryptoThemes] ${categoryId}: HTTP ${res.status}`);
-        continue;
-      }
-      const coins = (await res.json()) as Array<{ symbol: string }>;
+    const coins = await fetchThemeCoins(categoryId);
+    if (coins) {
       for (const c of coins) {
         const sym = (c.symbol || "").toUpperCase();
         if (!sym) continue;
@@ -81,10 +105,8 @@ async function fetchCryptoThemes(): Promise<Map<string, string[]>> {
         cur.push(label);
         map.set(sym, cur);
       }
-    } catch (err) {
-      console.warn(`[cryptoThemes] ${categoryId} falhou:`, err);
     }
-    await sleep(300);
+    await sleep(1500);
   }
   return map;
 }
