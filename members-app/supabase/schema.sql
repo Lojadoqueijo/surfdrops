@@ -109,6 +109,14 @@ create table if not exists alert_log (
   primary key (discord_id, symbol, flip_at)
 );
 
+-- Lista de espera (captura de lead — auditoria 5.1). Upsert por email = sem
+-- duplicados. Só o servidor escreve/lê (service_role; RLS deny p/ o resto).
+create table if not exists leads (
+  email text primary key,
+  source text not null default 'hub',
+  created_at timestamptz not null default now()
+);
+
 -- ============================================================================
 -- ROW LEVEL SECURITY (fecha o aviso "rls_disabled_in_public" do Supabase).
 -- A app acede ao Supabase SÓ com a SERVICE_ROLE_KEY (server-side), que IGNORA
