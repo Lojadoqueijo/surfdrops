@@ -47,8 +47,16 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 300; // cobre com folga o pior lote e o fallback "tudo de uma vez"
 
 export async function GET(request: Request) {
+  // FAIL-CLOSED (auditoria 1.2): o secret é obrigatório. Sem ele configurado,
+  // o endpoint recusa-se a correr (503) em vez de ficar aberto ao público.
+  // Vercel envia o Bearer automaticamente nos crons quando CRON_SECRET existe;
+  // o workflow do GitHub envia-o explicitamente (secrets.CRON_SECRET).
   const auth = request.headers.get("authorization");
-  if (process.env.CRON_SECRET && auth !== `Bearer ${process.env.CRON_SECRET}`) {
+  const cronSecret = process.env.CRON_SECRET?.trim();
+  if (!cronSecret) {
+    return NextResponse.json({ error: "CRON_SECRET não configurado" }, { status: 503 });
+  }
+  if (auth !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

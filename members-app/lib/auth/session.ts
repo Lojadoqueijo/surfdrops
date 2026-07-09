@@ -11,9 +11,20 @@ function b64url(data: ArrayBuffer | Uint8Array): string {
 }
 
 function getSecret(): string | null {
-  const s = process.env.DISCORD_CLIENT_SECRET ?? process.env.MEMBERS_GATE_KEY;
+  // SESSION_SECRET dedicada (auditoria 1.1) — as sessões deixam de partilhar
+  // o Client Secret do Discord. Fallback para o Client Secret (entretanto
+  // rodado) só para preview/dev onde a env possa faltar.
+  const s = process.env.SESSION_SECRET ?? process.env.DISCORD_CLIENT_SECRET;
   const t = s?.trim();
   return t && t.length > 0 ? t : null;
+}
+
+/** Comparação em tempo constante (auditoria 1.6 — evita timing attack). */
+function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
 }
 
 async function hmac(payload: string, secret: string): Promise<string> {
@@ -62,7 +73,7 @@ export async function readSession(
   if (!secret) return null;
   const [payload, sig] = token.split(".");
   if (!payload || !sig) return null;
-  if ((await hmac(payload, secret)) !== sig) return null;
+  if (!safeEqual(await hmac(payload, secret), sig)) return null;
   try {
     const json = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/"))) as {
       sub?: string;
@@ -83,7 +94,7 @@ export async function verifySession(token: string | undefined): Promise<boolean>
   if (!secret) return false;
   const [payload, sig] = token.split(".");
   if (!payload || !sig) return false;
-  if ((await hmac(payload, secret)) !== sig) return false;
+  if (!safeEqual(await hmac(payload, secret), sig)) return false;
   try {
     const json = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/"))) as {
       exp?: number;

@@ -4,13 +4,17 @@ import { getBotUsername, tgCall, webhookSecret } from "@/lib/telegram";
 // Regista (ou re-regista) o webhook do bot a apontar para este deployment.
 // Correr UMA vez depois de colar o TELEGRAM_BOT_TOKEN no Vercel:
 //   GET https://app.defisurfers.xyz/api/telegram/setup
-// Idempotente. Se CRON_SECRET existir, exige-o como Bearer.
+// Idempotente. FAIL-CLOSED (auditoria 1.2): exige sempre CRON_SECRET como Bearer.
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   const auth = req.headers.get("authorization");
-  if (process.env.CRON_SECRET && auth !== `Bearer ${process.env.CRON_SECRET}`) {
+  const cronSecret = process.env.CRON_SECRET?.trim();
+  if (!cronSecret) {
+    return NextResponse.json({ error: "CRON_SECRET não configurado" }, { status: 503 });
+  }
+  if (auth !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
