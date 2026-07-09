@@ -183,7 +183,16 @@ a:hover { text-decoration: underline; }
 .page-info { color: var(--muted); font-size: 12px; }
 /* Ícones TV/Yahoo empilhados mas compactos: 2×15px + gap cabem na altura da
    célula do ativo (logo 26px) sem engordar as linhas. */
-.col-links { text-align: right; }
+/* col-links (TV/Yahoo) FIXA à direita: quando um filtro faz a tabela transbordar
+   na horizontal, a última coluna saía do ecrã e o ícone do TradingView "desaparecia".
+   Sticky right mantém-na sempre visível. Fundos opacos p/ cobrir o que passa por baixo. */
+.term-table td.col-links, .term-table th.col-links {
+  position: sticky; right: 0; z-index: 2; text-align: right; background: var(--bg-2);
+}
+.term-table th.col-links { z-index: 3; }
+.term-table tbody tr:hover td.col-links { background: var(--panel); }
+.term-table tr.open td.col-links { background: var(--panel-2); }
+.term-table tr.fresh td.col-links { background: var(--bg-2); }
 .links-stack { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; vertical-align: middle; }
 .link-ico {
   display: inline-flex; align-items: center; justify-content: center;
