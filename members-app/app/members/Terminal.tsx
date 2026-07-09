@@ -804,7 +804,7 @@ function FragmentRow({
           </button>
         </td>
         <td className="asset">
-          <div className="asset-inner">
+          <div className={`asset-inner${fresh ? " has-flip" : ""}`}>
             <AssetLogo logoUrl={r.logoUrl} symbol={r.symbol} />
             <span className="asset-txt">
               <span className="asset-name" title={r.name}>{r.name}</span>

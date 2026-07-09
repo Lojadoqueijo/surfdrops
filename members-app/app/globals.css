@@ -218,6 +218,11 @@ a:hover { text-decoration: underline; }
 }
 .asset-sym { font-size: 11px; }
 @media (max-width: 940px) { .asset-name { max-width: 140px; } }
+/* Quando a linha tem a tag "FLIP RECENTE" (~90px), o nome trunca mais cedo para
+   o conjunto nome+tag não alargar a coluna e transbordar. O tooltip (title no
+   .asset-name) continua a mostrar o nome completo. */
+.asset-inner.has-flip .asset-name { max-width: 130px; }
+@media (max-width: 940px) { .asset-inner.has-flip .asset-name { max-width: 84px; } }
 
 .chip {
   display: inline-flex; align-items: center; padding: 4px 11px; border-radius: 7px;
