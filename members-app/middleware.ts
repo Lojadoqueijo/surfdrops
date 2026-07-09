@@ -16,6 +16,7 @@ const PUBLIC = [
   /^\/api\/public\//,
   /^\/api\/telegram\//,
   /^\/favicon/,
+  /^\/robots\.txt$/, // senão o middleware manda os bots para /login
 ];
 
 export async function middleware(req: NextRequest) {
