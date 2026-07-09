@@ -15,7 +15,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt">
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* Vercel Web Analytics: sem cookies, privacy-first, mesma origem (CSP ok). */}
+        <script defer src="/_vercel/insights/script.js" />
+      </body>
     </html>
   );
 }
