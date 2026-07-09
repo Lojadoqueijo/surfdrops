@@ -26,6 +26,35 @@ async function ultimaEscrita(classe: string): Promise<string | null> {
   return (data?.[0]?.updated_at as string) ?? null;
 }
 
+// Universo dinâmico (auditoria 2.4): saveUniverseCache só corre num build
+// dinâmico BEM-SUCEDIDO — se o updated_at da cache envelhecer, o universo está
+// a servir do cache/estático em silêncio (CoinGecko/NASDAQ partidos). Limiar
+// com folga: cripto reconstrói 1x/dia; ações só em dias úteis (fds ~72h).
+const LIMIAR_UNIVERSO_HORAS: Record<string, number> = {
+  cripto: 30,
+  acoes: 80,
+};
+
+async function universoCache(): Promise<
+  Record<string, { updatedAt: string | null; horas: number | null; ok: boolean }>
+> {
+  const out: Record<string, { updatedAt: string | null; horas: number | null; ok: boolean }> = {};
+  const s = getSupabase();
+  const rows = s
+    ? ((await s.from("universe_cache").select("class, updated_at")).data as
+        | Array<{ class: string; updated_at: string | null }>
+        | null)
+    : null;
+  for (const [cls, limiar] of Object.entries(LIMIAR_UNIVERSO_HORAS)) {
+    const updatedAt = rows?.find((r) => r.class === cls)?.updated_at ?? null;
+    const horas = updatedAt
+      ? Math.round(((Date.now() - new Date(updatedAt).getTime()) / 3_600_000) * 10) / 10
+      : null;
+    out[cls] = { updatedAt, horas, ok: horas !== null && horas <= limiar };
+  }
+  return out;
+}
+
 export async function GET() {
   const classes: Record<string, { updatedAt: string | null; horas: number | null; ok: boolean }> = {};
   let allOk = true;
@@ -40,8 +69,11 @@ export async function GET() {
     classes[classe] = { updatedAt, horas, ok };
   }
 
+  const universo = await universoCache();
+  for (const u of Object.values(universo)) if (!u.ok) allOk = false;
+
   return NextResponse.json(
-    { ok: allOk, classes, at: new Date().toISOString() },
+    { ok: allOk, classes, universo, at: new Date().toISOString() },
     { headers: { "Cache-Control": "no-store" } }
   );
 }

@@ -17,6 +17,14 @@ export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
   if (!code) return NextResponse.redirect(`${origin}/login?error=sem-codigo`);
 
+  // state anti-CSRF (auditoria 1.4): tem de coincidir com o cookie posto no
+  // /api/auth/login. Sem match, o code pode ter sido plantado por terceiros.
+  const state = req.nextUrl.searchParams.get("state");
+  const stateCookie = req.cookies.get("ds_oauth_state")?.value;
+  if (!state || !stateCookie || state !== stateCookie) {
+    return NextResponse.redirect(`${origin}/login?error=state`);
+  }
+
   const clientId = process.env.DISCORD_CLIENT_ID;
   const clientSecret = process.env.DISCORD_CLIENT_SECRET;
   const guildId = process.env.DISCORD_GUILD_ID;
@@ -99,5 +107,7 @@ export async function GET(req: NextRequest) {
     maxAge: 60 * 60 * 24 * 30,
     path: "/",
   });
+  // state consumido — apagar (uso único).
+  res.cookies.set("ds_oauth_state", "", { maxAge: 0, path: "/" });
   return res;
 }

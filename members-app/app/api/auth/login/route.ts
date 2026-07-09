@@ -15,5 +15,17 @@ export function GET(req: NextRequest) {
   // servidor — dispensa bot no servidor para o login (o anti-bot do AuthGG
   // expulsava o nosso bot; assim o gate não depende dele).
   url.searchParams.set("scope", "identify guilds.members.read");
-  return NextResponse.redirect(url);
+  // state anti-CSRF (auditoria 1.4): valor aleatório vai no URL e num cookie
+  // httpOnly de vida curta; o callback exige que coincidam.
+  const state = crypto.randomUUID().replace(/-/g, "");
+  url.searchParams.set("state", state);
+  const res = NextResponse.redirect(url);
+  res.cookies.set("ds_oauth_state", state, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    maxAge: 600,
+    path: "/",
+  });
+  return res;
 }
