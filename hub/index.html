@@ -266,6 +266,11 @@
   .author-body h2 { font-size: clamp(21px, 3vw, 28px); margin-bottom: 14px; letter-spacing: -0.3px; }
   .author-body h2 span { color: var(--accent); }
   .author-body p { color: var(--text-dim); margin-bottom: 14px; }
+  /* A frase-troféu da secção merece linha própria e peso — não fica enterrada. */
+  .author-body p.author-highlight {
+    color: var(--text); font-weight: 700; font-size: 17px;
+    border-left: 3px solid var(--accent); padding-left: 14px;
+  }
   .author-body strong { color: var(--text); }
   .author-links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
 
@@ -462,7 +467,7 @@
 <body>
 
 <div class="announce" id="announce">
-  <span class="dot"></span><span id="announce-text">Janela de entrada <b>aberta</b> — comunidade <b>-20%</b>. Fecha domingo à meia-noite <span class="cd-pill" id="cd-pill" role="button" tabindex="0" title="Abrir relógio em ecrã cheio">⏳ <b id="countdown">…</b></span></span>
+  <span class="dot"></span><span id="announce-text">Janela de entrada <b>aberta</b> — comunidade com <b>-20%</b>. Fecha domingo à meia-noite <span class="cd-pill" id="cd-pill" role="button" tabindex="0" title="Abrir relógio em ecrã cheio">⏳ <b id="countdown">…</b></span></span>
   <a href="https://t.me/surfistacrypto" target="_blank" rel="noopener" id="announce-cta">Garante a tua vaga →</a>
 </div>
 
@@ -524,7 +529,7 @@
     </div>
     <p class="hero-window" id="hero-window">Janela aberta até <b>domingo à meia-noite (13/07)</b> · 795,07€ em vez de <s>993,84€</s></p>
     <p class="hero-yt">
-      Acompanhas-nos no <b>YouTube</b>? Aqui é onde levamos isto a sério.
+      Acompanhas-nos no <b>YouTube</b>? Aqui é onde passas de ver para fazer.
     </p>
     <div class="hero-stats" id="hero-stats" hidden>
       <div class="hstat"><span class="hstat-v" id="st-total">—</span><span class="hstat-k">ativos no radar</span></div>
@@ -564,18 +569,23 @@
       </div>
       <div class="author-body">
         <span class="author-badge">🎓 Convidado pelas maiores faculdades de economia do país</span>
-        <h2>O modelo que já foi ensinado nas <span>universidades</span></h2>
+        <h2>Levámos este modelo às <span>universidades</span></h2>
         <p>
-          Há mais de 3 anos que o <strong>Surfista Crypto</strong> partilha DeFi para mais de 11 mil
-          pessoas no YouTube. E foi convidado pelas maiores faculdades de economia nacionais para
+          Há mais de 3 anos que o <strong>Surfista Crypto</strong> ensina DeFi a mais de 11 mil
+          pessoas no YouTube. E as maiores faculdades de economia nacionais convidaram-no para
           mostrar, a alunos e docentes, como funcionam os <strong>fluxos financeiros da DeFi</strong>:
           o flywheel, a geração de taxas e a sustentabilidade real destes produtos.
         </p>
         <p>
           Não é adivinhar preços. É perceber o modelo, teórico e prático, por trás do rendimento.
           Quando as próprias universidades levam a DeFi a sério, abre-se uma janela, e ela é de quem
-          entende primeiro. Hoje, alguns dos maiores especialistas de DeFi em Portugal são DeFi
-          Surfers, e é isso que a comunidade faz: plantar cedo, com método, para o ciclo de 2027 a 2029.
+          entende primeiro.
+        </p>
+        <p class="author-highlight">
+          Hoje, alguns dos maiores especialistas de DeFi em Portugal são DeFi Surfers.
+        </p>
+        <p>
+          E é isso que a comunidade faz: plantar cedo, com método, para o ciclo de 2027 a 2029.
         </p>
         <div class="author-links">
           <a class="yt-card" href="https://www.youtube.com/@surfistacrypto" target="_blank" rel="noopener">
@@ -748,7 +758,7 @@
       </div>
       <div class="step">
         <h3>Pagamento em USDC/USDT</h3>
-        <p>Pagamento em stablecoins, on-chain, como deve ser. Sem cartões, sem intermediários.</p>
+        <p>Pagamento em stablecoins, on-chain, como deve ser. Sem cartões, sem intermediários. Primeira vez? Acompanhamos-te no processo, passo a passo.</p>
       </div>
       <div class="step">
         <h3>Recebes o acesso</h3>
@@ -777,11 +787,19 @@
       </details>
       <details>
         <summary>Acompanho-vos no YouTube. O que muda aqui?</summary>
-        <p>No YouTube a análise é para milhares. Aqui é a sério e contigo: conteúdos estruturados do zero ao avançado, as ferramentas privadas que usamos todos os dias e uma comunidade pequena onde há acompanhamento próximo. É a diferença entre assistir e fazer.</p>
+        <p>No YouTube a análise é para milhares. Aqui é contigo: conteúdos estruturados do zero ao avançado, as ferramentas privadas que usamos todos os dias e uma comunidade pequena com acompanhamento próximo. É a diferença entre assistir e fazer.</p>
       </details>
       <details>
         <summary>Preciso de experiência em DeFi?</summary>
         <p>Não. Os conteúdos vão do zero ao avançado e as calls semanais existem exatamente para tirar dúvidas. Precisas de vontade de aprender a operar por ti. Soberania não se delega.</p>
+      </details>
+      <details>
+        <summary>Quanto tempo preciso por semana?</summary>
+        <p>Menos do que pensas. As calls ficam gravadas, os alertas do Radar chegam-te ao Telegram quando algo muda — não precisas de estar colado a gráficos. Com 2 a 3 horas por semana avanças a bom ritmo; com mais, avanças mais depressa. Vai ao teu ritmo, o acesso não expira.</p>
+      </details>
+      <details>
+        <summary>Posso experimentar antes de entrar?</summary>
+        <p>Podes. O Radar mensal (59€, sem fidelização) é a forma de provar a água: usas a ferramenta a sério e cancelas quando quiseres. E com o Crédito Surfer, o que pagares de Radar desconta na entrada da comunidade (até 397€) — testar nunca é dinheiro perdido.</p>
       </details>
       <details>
         <summary>E se eu só quiser o Radar?</summary>
@@ -789,7 +807,7 @@
       </details>
       <details>
         <summary>Como pago?</summary>
-        <p>USDC ou USDT, on-chain. A entrada fecha-se diretamente no Telegram, sem intermediários e sem burocracia.</p>
+        <p>USDC ou USDT, on-chain. A entrada fecha-se diretamente no Telegram, sem intermediários e sem burocracia. Nunca usaste stablecoins? Não é impedimento — explicamos-te o processo passo a passo na conversa. Aprender a mover-te on-chain já faz parte da formação.</p>
       </details>
     </div>
   </section>
