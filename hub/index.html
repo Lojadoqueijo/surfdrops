@@ -115,6 +115,65 @@
     box-shadow: 0 0 0 0 rgba(18,53,28,0.6); animation: blip 1.8s infinite; }
   @keyframes blip { 0% { box-shadow: 0 0 0 0 rgba(18,53,28,0.6); } 70% { box-shadow: 0 0 0 7px rgba(18,53,28,0); } 100% { box-shadow: 0 0 0 0 rgba(18,53,28,0); } }
 
+  /* ---- Pop-up do relógio: clicar na pílula abre um countdown grande (live) ---- */
+  .cd-pill { cursor: pointer; transition: transform .12s ease, filter .12s ease; }
+  .cd-pill:hover { filter: brightness(1.06); transform: translateY(-1px); }
+  #cd-modal {
+    position: fixed; inset: 0; z-index: 200; display: none;
+    align-items: center; justify-content: center; padding: 24px;
+    background: rgba(8,3,20,.82); backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
+  }
+  #cd-modal.open { display: flex; animation: cdfade .22s ease; }
+  @keyframes cdfade { from { opacity: 0; transform: scale(.985); } to { opacity: 1; transform: none; } }
+  .cd-card {
+    position: relative; width: min(940px, 96vw); text-align: center;
+    padding: clamp(30px,5vw,54px) clamp(20px,4vw,42px) clamp(26px,4vw,40px); border-radius: 28px;
+    background: radial-gradient(130% 150% at 50% -10%, rgba(139,92,246,.30), rgba(18,8,38,.95) 62%), var(--bg);
+    border: 1px solid rgba(139,92,246,.45);
+    box-shadow: 0 40px 110px rgba(0,0,0,.6), 0 0 80px rgba(139,92,246,.22);
+  }
+  .cd-close {
+    position: absolute; top: 14px; right: 16px; width: 38px; height: 38px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.06); color: #fff;
+    font-size: 15px; line-height: 1; cursor: pointer;
+  }
+  .cd-close:hover { background: rgba(255,255,255,.14); }
+  .cd-kicker { font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 3px;
+    font-size: clamp(11px,1.6vw,14px); color: var(--warn); font-weight: 800; margin: 0 0 10px; }
+  .cd-kicker b { color: #fff; }
+  .cd-title { font-size: clamp(20px,3.3vw,34px); font-weight: 800; color: #fff; margin: 0 0 clamp(18px,3vw,30px); }
+  .cd-clock { display: flex; align-items: flex-start; justify-content: center; gap: clamp(6px,1.4vw,16px); }
+  .cd-seg { display: flex; flex-direction: column; align-items: center; gap: 8px;
+    min-width: clamp(66px,15vw,150px);
+    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 18px;
+    padding: clamp(10px,2vw,20px) clamp(6px,1.5vw,14px); }
+  .cd-num { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-variant-numeric: tabular-nums;
+    font-size: clamp(42px,11vw,110px); line-height: 1; color: #fff; text-shadow: 0 0 24px rgba(139,92,246,.5); }
+  .cd-lbl { font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 2px;
+    font-size: clamp(9px,1.3vw,13px); color: var(--text-dim); }
+  .cd-colon { font-family: 'JetBrains Mono', monospace; font-weight: 800; color: rgba(255,255,255,.32);
+    font-size: clamp(30px,7vw,74px); line-height: 1; align-self: center; margin-top: clamp(-10px,-1.5vw,-18px); }
+  .cd-seg.sec .cd-num { color: var(--warn); }
+  .cd-foot { color: var(--text-dim); font-size: clamp(12px,1.6vw,15px); margin: clamp(20px,3vw,30px) 0 0; }
+  .cd-foot s { color: var(--text-faint); }
+  .cd-cta { display: inline-block; margin-top: clamp(16px,2.4vw,24px); background: var(--gradient-1);
+    color: #1a0a2e; font-weight: 800; padding: 13px 28px; border-radius: 999px; text-decoration: none;
+    box-shadow: 0 10px 30px rgba(139,92,246,.4); }
+  .cd-cta:hover { filter: brightness(1.05); }
+  /* Estado urgente (<24h): tudo a vermelho, para máxima pressão na live. */
+  #cd-modal.urgent .cd-card { border-color: rgba(239,68,68,.55);
+    box-shadow: 0 40px 110px rgba(0,0,0,.6), 0 0 90px rgba(239,68,68,.32);
+    background: radial-gradient(130% 150% at 50% -10%, rgba(239,68,68,.24), rgba(18,8,38,.95) 62%), var(--bg); }
+  #cd-modal.urgent .cd-kicker { color: var(--hot); }
+  #cd-modal.urgent .cd-num { text-shadow: 0 0 26px rgba(239,68,68,.55); }
+  #cd-modal.urgent .cd-seg.sec .cd-num { color: var(--hot); animation: cdbeat 1s ease-in-out infinite; }
+  @keyframes cdbeat { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+  @media (max-width: 560px) {
+    .cd-colon { display: none; }
+    .cd-clock { gap: 8px; flex-wrap: wrap; }
+    .cd-seg { min-width: 66px; flex: 1 1 66px; }
+  }
+
   /* ---- nav ---- */
   .nav { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 18px 0; flex-wrap: wrap; }
   .nav-logo { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 800; letter-spacing: 0.5px; color: var(--text); }
@@ -354,8 +413,28 @@
 <body>
 
 <div class="announce" id="announce">
-  <span class="dot"></span><span id="announce-text">Janela de entrada <b>aberta</b> — comunidade <b>-20%</b>. Fecha domingo à meia-noite <span class="cd-pill">⏳ <b id="countdown">…</b></span></span>
+  <span class="dot"></span><span id="announce-text">Janela de entrada <b>aberta</b> — comunidade <b>-20%</b>. Fecha domingo à meia-noite <span class="cd-pill" id="cd-pill" role="button" tabindex="0" title="Abrir relógio em ecrã cheio">⏳ <b id="countdown">…</b></span></span>
   <a href="https://t.me/surfistacrypto" target="_blank" rel="noopener" id="announce-cta">Garante a tua vaga →</a>
+</div>
+
+<!-- Pop-up do relógio (clicar na pílula) — countdown grande com segundos, para abrir na live. -->
+<div id="cd-modal" role="dialog" aria-modal="true" aria-label="Contagem decrescente para o fecho da janela">
+  <div class="cd-card">
+    <button class="cd-close" id="cd-close" aria-label="Fechar">✕</button>
+    <p class="cd-kicker">DeFiSurfers · Janela <b>−20%</b></p>
+    <h2 class="cd-title" id="cd-title">A janela fecha em</h2>
+    <div class="cd-clock">
+      <div class="cd-seg"><span class="cd-num" id="cd-d">00</span><span class="cd-lbl">dias</span></div>
+      <span class="cd-colon">:</span>
+      <div class="cd-seg"><span class="cd-num" id="cd-h">00</span><span class="cd-lbl">horas</span></div>
+      <span class="cd-colon">:</span>
+      <div class="cd-seg"><span class="cd-num" id="cd-mm">00</span><span class="cd-lbl">min</span></div>
+      <span class="cd-colon">:</span>
+      <div class="cd-seg sec"><span class="cd-num" id="cd-ss">00</span><span class="cd-lbl">seg</span></div>
+    </div>
+    <p class="cd-foot" id="cd-foot">Encerra domingo à meia-noite · comunidade a <b>795,07€</b> <s>993,84€</s></p>
+    <a class="cd-cta" href="https://t.me/surfistacrypto" target="_blank" rel="noopener">Garante a tua vaga →</a>
+  </div>
 </div>
 
 <div class="wrap">
@@ -698,12 +777,32 @@
     if (d > 0) return d + 'd ' + h + 'h ' + m + 'm';
     return h + 'h ' + m + 'm ' + s + 's'; // último dia: mostra os segundos a ticar
   }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function updateModal(left) {
+    var modal = $('cd-modal');
+    if (!modal || !modal.classList.contains('open')) return;
+    if (left <= 0) {
+      $('cd-title').textContent = 'A janela fechou';
+      $('cd-d').textContent = '00'; $('cd-h').textContent = '00';
+      $('cd-mm').textContent = '00'; $('cd-ss').textContent = '00';
+      $('cd-foot').innerHTML = 'Entra na <b>lista de espera</b> para a próxima janela.';
+      return;
+    }
+    var s = Math.floor(left / 1000);
+    var d = Math.floor(s / 86400); s -= d * 86400;
+    var h = Math.floor(s / 3600); s -= h * 3600;
+    var m = Math.floor(s / 60); s -= m * 60;
+    $('cd-d').textContent = pad(d); $('cd-h').textContent = pad(h);
+    $('cd-mm').textContent = pad(m); $('cd-ss').textContent = pad(s);
+    modal.classList.toggle('urgent', left <= DAY);
+  }
   function render() {
     var left = DEADLINE - Date.now();
     var a = $('announce');
     if (left > 0) {
       var c = $('countdown'); if (c) c.textContent = fmtLeft(left);
       if (a) { if (left <= DAY) a.classList.add('urgent'); else a.classList.remove('urgent'); }
+      updateModal(left);
       return;
     }
     if (a) a.classList.remove('urgent');
@@ -713,7 +812,28 @@
     var b = $('plan-badge'); if (b) b.textContent = 'Vagas limitadas';
     var p = $('plan-price'); if (p) p.textContent = '993,84€';
     var n = $('plan-note'); if (n) n.textContent = 'pagamento único · próxima janela por anunciar';
+    updateModal(left);
   }
+
+  // Abrir/fechar o pop-up do relógio.
+  function openClock() {
+    var modal = $('cd-modal'); if (!modal) return;
+    modal.classList.add('open');
+    updateModal(DEADLINE - Date.now());
+  }
+  function closeClock() { var modal = $('cd-modal'); if (modal) modal.classList.remove('open'); }
+  var pill = $('cd-pill');
+  if (pill) {
+    pill.addEventListener('click', openClock);
+    pill.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openClock(); }
+    });
+  }
+  var closeBtn = $('cd-close'); if (closeBtn) closeBtn.addEventListener('click', closeClock);
+  var modalEl = $('cd-modal');
+  if (modalEl) modalEl.addEventListener('click', function (e) { if (e.target === modalEl) closeClock(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeClock(); });
+
   render();
   setInterval(render, 1000);
 })();
