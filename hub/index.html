@@ -415,6 +415,24 @@
   .faq summary::marker { color: var(--accent); }
   .faq p { color: var(--text-dim); font-size: 13px; margin-top: 10px; }
 
+  /* ---- Lista de espera (captura de lead) ---- */
+  .lista-wrap { max-width: 560px; margin: 0 auto; text-align: center; }
+  .lead-form { display: flex; gap: 10px; margin-top: 18px; }
+  .lead-form input[type="email"] {
+    flex: 1; background: var(--bg-elev); border: 1px solid var(--border); border-radius: 12px;
+    padding: 13px 16px; color: var(--text); font-size: 14px; font-family: inherit;
+  }
+  .lead-form input[type="email"]:focus { outline: none; border-color: var(--accent); }
+  .lead-form button {
+    background: var(--gradient-1); color: #1a0a2e; font-weight: 800; border: none;
+    border-radius: 12px; padding: 13px 22px; cursor: pointer; font-size: 14px; font-family: inherit;
+  }
+  .lead-form button:disabled { opacity: .6; cursor: default; }
+  .lead-note { color: var(--text-faint); font-size: 11.5px; margin-top: 10px; }
+  .lead-ok { color: var(--up); font-weight: 700; margin-top: 14px; display: none; }
+  .lead-hp { position: absolute; left: -9999px; opacity: 0; height: 1px; width: 1px; }
+  @media (max-width: 520px) { .lead-form { flex-direction: column; } }
+
   /* ---- CTA final + footer ---- */
   .final { text-align: center; padding: 72px 0 30px; }
   .final h2 { font-size: clamp(23px, 3.6vw, 33px); margin-bottom: 14px; letter-spacing: -0.3px; }
@@ -777,6 +795,23 @@
     <a class="btn btn-primary" href="https://t.me/surfistacrypto" target="_blank" rel="noopener">🌊 Garantir a minha vaga</a>
   </section>
 
+  <!-- ===================== LISTA DE ESPERA (captura de lead) ===================== -->
+  <section id="lista">
+    <div class="sec-head">
+      <h2>Não entras <span>nesta janela</span>?</h2>
+      <p>Deixa o email e és o primeiro a saber quando a próxima abrir.</p>
+    </div>
+    <div class="lista-wrap">
+      <form class="lead-form" id="lead-form">
+        <input type="text" name="web" class="lead-hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <input type="email" id="lead-email" required placeholder="o-teu@email.com" autocomplete="email" aria-label="O teu email" />
+        <button type="submit" id="lead-btn">Avisa-me</button>
+      </form>
+      <p class="lead-ok" id="lead-ok">✓ Estás na lista. Falamos quando a janela abrir.</p>
+      <p class="lead-note">Só para avisar da próxima janela de entrada. Sem spam, sem partilha com terceiros.</p>
+    </div>
+  </section>
+
   <footer>
     <div class="foot">
       <span>🌊 DeFi Surfers · desde 2023</span>
@@ -864,7 +899,13 @@
     if (a) a.classList.remove('urgent');
     var t = $('announce-text');
     if (t) t.innerHTML = 'Inscrições fechadas — entra na <b>lista de espera</b> para a próxima janela.';
-    var cta = $('announce-cta'); if (cta) cta.textContent = 'Lista de espera →';
+    // Fechado: os CTAs deixam de morrer num DM e passam a CAPTURAR o lead (#lista).
+    var cta = $('announce-cta');
+    if (cta) { cta.textContent = 'Lista de espera →'; cta.href = '#lista'; cta.removeAttribute('target'); }
+    var fin = document.querySelector('.final .btn-primary');
+    if (fin) { fin.textContent = '📩 Entrar na lista de espera'; fin.href = '#lista'; fin.removeAttribute('target'); }
+    var mc = document.querySelector('.cd-cta');
+    if (mc) { mc.textContent = 'Entrar na lista →'; mc.href = '#lista'; mc.removeAttribute('target'); mc.onclick = function () { closeClock(); }; }
     var b = $('plan-badge'); if (b) b.textContent = 'Vagas limitadas';
     var p = $('plan-price'); if (p) p.textContent = '993,84€';
     var n = $('plan-note'); if (n) n.textContent = 'pagamento único · próxima janela por anunciar';
@@ -905,6 +946,36 @@
   setInterval(render, 1000);
 })();
 
+// Lista de espera: grava o email via endpoint público do Radar (honeypot
+// anti-bot no campo escondido "web"; o endpoint valida e deduplica).
+(function () {
+  var form = document.getElementById('lead-form');
+  if (!form) return;
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var btn = document.getElementById('lead-btn');
+    var email = document.getElementById('lead-email').value;
+    var hp = form.querySelector('input[name="web"]').value;
+    btn.disabled = true; btn.textContent = 'A guardar…';
+    fetch('https://app.defisurfers.xyz/api/public/lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, source: 'hub', web: hp })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (d && d.ok) {
+        form.style.display = 'none';
+        document.getElementById('lead-ok').style.display = 'block';
+      } else {
+        btn.disabled = false; btn.textContent = 'Avisa-me';
+        alert('Email inválido — confirma e tenta de novo.');
+      }
+    }).catch(function () {
+      btn.disabled = false; btn.textContent = 'Avisa-me';
+      alert('A ligação falhou — tenta outra vez.');
+    });
+  });
+})();
+
 // Números e tabela ao vivo — mesmo endpoint público do teaser do Surf Drops.
 (function () {
   var API = 'https://app.defisurfers.xyz/api/public/teaser';
@@ -940,5 +1011,7 @@
   }).catch(function () { /* skeletons ficam */ });
 })();
 </script>
+<!-- Vercel Web Analytics: sem cookies, privacy-first, mesma origem (CSP ok). -->
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
