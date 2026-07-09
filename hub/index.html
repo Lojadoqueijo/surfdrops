@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DeFi Surfers — A primeira e maior comunidade de DeFi em Portugal</title>
-<meta name="description" content="A primeira e maior comunidade de DeFi em Portugal. Há 3 anos a desmistificar DeFi no país: conteúdos educativos do zero ao avançado, Telegram e Discord privados, e as ferramentas que usamos todos os dias (Linha do Swell e Radar do Swell, 3.350 ativos). Planta agora e colhe o ciclo de 2027 a 2029.">
+<meta name="description" content="A primeira e maior comunidade de DeFi em Portugal. Há 3 anos a desmistificar DeFi no país: conteúdos educativos do zero ao avançado, Telegram e Discord privados, e as ferramentas que usamos todos os dias (Linha do Swell e Radar do Swell, 3.600+ ativos). Planta agora e colhe o ciclo de 2027 a 2029.">
 <link rel="canonical" href="https://defisurfers.xyz/">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏄</text></svg>">
 <meta property="og:title" content="DeFi Surfers — A primeira e maior comunidade de DeFi em Portugal">
@@ -236,6 +236,10 @@
   .btn-ghost:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
   .hero-yt { margin-top: 18px; font-size: 13px; color: var(--text-faint); }
   .hero-yt b { color: var(--text-dim); }
+  /* Prazo da janela visível no próprio hero (a barra do topo sofre de banner blindness). */
+  .hero-window { margin-top: 14px; font-size: 13px; color: var(--text-dim); }
+  .hero-window b { color: var(--warn); }
+  .hero-window s { color: var(--text-faint); }
   .hero-stats { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--border); }
   .hstat { text-align: center; }
   .hstat-v { font-family: 'JetBrains Mono', monospace; display: block; font-size: 28px; font-weight: 800; }
@@ -518,6 +522,7 @@
       <a class="btn btn-primary" href="https://t.me/surfistacrypto" target="_blank" rel="noopener">🌊 Garantir a minha vaga</a>
       <a class="btn btn-ghost" href="#radar">Ver o Radar ao vivo ↓</a>
     </div>
+    <p class="hero-window" id="hero-window">Janela aberta até <b>domingo à meia-noite (13/07)</b> · 795,07€ em vez de <s>993,84€</s></p>
     <p class="hero-yt">
       Acompanhas-nos no <b>YouTube</b>? Aqui é onde levamos isto a sério.
     </p>
@@ -545,7 +550,7 @@
         </div>
       </div>
       <div class="radar-fade">
-        <span class="radar-lock">🔒 +3.450 ativos, watchlist pessoal e alertas — no Radar completo</span>
+        <span class="radar-lock">🔒 3.600+ ativos, watchlist pessoal e alertas — no Radar completo</span>
       </div>
     </div>
     <p class="radar-note">Dados reais · desde o flip da Linha · atualização diária ao fecho das velas · ilustrativo, não é recomendação</p>
@@ -671,7 +676,7 @@
       <div class="pillar hot">
         <span class="pillar-ico">📡</span>
         <h3>Radar do Swell <em>Novo</em></h3>
-        <p>O mesmo motor da Linha a varrer <strong>3.350 ativos</strong>: cripto, ações dos EUA, ETFs, commodities e índices globais. Vês onde está a acontecer sem abrir 50 gráficos.</p>
+        <p>O mesmo motor da Linha a varrer <strong>mais de 3.600 ativos</strong>: cripto, ações dos EUA, ETFs, commodities e índices globais. Vês onde está a acontecer sem abrir 50 gráficos.</p>
       </div>
     </div>
   </section>
@@ -683,17 +688,22 @@
       <h2>Escolhe como <span>entras na água</span></h2>
       <p>O Radar está sempre aberto. A comunidade completa abre em janelas, com vagas limitadas — e a janela está <b style="color:var(--up)">aberta agora, com 20% de desconto</b>.</p>
     </div>
+    <!-- Ordem deliberada: o vitalício PRIMEIRO (âncora alta — os outros parecem
+         degraus para chegar lá; no mobile é o primeiro card que se vê). -->
     <div class="plans">
-      <div class="plan">
-        <div class="plan-name">Radar · Mensal</div>
-        <div class="plan-price">59€<span>/mês</span></div>
-        <div class="plan-note">sem fidelização, cancelas quando quiseres</div>
+      <div class="plan best">
+        <span class="plan-badge" id="plan-badge">Janela aberta · -20%</span>
+        <div class="plan-name">DeFi Surfers · Vitalício</div>
+        <div class="plan-price" id="plan-price"><s>993,84€</s>795,07€</div>
+        <div class="plan-note" id="plan-note">pagamento único · <b>poupas 198,77€</b> nesta janela · preço normal 993,84€</div>
         <ul>
-          <li>Acesso completo aos 3.350 ativos</li>
-          <li>Watchlist pessoal + alertas Telegram</li>
-          <li>Acumula Crédito Surfer para a comunidade</li>
+          <li><strong>Radar do Swell vitalício</strong></li>
+          <li>Conteúdos educativos completos (do zero ao avançado)</li>
+          <li>Linha do Swell (indicador TradingView)</li>
+          <li>Telegram + Discord privados · calls semanais</li>
+          <li>Membros não voltam a pagar o Radar. Nunca.</li>
         </ul>
-        <a class="plan-btn" href="https://t.me/surfistacrypto" target="_blank" rel="noopener">Falar no Telegram</a>
+        <a class="plan-btn" href="https://t.me/surfistacrypto" target="_blank" rel="noopener">Garantir a minha vaga</a>
       </div>
       <div class="plan">
         <span class="plan-badge soft">Poupa 32%</span>
@@ -707,19 +717,16 @@
         </ul>
         <a class="plan-btn" href="https://t.me/surfistacrypto" target="_blank" rel="noopener">Falar no Telegram</a>
       </div>
-      <div class="plan best">
-        <span class="plan-badge" id="plan-badge">Janela aberta · -20%</span>
-        <div class="plan-name">DeFi Surfers · Vitalício</div>
-        <div class="plan-price" id="plan-price"><s>993,84€</s>795,07€</div>
-        <div class="plan-note" id="plan-note">pagamento único · preço normal 993,84€ · -20% só na janela atual</div>
+      <div class="plan">
+        <div class="plan-name">Radar · Mensal</div>
+        <div class="plan-price">59€<span>/mês</span></div>
+        <div class="plan-note">sem fidelização, cancelas quando quiseres</div>
         <ul>
-          <li><strong>Radar do Swell vitalício</strong></li>
-          <li>Conteúdos educativos completos (do zero ao avançado)</li>
-          <li>Linha do Swell (indicador TradingView)</li>
-          <li>Telegram + Discord privados · calls semanais</li>
-          <li>Membros não voltam a pagar o Radar. Nunca.</li>
+          <li>Acesso completo aos 3.600+ ativos</li>
+          <li>Watchlist pessoal + alertas Telegram</li>
+          <li>Acumula Crédito Surfer para a comunidade</li>
         </ul>
-        <a class="plan-btn" href="https://t.me/surfistacrypto" target="_blank" rel="noopener">Garantir a minha vaga</a>
+        <a class="plan-btn" href="https://t.me/surfistacrypto" target="_blank" rel="noopener">Falar no Telegram</a>
       </div>
     </div>
     <p class="credit-note">
@@ -893,10 +900,16 @@
     if (left > 0) {
       var c = $('countdown'); if (c) c.textContent = fmtLeft(left);
       if (a) { if (left <= DAY) a.classList.add('urgent'); else a.classList.remove('urgent'); }
+      // Janela ABERTA: a lista de espera fica escondida — é uma alternativa de
+      // custo zero ao lado do CTA de compra (porta de fuga). Reaparece no fecho.
+      var liOpen = $('lista'); if (liOpen) liOpen.style.display = 'none';
       updateModal(left); updateFloat(left);
       return;
     }
     if (a) a.classList.remove('urgent');
+    // Janela FECHADA: lista de espera visível (recebe os CTAs); prazo do hero sai.
+    var liClosed = $('lista'); if (liClosed) liClosed.style.display = '';
+    var hw = $('hero-window'); if (hw) hw.style.display = 'none';
     var t = $('announce-text');
     if (t) t.innerHTML = 'Inscrições fechadas — entra na <b>lista de espera</b> para a próxima janela.';
     // Fechado: os CTAs deixam de morrer num DM e passam a CAPTURAR o lead (#lista).
