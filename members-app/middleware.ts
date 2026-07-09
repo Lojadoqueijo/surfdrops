@@ -17,6 +17,7 @@ const PUBLIC = [
   /^\/api\/telegram\//,
   /^\/favicon/,
   /^\/robots\.txt$/, // senão o middleware manda os bots para /login
+  /^\/_vercel\//, // Web Analytics (script + beacons) tem de passar sem sessão
 ];
 
 export async function middleware(req: NextRequest) {
