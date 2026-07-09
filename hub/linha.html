@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backtest da Linha do Swell — trade a trade | DeFi Surfers</title>
+<meta name="description" content="O histórico completo da Linha do Swell em Bitcoin, Solana e Polkadot: todos os flips, todos os trades — incluindo os maus. Retorno e drawdown contra o buy &amp; hold, verificável vela a vela.">
+<link rel="canonical" href="https://defisurfers.xyz/linha">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏄</text></svg>">
+<meta property="og:title" content="A Linha do Swell, trade a trade — backtest completo">
+<meta property="og:description" content="BTC +2.921% vs +1.458% do buy & hold. Todos os trades públicos, incluindo os maus. Verificável vela a vela.">
+<meta property="og:url" content="https://defisurfers.xyz/linha">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://app.defisurfers.xyz/api/public/og?v=1">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #120826; --bg-deep: #0d0620; --bg-elev: #1c0f38; --bg-card: #251447;
+    --border: #35205c;
+    --text: #ece8f6; --text-dim: #b6adcc; --text-faint: #7d6f9a;
+    --accent: #8b5cf6; --accent-blue: #a78bfa;
+    --warn: #ffb547; --up: #22c55e; --hot: #ef4444;
+    --gradient-1: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif; font-size: 15px; line-height: 1.6;
+    background-image: radial-gradient(90% 60% at 50% -10%, rgba(139,92,246,.16), transparent 60%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+    background-attachment: fixed;
+  }
+  a { color: var(--accent-blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+
+  .topnav { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; }
+  .brand { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 16px; color: var(--text); }
+  .brand span { color: var(--accent); }
+  .topnav .links a { margin-left: 18px; font-size: 13px; font-weight: 600; }
+
+  header.hero { text-align: center; padding: 44px 0 34px; }
+  .kicker { font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 2.5px;
+    font-size: 11px; color: var(--warn); font-weight: 800; }
+  h1 { font-size: clamp(28px, 5vw, 42px); font-weight: 800; margin: 12px 0 14px; letter-spacing: -0.5px; }
+  h1 span { color: var(--accent); }
+  .hero p { color: var(--text-dim); max-width: 640px; margin: 0 auto; }
+  .updated { display: inline-block; margin-top: 14px; font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--text-faint); border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; }
+
+  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 30px 0 8px; }
+  .sum-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+  .sum-card h3 { font-size: 14px; margin-bottom: 10px; }
+  .sum-card h3 small { color: var(--text-faint); font-weight: 600; }
+  .sum-big { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 26px; color: var(--up); line-height: 1.15; }
+  .sum-big.flat { color: var(--warn); }
+  .sum-vs { font-size: 12.5px; color: var(--text-dim); margin-top: 2px; }
+  .sum-dd { font-size: 12px; color: var(--text-faint); margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+  .sum-dd b { color: var(--text-dim); }
+
+  section.asset { margin: 44px 0; }
+  section.asset h2 { font-size: 22px; margin-bottom: 4px; }
+  section.asset h2 em { font-style: normal; color: var(--text-faint); font-size: 14px; font-weight: 600; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; }
+  .chip { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 700;
+    background: var(--bg-elev); border: 1px solid var(--border); border-radius: 999px; padding: 5px 12px; color: var(--text-dim); }
+  .chip b { color: var(--text); }
+  .chip.win b { color: var(--up); } .chip.loss b { color: var(--hot); }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-elev); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 560px; }
+  th, td { padding: 9px 14px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child, th:nth-child(2), td:nth-child(2), th:nth-child(4), td:nth-child(4) { text-align: left; }
+  th { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-faint); }
+  td { font-variant-numeric: tabular-nums; color: var(--text-dim); }
+  tr:last-child td { border-bottom: none; }
+  td.pos { color: var(--up); font-weight: 700; } td.neg { color: var(--hot); font-weight: 700; }
+  .asset-note { font-size: 13px; color: var(--text-dim); margin-top: 12px; }
+  .asset-note b { color: var(--text); }
+
+  .method { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin: 40px 0; }
+  .method h2 { font-size: 17px; margin-bottom: 12px; }
+  .method ul { padding-left: 20px; color: var(--text-dim); font-size: 13.5px; }
+  .method li { margin-bottom: 7px; }
+
+  .cta-final { text-align: center; padding: 30px 0 20px; }
+  .cta-final h2 { font-size: 24px; margin-bottom: 10px; }
+  .cta-final p { color: var(--text-dim); max-width: 560px; margin: 0 auto 20px; }
+  .btn { display: inline-block; background: var(--gradient-1); color: #1a0a2e; font-weight: 800;
+    padding: 14px 30px; border-radius: 999px; box-shadow: 0 10px 30px rgba(139,92,246,.35); }
+  .btn:hover { filter: brightness(1.06); text-decoration: none; }
+  .cta-sec { display: block; margin-top: 14px; font-size: 13px; }
+
+  footer { border-top: 1px solid var(--border); margin-top: 40px; padding: 22px 0 34px; }
+  .disclaimer { font-size: 11.5px; color: var(--text-faint); line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav class="topnav">
+    <a class="brand" href="https://defisurfers.xyz">🌊 DeFi<span>Surfers</span></a>
+    <span class="links">
+      <a href="https://defisurfers.xyz">A comunidade</a>
+      <a href="https://app.defisurfers.xyz">Abrir app</a>
+    </span>
+  </nav>
+
+  <header class="hero">
+    <span class="kicker">Histórico completo · sem seleção de trades</span>
+    <h1>A Linha do Swell, <span>trade a trade</span>.</h1>
+    <p>
+      Regra mecânica, sem opinião: <b>long no fecho semanal que confirma o flip bullish, cash no
+      fecho que confirma o bearish</b>. Publicamos todos os trades que a regra gerou desde o início
+      do histórico — incluindo os maus. Podes conferir cada data no gráfico.
+    </p>
+    <span class="updated">Atualizado a 10/07/2026 · velas semanais Binance · só fechos confirmados</span>
+  </header>
+
+  <div class="summary">
+    <div class="sum-card">
+      <h3>Bitcoin <small>· desde 2017</small></h3>
+      <div class="sum-big">+2.921%</div>
+      <div class="sum-vs">buy &amp; hold: +1.458%</div>
+      <div class="sum-dd">Pior queda: <b>-58%</b> vs -83% do buy &amp; hold</div>
+    </div>
+    <div class="sum-card">
+      <h3>Solana <small>· desde 2020</small></h3>
+      <div class="sum-big">+2.521%</div>
+      <div class="sum-vs">buy &amp; hold: +2.308%</div>
+      <div class="sum-dd">Pior queda: <b>-73%</b> vs -96% do buy &amp; hold</div>
+    </div>
+    <div class="sum-card">
+      <h3>Polkadot <small>· desde 2020</small></h3>
+      <div class="sum-big flat">+5%</div>
+      <div class="sum-vs">buy &amp; hold: <b style="color:var(--hot)">-78%</b></div>
+      <div class="sum-dd">Um acerto pagou três erros — e evitou o desastre</div>
+    </div>
+  </div>
+
+  <!-- ===================== BITCOIN ===================== -->
+  <section class="asset">
+    <h2>Bitcoin <em>BTCUSDT · semanal · 2017-08 → 2026-06</em></h2>
+    <div class="chips">
+      <span class="chip win">Linha: <b>+2.921%</b></span>
+      <span class="chip">Buy &amp; hold: <b>+1.458%</b></span>
+      <span class="chip">Pior queda: <b>-58%</b> vs -83%</span>
+      <span class="chip">Trades: <b>5</b> (4 positivos)</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Entrada</th><th>Preço</th><th>Saída</th><th>Preço</th><th>Resultado</th><th>Semanas</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>2017-08-14</td><td>$4.086</td><td>2018-01-29</td><td>$8.185</td><td class="pos">+100,3%</td><td>24</td></tr>
+          <tr><td>2</td><td>2019-04-22</td><td>$5.308</td><td>2019-09-23</td><td>$8.044</td><td class="pos">+51,6%</td><td>22</td></tr>
+          <tr><td>3</td><td>2020-07-27</td><td>$11.071</td><td>2021-05-17</td><td>$34.655</td><td class="pos">+213,0%</td><td>42</td></tr>
+          <tr><td>4</td><td>2021-10-04</td><td>$54.659</td><td>2022-01-03</td><td>$41.865</td><td class="neg">-23,4%</td><td>13</td></tr>
+          <tr><td>5</td><td>2023-01-16</td><td>$22.708</td><td>2025-11-10</td><td>$94.261</td><td class="pos">+315,1%</td><td>147</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="asset-note">Sim, o trade 4 perdeu <b>-23,4%</b> — os falsos sinais existem e mostramo-los.
+      O que interessa é o conjunto: 5 trades em 9 anos, e o maior durou <b>quase 3 anos</b> (22,7k → 94,3k).
+      Enquanto isso, quem segurou sem regra passou por uma queda de -83%.</p>
+  </section>
+
+  <!-- ===================== SOLANA ===================== -->
+  <section class="asset">
+    <h2>Solana <em>SOLUSDT · semanal · 2020-08 → 2026-06</em></h2>
+    <div class="chips">
+      <span class="chip win">Linha: <b>+2.521%</b></span>
+      <span class="chip">Buy &amp; hold: <b>+2.308%</b></span>
+      <span class="chip">Pior queda: <b>-73%</b> vs -96%</span>
+      <span class="chip">Trades: <b>4</b> (3 positivos)</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Entrada</th><th>Preço</th><th>Saída</th><th>Preço</th><th>Resultado</th><th>Semanas</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>2020-08-10</td><td>$3,39</td><td>2021-05-17</td><td>$24,54</td><td class="pos">+624,1%</td><td>40</td></tr>
+          <tr><td>2</td><td>2021-08-16</td><td>$72,78</td><td>2022-01-17</td><td>$99,78</td><td class="pos">+37,1%</td><td>22</td></tr>
+          <tr><td>3</td><td>2023-07-10</td><td>$27,42</td><td>2025-03-03</td><td>$126,51</td><td class="pos">+361,4%</td><td>86</td></tr>
+          <tr><td>4</td><td>2025-09-08</td><td>$239,76</td><td>2025-11-10</td><td>$137,17</td><td class="neg">-42,8%</td><td>9</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="asset-note">A SOL caiu <b>-96%</b> no bear de 2022 para quem segurou. A regra saiu em
+      janeiro de 2022 a $99,78 e só voltou em julho de 2023 a $27,42 — não apanhou o fundo exato
+      (nenhuma regra apanha), mas evitou o pior e apanhou o ciclo seguinte inteiro.</p>
+  </section>
+
+  <!-- ===================== POLKADOT ===================== -->
+  <section class="asset">
+    <h2>Polkadot <em>DOTUSDT · semanal · 2020-08 → 2026-06</em></h2>
+    <div class="chips">
+      <span class="chip win">Linha: <b>+5%</b></span>
+      <span class="chip loss">Buy &amp; hold: <b>-78%</b></span>
+      <span class="chip">Trades: <b>4</b> (1 positivo)</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Entrada</th><th>Preço</th><th>Saída</th><th>Preço</th><th>Resultado</th><th>Semanas</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>2020-08-17</td><td>$3,98</td><td>2021-05-17</td><td>$17,91</td><td class="pos">+350,3%</td><td>39</td></tr>
+          <tr><td>2</td><td>2021-09-06</td><td>$35,79</td><td>2022-01-17</td><td>$18,81</td><td class="neg">-47,4%</td><td>19</td></tr>
+          <tr><td>3</td><td>2023-02-13</td><td>$7,44</td><td>2024-06-17</td><td>$5,65</td><td class="neg">-24,0%</td><td>70</td></tr>
+          <tr><td>4</td><td>2024-11-18</td><td>$8,83</td><td>2025-01-27</td><td>$5,15</td><td class="neg">-41,6%</td><td>10</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="asset-note">O caso que mostra <b>para que serve a regra</b>: só 1 trade em 4 acertou —
+      mas esse acerto (+350%) pagou os três erros, e o conjunto fechou <b>positivo num ativo que
+      destruiu -78%</b> de quem o segurou. Não é magia; é corte de perdas, sistemático.</p>
+  </section>
+
+  <!-- ===================== METODOLOGIA ===================== -->
+  <div class="method">
+    <h2>Metodologia (para poderes conferir)</h2>
+    <ul>
+      <li><b>Regra:</b> long no fecho da vela semanal que confirma o flip bullish; 100% cash no fecho que confirma o bearish. Sem shorts, sem alavancagem, sem discricionariedade.</li>
+      <li><b>Motor:</b> exatamente o mesmo código que calcula os flips no Radar do Swell, corrido sobre o histórico completo — não é uma versão "de montra".</li>
+      <li><b>Dados:</b> velas semanais Binance (pares USDT), desde a primeira vela disponível de cada ativo. Só velas fechadas — nunca a vela em curso.</li>
+      <li><b>Medição:</b> resultados fecho-a-fecho. A "pior queda" é o maior drawdown da curva de capital em fechos semanais, para a regra e para o buy &amp; hold no mesmo período.</li>
+      <li><b>Não incluído:</b> taxas de trading, slippage e impostos — reduziriam ambos os lados.</li>
+      <li><b>Sem seleção:</b> a lista de trades de cada ativo está completa, do primeiro ao último flip. Nada foi removido.</li>
+    </ul>
+  </div>
+
+  <!-- ===================== CTA ===================== -->
+  <section class="cta-final">
+    <h2>A Linha diz-te <span style="color:var(--accent)">quando</span>. O Radar diz-te onde.</h2>
+    <p>Os membros DeFi Surfers usam a Linha do Swell no TradingView e o Radar a varrer 3.600+ ativos
+      com esta mesma regra — cripto, ações, ETFs, commodities e índices.</p>
+    <a class="btn" href="https://defisurfers.xyz/#planos">Conhecer a comunidade →</a>
+    <a class="cta-sec" href="https://defisurfers.xyz">← Voltar à página principal</a>
+  </section>
+
+  <footer>
+    <p class="disclaimer">
+      Resultados de <b>simulação histórica (backtest)</b>, calculados sobre dados passados com a regra
+      mecânica descrita acima. Não incluem taxas, slippage nem impostos. Desempenho passado — real ou
+      simulado — não garante resultados futuros. Este material é estritamente educativo e informativo:
+      nada nesta página constitui recomendação de compra ou venda de qualquer ativo, nem aconselhamento
+      financeiro. Criptoativos envolvem risco real de perda total do capital. Faz sempre a tua própria
+      investigação (DYOR).
+    </p>
+  </footer>
+</div>
+
+<!-- Vercel Web Analytics -->
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

@@ -350,6 +350,19 @@
   }
   .radar-note { text-align: center; color: var(--text-faint); font-size: 11px; margin-top: 12px; }
 
+  /* ---- tira de prova histórica (link p/ o backtest /linha) ---- */
+  .proof-strip {
+    display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
+    max-width: 760px; margin: 22px auto 0; padding: 13px 20px;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+    color: var(--text-dim); font-size: 13px; text-align: center;
+  }
+  .proof-strip:hover { border-color: var(--accent); text-decoration: none; }
+  .ps-kicker { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1.5px; color: var(--warn); white-space: nowrap; }
+  .ps-txt b { color: var(--text); } .ps-txt b.up { color: var(--up); }
+  .ps-link { color: var(--accent-blue); font-weight: 700; white-space: nowrap; }
+
   /* ---- radar ao vivo: ticker vertical animado (melhores performers) ---- */
   .radar-ticker-wrap {
     position: relative; max-width: 620px; margin: 0 auto;
@@ -559,6 +572,13 @@
       </div>
     </div>
     <p class="radar-note">Dados reais · desde o flip da Linha · atualização diária ao fecho das velas · ilustrativo, não é recomendação</p>
+
+    <!-- Prova histórica: manchete + link para o backtest completo (/linha). -->
+    <a class="proof-strip" href="/linha">
+      <span class="ps-kicker">📜 Backtest público</span>
+      <span class="ps-txt">Bitcoin: <b class="up">+2.921%</b> com a Linha vs <b>+1.458%</b> do buy &amp; hold — histórico completo, trade a trade, incluindo os maus.</span>
+      <span class="ps-link">Ver todos os trades →</span>
+    </a>
   </section>
 
   <!-- ===================== AUTORIDADE ===================== -->
