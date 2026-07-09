@@ -26,10 +26,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Chamar os lotes do horário
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
           call() {
             echo "== $1 =="
-            curl -sS --max-time 320 "https://app.defisurfers.xyz/api/cron/refresh?$1" || true
+            # O endpoint é fail-closed: exige o Bearer (auditoria 1.2).
+            curl -sS --max-time 320 -H "Authorization: Bearer ${CRON_SECRET}" "https://app.defisurfers.xyz/api/cron/refresh?$1" || true
             echo
           }
           vigia() {
