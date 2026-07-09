@@ -1,0 +1,22 @@
+# Surf Drops (drops.defisurfers.xyz) — conteúdo público de airdrops da
+# comunidade DeFi Surfers. Bots de pesquisa e de IA são bem-vindos.
+
+User-agent: *
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://drops.defisurfers.xyz/sitemap.xml

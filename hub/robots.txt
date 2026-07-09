@@ -1,0 +1,22 @@
+# defisurfers.xyz — página pública da comunidade DeFi Surfers.
+# Bots de pesquisa e de IA são bem-vindos (GEO: queremos ser citados).
+
+User-agent: *
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://defisurfers.xyz/sitemap.xml
