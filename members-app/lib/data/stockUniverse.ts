@@ -129,7 +129,7 @@ const CURATED_STOCKS: UniverseAsset[] = [
       ["HO.PA", "EURONEXT:HO", "Thales", "FR", "EUR", ["Europa", "Defesa"]],
       // 🌍 Exceções: Suíça, Países Baixos, Bélgica, Espanha
       ["NESN.SW", "SIX:NESN", "Nestlé", "CH", "CHF", ["Europa"]],
-      ["ROG.SW", "SIX:ROG", "Roche", "CH", "CHF", ["Europa", "Farma"]],
+      ["RO.SW", "SIX:RO", "Roche", "CH", "CHF", ["Europa", "Farma"]], // ação ao portador (ROG.SW não existe no Yahoo)
       ["CFR.SW", "SIX:CFR", "Richemont (Cartier)", "CH", "CHF", ["Europa", "Luxo"]],
       ["ABBN.SW", "SIX:ABBN", "ABB", "CH", "CHF", ["Europa", "IA"]],
       ["SDZ.SW", "SIX:SDZ", "Sandoz Group", "CH", "CHF", ["Europa", "Farma"]],
