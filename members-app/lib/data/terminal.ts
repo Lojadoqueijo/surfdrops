@@ -28,7 +28,7 @@ export interface TerminalRow {
   yahooSymbol: string | null;
   rankHint: number;
 
-  trend: "bullish" | "bearish";
+  trend: "bullish" | "bearish" | "novo";
   weeklyTrend: AssetSnapshot["weeklyTrend"];
   dailyTrend: AssetSnapshot["dailyTrend"];
   estado: AssetSnapshot["estado"];

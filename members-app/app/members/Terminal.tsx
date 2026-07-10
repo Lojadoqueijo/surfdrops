@@ -83,15 +83,19 @@ function fmtSince(ms: number | null): string {
 // Decisão 2026-07-05: sem estado WARMUP na UI — um ativo ou está bullish ou
 // bearish (como no terminal do Ivan). Os campos warmup/cooldown continuam no
 // motor/BD para uso futuro (alertas), mas não aparecem.
-type TrendTag = "BULLISH" | "BEARISH";
+type TrendTag = "BULLISH" | "BEARISH" | "NOVO";
 
+// "NOVO" = recém-listado, linha semanal a aquecer (ex.: SPCX pós-IPO) —
+// visível sem sinal; os filtros Bullish/Bearish escondem-no por definição.
 function trendTag(r: TerminalRow): TrendTag {
+  if (r.trend === "novo") return "NOVO";
   return r.trend === "bullish" ? "BULLISH" : "BEARISH";
 }
 
 const TREND_CLASS: Record<TrendTag, string> = {
   BULLISH: "t-bull",
   BEARISH: "t-bear",
+  NOVO: "t-novo",
 };
 
 interface Warning {
@@ -319,7 +323,8 @@ export default function Terminal({
   const pulse = useMemo(() => {
     const total = filtered.length;
     const bull = filtered.filter((r) => r.trend === "bullish").length;
-    const bear = total - bull;
+    // explícito (não total-bull): ativos "novo" não contam como bearish
+    const bear = filtered.filter((r) => r.trend === "bearish").length;
     const mcap = filtered.reduce((sum, r) => sum + (r.marketCap ?? 0), 0);
     return { total, bull, bear, mcap };
   }, [filtered]);
@@ -818,7 +823,16 @@ function FragmentRow({
           </div>
         </td>
         <td className="col-trend">
-          <span className={`chip ${TREND_CLASS[tag]}`}>{tag}</span>
+          <span
+            className={`chip ${TREND_CLASS[tag]}`}
+            title={
+              tag === "NOVO"
+                ? "Recém-listado — a linha semanal precisa de ~11 velas fechadas para ativar. Sem sinal até lá."
+                : undefined
+            }
+          >
+            {tag === "NOVO" ? "⏳ NOVO" : tag}
+          </span>
         </td>
         <td className={`num col-delta ${(r.sinceFlipPct ?? 0) >= 0 ? "bull" : "bear"}`}>
           {fmtPct(r.sinceFlipPct)}
@@ -874,7 +888,9 @@ function FragmentRow({
                 </div>
                 <div className="lvl">
                   <span className="lvl-k">Next Flip (stop)</span>
-                  <span className="lvl-v">{fmtPrice(r.nextFlip, r.currency)}</span>
+                  <span className="lvl-v">
+                    {r.trend === "novo" ? "—" : fmtPrice(r.nextFlip, r.currency)}
+                  </span>
                 </div>
                 <div className="lvl">
                   <span className="lvl-k">Last Flip</span>

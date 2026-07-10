@@ -109,7 +109,7 @@ export function breadthClass(sector: string): "cripto" | "acoes" | "etf_cmd_idx"
  * NUNCA se poda — cresce ~4 linhas/dia (~KBs/ano). Idempotente (upsert do dia).
  */
 export async function recordBreadthDaily(
-  snapshots: Array<{ sector: string; trend: "bullish" | "bearish" }>,
+  snapshots: Array<{ sector: string; trend: "bullish" | "bearish" | "novo" }>,
   date = todayIsoDate()
 ): Promise<PersistResult> {
   const supabase = getSupabase();
@@ -121,7 +121,8 @@ export async function recordBreadthDaily(
     const cls = breadthClass(s.sector);
     const a = agg.get(cls) ?? { bull: 0, bear: 0 };
     if (s.trend === "bullish") a.bull++;
-    else a.bear++;
+    else if (s.trend === "bearish") a.bear++; // "novo" fica fora da Maré
+    else continue;
     agg.set(cls, a);
   }
   const rows = [...agg.entries()].map(([cls, a]) => ({

@@ -61,7 +61,9 @@ export interface AssetSnapshot {
   yahooSymbol: string | null;
   rank: number | null;
   categories: string[] | null;
-  trend: "bullish" | "bearish";
+  // "novo" = recém-listado, linha semanal ainda a aquecer (ATR precisa de ~11
+  // velas) — visível no terminal sem sinal; converte-se sozinho quando aquecer.
+  trend: "bullish" | "bearish" | "novo";
   weeklyTrend: TrendDir;
   dailyTrend: TrendDir;
   estado: Estado;

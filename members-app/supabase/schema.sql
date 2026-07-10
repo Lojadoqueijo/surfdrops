@@ -15,7 +15,8 @@ create table if not exists snapshots (
   yahoo_symbol text,
   rank integer,
   categories jsonb,
-  trend text not null check (trend in ('bullish', 'bearish')),
+  -- 'novo' = recém-listado, linha semanal a aquecer (visível sem sinal)
+  trend text not null check (trend in ('bullish', 'bearish', 'novo')),
   weekly_trend text check (weekly_trend in ('bullish', 'bearish')),
   daily_trend text check (daily_trend in ('bullish', 'bearish')),
   estado text check (estado in ('ALIGNED BULL', 'ALIGNED BEAR', 'CONFLICT')),

@@ -48,8 +48,46 @@ export function buildAssetSnapshot(params: {
   const last = weeklyStates[weeklyStates.length - 1];
 
   // Ativo demasiado recente para o motor semanal (menos velas do que o ATR
-  // precisa → linha ainda NaN): excluir em vez de gravar valores inválidos.
-  if (!Number.isFinite(last.swellLevel)) return null;
+  // precisa → linha ainda NaN): visível como "novo" — sem sinal, sem flip,
+  // sem níveis — em vez de invisível (decisão 2026-07-10, caso SPCX).
+  if (!Number.isFinite(last.swellLevel)) {
+    const lastPrice =
+      (dailyCandles.length > 0 ? dailyCandles[dailyCandles.length - 1].close : undefined) ??
+      weeklyCandles[weeklyCandles.length - 1].close;
+    return {
+      symbol,
+      sector,
+      name: meta?.name ?? null,
+      logoUrl: meta?.logoUrl ?? null,
+      tvSymbol: meta?.tvSymbol ?? null,
+      yahooSymbol: meta?.yahooSymbol ?? null,
+      rank: meta?.rank ?? null,
+      categories: meta?.categories ?? null,
+      trend: "novo",
+      weeklyTrend: null,
+      dailyTrend: null,
+      estado: null,
+      nextFlip: 0,
+      lastFlip: null,
+      lastFlipClose: null,
+      lastFlipDate: null,
+      dailyFlipDate: null,
+      sinceFlipPct: null,
+      price: lastPrice,
+      updatedAt: new Date().toISOString(),
+      marketCap: meta?.marketCap ?? null,
+      strength: null,
+      warmup: false,
+      cooldown: false,
+      exhaustionAtr: null,
+      dotTop: false,
+      dotBottom: false,
+      bearDiv: false,
+      bullDiv: false,
+      cheapZone: false,
+      tp: null,
+    };
+  }
 
   const weeklySeries = trendDirectionSeries(weeklyCandles);
   const dailySeries = dailyCandles.length > 0 ? trendDirectionSeries(dailyCandles) : [];
