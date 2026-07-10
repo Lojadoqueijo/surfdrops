@@ -21,6 +21,11 @@ const BREADTH_CLASS: Partial<Record<TabId, string>> = {
   Commodities: "etf_cmd_idx",
   Índices: "etf_cmd_idx",
 };
+const BREADTH_LABEL: Record<string, string> = {
+  cripto: "Cripto",
+  acoes: "Ações",
+  etf_cmd_idx: "ETFs, Commodities e Índices",
+};
 
 interface BreadthPoint {
   date: string;
@@ -34,7 +39,7 @@ interface BreadthData {
 
 // Chip da Maré no pulso: sparkline dos ~90 dias + delta em pontos percentuais.
 // Estado vazio honesto enquanto o histórico não acumula (ações/ETFs).
-function MareChip({ cls }: { cls: string }) {
+function MareChip({ cls, onOpen }: { cls: string; onOpen: () => void }) {
   const [data, setData] = useState<BreadthData | null>(null);
   const [loading, setLoading] = useState(true);
   const cacheRef = useRef<Map<string, BreadthData>>(new Map());
@@ -84,10 +89,18 @@ function MareChip({ cls }: { cls: string }) {
 
   const pct = data?.latest?.pct ?? null;
   const delta = data?.deltaPp7d ?? null;
+  const clickable = enough;
 
   return (
-    <div className="stat mare-stat">
-      <span className="stat-k">Maré · 90d</span>
+    <div
+      className={`stat mare-stat${clickable ? " mare-clickable" : ""}`}
+      onClick={clickable ? onOpen : undefined}
+      role={clickable ? "button" : undefined}
+      tabIndex={clickable ? 0 : undefined}
+      onKeyDown={clickable ? (e) => (e.key === "Enter" || e.key === " ") && onOpen() : undefined}
+      title={clickable ? "Ver a Maré em detalhe" : undefined}
+    >
+      <span className="stat-k">Maré · 90d {clickable && <span className="mare-expand">⤢</span>}</span>
       {loading ? (
         <span className="mare-empty">a carregar…</span>
       ) : !enough ? (
@@ -104,12 +117,174 @@ function MareChip({ cls }: { cls: string }) {
             {delta !== null && (
               <em className={delta >= 0 ? "bull" : "bear"}>
                 {delta >= 0 ? "▲" : "▼"} {delta >= 0 ? "+" : ""}
-                {delta}pp/7d
+                {delta}%/7d
               </em>
             )}
           </span>
         </div>
       )}
+    </div>
+  );
+}
+
+interface BreadthFull {
+  date: string;
+  bull: number;
+  bear: number;
+  total: number;
+  pct: number;
+}
+
+// Painel expansível da Maré (fase 2): área do % bullish com seletor de período
+// e crosshair (data + % + contagem bull/bear na semana). Fecha com ✕/fora/Esc.
+function MarePanel({ cls, label, onClose }: { cls: string; label: string; onClose: () => void }) {
+  const RANGES: Array<[string, number]> = [
+    ["30d", 30],
+    ["90d", 90],
+    ["1a", 365],
+    ["Tudo", 3650],
+  ];
+  const [days, setDays] = useState(365);
+  const [series, setSeries] = useState<BreadthFull[] | null>(null);
+  const [hover, setHover] = useState<number | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    setSeries(null);
+    fetch(`/api/public/breadth?class=${cls}&days=${days}`)
+      .then((r) => r.json())
+      .then((j) => alive && setSeries(j?.ok ? (j.series ?? []) : []))
+      .catch(() => alive && setSeries([]));
+    return () => {
+      alive = false;
+    };
+  }, [cls, days]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const W = 760,
+    H = 300,
+    padL = 34,
+    padR = 12,
+    padT = 14,
+    padB = 26;
+  const iw = W - padL - padR,
+    ih = H - padT - padB;
+  const n = series?.length ?? 0;
+  const x = (i: number) => padL + (n > 1 ? (i / (n - 1)) * iw : 0);
+  const y = (v: number) => padT + ih - (v / 100) * ih;
+
+  const geom = useMemo(() => {
+    if (!series || n < 2) return null;
+    const line = series.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.pct).toFixed(1)}`).join("");
+    const area = `${line} L${x(n - 1).toFixed(1)},${y(0)} L${x(0).toFixed(1)},${y(0)} Z`;
+    const years: Array<{ i: number; y: number }> = [];
+    let lastYr = 0;
+    series.forEach((p, i) => {
+      const yr = Number(p.date.slice(0, 4));
+      if (yr !== lastYr) {
+        years.push({ i, y: yr });
+        lastYr = yr;
+      }
+    });
+    return { line, area, years };
+  }, [series, n]);
+
+  const cur = hover !== null && series ? series[hover] : null;
+
+  return (
+    <div className="mare-modal" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="mare-card">
+        <button className="mare-close" onClick={onClose} aria-label="Fechar">
+          ✕
+        </button>
+        <div className="mare-head">
+          <span className="mare-title">
+            Maré do mercado — <b>{label}</b>
+          </span>
+          <div className="mare-ranges">
+            {RANGES.map(([lbl, d]) => (
+              <button key={lbl} className={days === d ? "on" : ""} onClick={() => setDays(d)}>
+                {lbl}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {!series ? (
+          <div className="mare-panel-empty">a carregar…</div>
+        ) : n < 2 ? (
+          <div className="mare-panel-empty">Sem histórico suficiente para este período ainda.</div>
+        ) : (
+          <>
+            <div className="mare-chart-wrap">
+              <svg
+                viewBox={`0 0 ${W} ${H}`}
+                className="mare-chart"
+                onPointerMove={(e) => {
+                  const r = (e.currentTarget as SVGElement).getBoundingClientRect();
+                  const px = ((e.clientX - r.left) * W) / r.width;
+                  let i = Math.round(((px - padL) / iw) * (n - 1));
+                  i = Math.max(0, Math.min(n - 1, i));
+                  setHover(i);
+                }}
+                onPointerLeave={() => setHover(null)}
+              >
+                <rect x={padL} y={padT} width={iw} height={ih} className="mare-plot" />
+                {[25, 50, 75].map((t) => (
+                  <g key={t}>
+                    <line
+                      x1={padL}
+                      x2={W - padR}
+                      y1={y(t)}
+                      y2={y(t)}
+                      className={t === 50 ? "mare-mid50" : "mare-grid"}
+                    />
+                    <text x={padL - 6} y={y(t) + 3} className="mare-tick" textAnchor="end">
+                      {t}
+                    </text>
+                  </g>
+                ))}
+                {geom?.years.map((yr) => (
+                  <text key={yr.y} x={x(yr.i)} y={H - 8} className="mare-tick" textAnchor="middle">
+                    {yr.y}
+                  </text>
+                ))}
+                <path d={geom!.area} className="mare-panel-area" />
+                <path d={geom!.line} className="mare-panel-line" />
+                {cur && hover !== null && (
+                  <g>
+                    <line x1={x(hover)} x2={x(hover)} y1={padT} y2={padT + ih} className="mare-xh" />
+                    <circle cx={x(hover)} cy={y(cur.pct)} r={4} className="mare-xh-dot" />
+                  </g>
+                )}
+              </svg>
+              {cur && (
+                <div
+                  className="mare-tip"
+                  style={{ left: `${Math.min(Math.max((x(hover!) / W) * 100, 8), 78)}%` }}
+                >
+                  <span className="d">{cur.date}</span>
+                  <span className={cur.pct >= 50 ? "bull" : "bear"}>
+                    {Math.round(cur.pct)}% bullish
+                  </span>
+                  <span className="c">
+                    {cur.bull} verde · {cur.bear} vermelho
+                  </span>
+                </div>
+              )}
+            </div>
+            <p className="mare-foot">
+              % de ativos com tendência semanal bullish. Acima de 50% = maioria verde. Histórico
+              da cripto retro-calculado das velas; restantes classes acumulam a partir de agora.
+            </p>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -298,6 +473,7 @@ export default function Terminal({
   mock: boolean;
 }) {
   const [activeClass, setActiveClass] = useState<TabId>("Cripto");
+  const [mareOpen, setMareOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [trendFilter, setTrendFilter] = useState<Set<TrendTag>>(new Set());
   const [category, setCategory] = useState<string>("");
@@ -625,13 +801,21 @@ export default function Terminal({
             </span>
           </div>
           {activeClass !== "Watchlist" && BREADTH_CLASS[activeClass] && (
-            <MareChip cls={BREADTH_CLASS[activeClass]!} />
+            <MareChip cls={BREADTH_CLASS[activeClass]!} onOpen={() => setMareOpen(true)} />
           )}
           <span className="upd-note">
             Última atualização: {new Date(updatedAt).toLocaleString("pt-PT")}
           </span>
         </div>
       </header>
+
+      {mareOpen && activeClass !== "Watchlist" && BREADTH_CLASS[activeClass] && (
+        <MarePanel
+          cls={BREADTH_CLASS[activeClass]!}
+          label={BREADTH_LABEL[BREADTH_CLASS[activeClass]!]}
+          onClose={() => setMareOpen(false)}
+        />
+      )}
 
       <div className="controls">
         <input
