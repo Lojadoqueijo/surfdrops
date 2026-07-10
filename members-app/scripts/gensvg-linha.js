@@ -86,7 +86,7 @@ async function gen(symbol, label) {
     <text x="${x.toFixed(1)}" y="${y.toFixed(1)}" class="ann ${cls}" text-anchor="middle">${txt}</text>`;
   };
 
-  const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${label}: portfólio de 1.000 $ com a Linha vs buy & hold" class="eq-svg">
+  const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${label}: portfólio de 1.000 $ com a Linha vs buy & hold" class="eq-svg" data-t0="${candles[start].time}" data-lo="${lo.toFixed(4)}" data-hi="${hi.toFixed(4)}" data-strat="${strat.map((v) => Math.round(v)).join(",")}" data-bh="${bh.map((v) => Math.round(v)).join(",")}" data-cash="${cash.map((c) => (c ? 1 : 0)).join("")}">
   <!-- zonas em cash: a defesa a acontecer -->
   ${bands.map(([a, b]) => `<rect x="${lx(a).toFixed(1)}" y="${padT}" width="${(lx(b) - lx(a)).toFixed(1)}" height="${ih}" class="cash-band"/>`).join("\n  ")}
   ${ticks.map((t) => `<line x1="${padL}" x2="${W - padR}" y1="${ly(t).toFixed(1)}" y2="${ly(t).toFixed(1)}" class="grid"/><text x="${padL - 8}" y="${(ly(t) + 3.5).toFixed(1)}" class="tick" text-anchor="end">${t >= 1000 ? (t / 1000) + "k $" : t + " $"}</text>`).join("\n  ")}
@@ -95,6 +95,7 @@ async function gen(symbol, label) {
   <path d="${path(strat)}" class="line-strat"/>
   ${annot(tB, "bh", `-${Math.round(tB.dd * 100)}% quem segurou`)}
   ${annot(tS, "st", `-${Math.round(tS.dd * 100)}% com a Linha`)}
+  <g class="xh" style="display:none"><line class="xh-line" x1="0" x2="0" y1="${padT}" y2="${padT + ih}"/><circle class="xh-dot bh" r="4"/><circle class="xh-dot st" r="4"/></g>
 </svg>`;
 
   const meta = {
