@@ -338,7 +338,9 @@ export async function getStockUniverse(): Promise<UniverseAsset[]> {
       .map((c) => ({ c, mcap: mcaps.get(c.yahoo) ?? 0 }))
       .filter((x) => x.mcap > 0)
       .sort((a, b) => b.mcap - a.mcap)
-      .slice(0, STOCK_TOP_N - CURATED_STOCKS.length);
+      // Top 3000 COMPLETO (2026-07-10): as curadas são ADITIVAS — antes
+      // comiam o fim do ranking e expulsavam ~55 small caps dos EUA.
+      .slice(0, STOCK_TOP_N);
 
     const assets = ranked.map((x, i) => {
       const sp = gics.get(x.c.symbol);
@@ -346,7 +348,8 @@ export async function getStockUniverse(): Promise<UniverseAsset[]> {
     });
 
     // Curadas primeiro no array (→ fatia 0, sempre processada); dedupe caso
-    // uma já esteja no top por mcap. O total mantém-se em STOCK_TOP_N.
+    // uma já esteja no top por mcap. Total ≈ 3.055 → a fatia 6 (workflow
+    // GitHub) cobre o excedente acima de 3.000.
     const existing = new Set(assets.map((a) => a.symbol));
     const merged = [...CURATED_STOCKS.filter((c) => !existing.has(c.symbol)), ...assets];
 

@@ -356,7 +356,11 @@ export default function Terminal({
     // explícito (não total-bull): ativos "novo" não contam como bearish
     const bear = filtered.filter((r) => r.trend === "bearish").length;
     const mcap = filtered.reduce((sum, r) => sum + (r.marketCap ?? 0), 0);
-    return { total, bull, bear, mcap };
+    // internacionais sem mcap (cotação em moeda local) — ficam fora da soma
+    const mcapExcl = filtered.filter(
+      (r) => r.marketCap === null && r.country && r.country !== "US"
+    ).length;
+    return { total, bull, bear, mcap, mcapExcl };
   }, [filtered]);
 
   // Paginação: 20 por página; clamp quando os filtros encolhem o conjunto.
@@ -540,7 +544,15 @@ export default function Terminal({
               <span className="profile-sub">DeFi Surfer</span>
             </div>
           </div>
-          <div className="stat">
+          <div
+            className="stat"
+            style={{ cursor: "help" }}
+            title={
+              pulse.mcapExcl > 0
+                ? `Soma em USD dos ativos com market cap conhecido — exclui ${pulse.mcapExcl} ${pulse.mcapExcl === 1 ? "ação internacional cotada" : "ações internacionais cotadas"} em moeda local (mkt cap "—").`
+                : "Soma em USD dos ativos visíveis com market cap conhecido."
+            }
+          >
             <span className="stat-k">Total Market Cap</span>
             <span className="stat-v">{pulse.mcap > 0 ? fmtMarketCap(pulse.mcap) : "—"}</span>
           </div>
