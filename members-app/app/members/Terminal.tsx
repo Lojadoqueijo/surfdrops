@@ -98,6 +98,36 @@ const TREND_CLASS: Record<TrendTag, string> = {
   NOVO: "t-novo",
 };
 
+// Badge de país junto ao símbolo — só para ativos fora dos EUA (a informação
+// útil é "este é o diferente"; bandeira em 3.000 linhas americanas era ruído).
+// Código ISO em texto de propósito: emoji de bandeira não renderiza no Windows.
+const COUNTRY_NAMES: Record<string, string> = {
+  JP: "Japão",
+  GB: "Reino Unido",
+  DE: "Alemanha",
+  FR: "França",
+  CH: "Suíça",
+  NL: "Países Baixos",
+  BE: "Bélgica",
+  DK: "Dinamarca",
+  ES: "Espanha",
+  IT: "Itália",
+  PT: "Portugal",
+  SE: "Suécia",
+  CA: "Canadá",
+  AU: "Austrália",
+  BR: "Brasil",
+  MX: "México",
+  IN: "Índia",
+  KR: "Coreia do Sul",
+  TW: "Taiwan",
+  HK: "Hong Kong",
+  CN: "China",
+  SG: "Singapura",
+  ID: "Indonésia",
+  EU: "Zona Euro",
+};
+
 interface Warning {
   label: string;
   tone: "good" | "bad" | "warn";
@@ -817,7 +847,14 @@ function FragmentRow({
             <AssetLogo logoUrl={r.logoUrl} symbol={r.symbol} />
             <span className="asset-txt">
               <span className="asset-name" title={r.name}>{r.name}</span>
-              <span className="asset-sym muted">{r.symbol}</span>
+              <span className="asset-sym muted">
+                {r.symbol}
+                {r.country && r.country !== "US" && (
+                  <em className="badge-country" title={COUNTRY_NAMES[r.country] ?? r.country}>
+                    {r.country}
+                  </em>
+                )}
+              </span>
             </span>
             {fresh && <span className="badge-new">FLIP RECENTE</span>}
           </div>
