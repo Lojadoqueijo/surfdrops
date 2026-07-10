@@ -70,7 +70,7 @@ export async function GET() {
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
           <div style={{ display: "flex", fontSize: 27, color: MUTED }}>
-            3.450 ativos · ~300 membros · rendimento em DeFi
+            3.600+ ativos · ~300 membros · rendimento em DeFi
           </div>
           <div style={{ display: "flex", alignItems: "flex-end" }}>
             {[42, 68, 96, 124, 156].map((h, i) => (

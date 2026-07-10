@@ -28,7 +28,8 @@ export default async function LoginPage({
         <span className="tag">by DeFi Surfers</span>
       </div>
       <p className="muted">
-        3.350 ativos varridos pelo motor da Linha do Swell — acesso exclusivo a membros.
+        3.600+ ativos — cripto, ações dos EUA, Europa e Ásia, ETFs, commodities e índices —
+        varridos pelo motor da Linha do Swell. Acesso exclusivo a membros.
       </p>
 
       {error && <p className="login-error">{MESSAGES[error] ?? "Erro no login."}</p>}
