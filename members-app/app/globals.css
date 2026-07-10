@@ -87,6 +87,21 @@ a:hover { text-decoration: underline; }
 .stat-v { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .stat-v em { font-style: normal; font-size: 12px; font-weight: 700; opacity: 0.75; }
 .stat-v.small-v { font-size: 13px; font-weight: 600; color: var(--muted); padding-top: 5px; }
+
+/* Chip da Maré (breadth): sparkline dos 90d + % atual e delta. */
+.mare-stat { min-width: 150px; }
+.mare-row { display: flex; align-items: center; gap: 10px; }
+.mare-spark { flex-shrink: 0; }
+.mare-mid { stroke: rgba(255,255,255,0.18); stroke-width: 1; stroke-dasharray: 3 3; }
+.mare-area { fill: rgba(34,197,94,0.14); }
+.mare-line { fill: none; stroke: var(--green); stroke-width: 1.6; stroke-linejoin: round; }
+.mare-meta { display: flex; flex-direction: column; line-height: 1.2; }
+.mare-meta b { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.mare-meta b.bull { color: var(--green); } .mare-meta b.bear { color: var(--red); }
+.mare-meta em { font-style: normal; font-size: 10.5px; font-weight: 700; }
+.mare-meta em.bull { color: var(--green); } .mare-meta em.bear { color: var(--red); }
+.mare-empty { font-size: 12px; color: var(--muted); font-style: italic; padding-top: 4px; }
+
 .upd-note { margin-left: auto; text-align: right; font-size: 10px; color: var(--muted); }
 
 .tabs {

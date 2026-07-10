@@ -13,6 +13,107 @@ const TABS: TabId[] = [...ASSET_CLASSES, "Watchlist"];
 const WATCHLIST_STORAGE_KEY = "ds_watchlist";
 const PAGE_SIZE = 20;
 
+// Maré (breadth): mapa da tab → classe do endpoint /api/public/breadth.
+const BREADTH_CLASS: Partial<Record<TabId, string>> = {
+  Cripto: "cripto",
+  Ações: "acoes",
+  ETFs: "etf_cmd_idx",
+  Commodities: "etf_cmd_idx",
+  Índices: "etf_cmd_idx",
+};
+
+interface BreadthPoint {
+  date: string;
+  pct: number;
+}
+interface BreadthData {
+  series: BreadthPoint[];
+  latest: { pct: number } | null;
+  deltaPp7d: number | null;
+}
+
+// Chip da Maré no pulso: sparkline dos ~90 dias + delta em pontos percentuais.
+// Estado vazio honesto enquanto o histórico não acumula (ações/ETFs).
+function MareChip({ cls }: { cls: string }) {
+  const [data, setData] = useState<BreadthData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const cacheRef = useRef<Map<string, BreadthData>>(new Map());
+
+  useEffect(() => {
+    const cached = cacheRef.current.get(cls);
+    if (cached) {
+      setData(cached);
+      setLoading(false);
+      return;
+    }
+    let alive = true;
+    setLoading(true);
+    fetch(`/api/public/breadth?class=${cls}&days=90`)
+      .then((r) => r.json())
+      .then((j) => {
+        if (!alive) return;
+        const d: BreadthData = j?.ok
+          ? { series: j.series ?? [], latest: j.latest, deltaPp7d: j.deltaPp7d }
+          : { series: [], latest: null, deltaPp7d: null };
+        cacheRef.current.set(cls, d);
+        setData(d);
+      })
+      .catch(() => alive && setData({ series: [], latest: null, deltaPp7d: null }))
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, [cls]);
+
+  const series = data?.series ?? [];
+  const enough = series.length >= 8;
+
+  const path = useMemo(() => {
+    if (!enough) return "";
+    const w = 108,
+      h = 30;
+    const pts = series.map((p) => p.pct);
+    const lo = Math.min(...pts, 40),
+      hi = Math.max(...pts, 60);
+    const x = (i: number) => (i / (series.length - 1)) * w;
+    const y = (v: number) => h - 2 - ((v - lo) / (hi - lo || 1)) * (h - 4);
+    const line = series.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.pct).toFixed(1)}`).join("");
+    const mid = y(50);
+    return { line, area: `${line} L${w},${h} L0,${h} Z`, mid, w, h };
+  }, [series, enough]);
+
+  const pct = data?.latest?.pct ?? null;
+  const delta = data?.deltaPp7d ?? null;
+
+  return (
+    <div className="stat mare-stat">
+      <span className="stat-k">Maré · 90d</span>
+      {loading ? (
+        <span className="mare-empty">a carregar…</span>
+      ) : !enough ? (
+        <span className="mare-empty">a acumular histórico…</span>
+      ) : (
+        <div className="mare-row">
+          <svg className="mare-spark" width={(path as { w: number }).w} height={(path as { h: number }).h} viewBox={`0 0 ${(path as { w: number }).w} ${(path as { h: number }).h}`} aria-hidden="true">
+            <line x1="0" x2={(path as { w: number }).w} y1={(path as { mid: number }).mid} y2={(path as { mid: number }).mid} className="mare-mid" />
+            <path d={(path as { area: string }).area} className="mare-area" />
+            <path d={(path as { line: string }).line} className="mare-line" />
+          </svg>
+          <span className="mare-meta">
+            <b className={pct !== null && pct >= 50 ? "bull" : "bear"}>{pct !== null ? Math.round(pct) : "—"}%</b>
+            {delta !== null && (
+              <em className={delta >= 0 ? "bull" : "bear"}>
+                {delta >= 0 ? "▲" : "▼"} {delta >= 0 ? "+" : ""}
+                {delta}pp/7d
+              </em>
+            )}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Formatação
 // ---------------------------------------------------------------------------
@@ -523,6 +624,9 @@ export default function Terminal({
               {pulse.bear}
             </span>
           </div>
+          {activeClass !== "Watchlist" && BREADTH_CLASS[activeClass] && (
+            <MareChip cls={BREADTH_CLASS[activeClass]!} />
+          )}
           <span className="upd-note">
             Última atualização: {new Date(updatedAt).toLocaleString("pt-PT")}
           </span>
