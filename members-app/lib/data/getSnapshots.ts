@@ -39,6 +39,8 @@ export async function snapshotForAsset(asset: UniverseAsset): Promise<AssetSnaps
       rank: asset.rankHint,
       categories: asset.categories,
       marketCap: asset.marketCap ?? null,
+      country: asset.country ?? null,
+      currency: asset.currency ?? null,
     },
   });
 }

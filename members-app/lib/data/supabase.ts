@@ -66,6 +66,8 @@ export async function upsertSnapshots(snapshots: AssetSnapshot[]): Promise<Persi
     yahoo_symbol: s.yahooSymbol,
     rank: s.rank,
     categories: s.categories,
+    country: s.country,
+    currency: s.currency,
     trend: s.trend,
     weekly_trend: s.weeklyTrend,
     daily_trend: s.dailyTrend,
@@ -97,8 +99,11 @@ export async function upsertSnapshots(snapshots: AssetSnapshot[]): Promise<Persi
 }
 
 // Classe de amplitude (Maré). Mesma partição que /api/public/health.
-export function breadthClass(sector: string): "cripto" | "acoes" | "etf_cmd_idx" {
+// null = fora da Maré: as internacionais curadas não entram na contagem
+// (juntá-las a "acoes" deslocaria o % por composição, não por mercado).
+export function breadthClass(sector: string): "cripto" | "acoes" | "etf_cmd_idx" | null {
   if (sector.startsWith("Cripto")) return "cripto";
+  if (sector === "Ações — Internacional") return null;
   if (sector.startsWith("Ações")) return "acoes";
   return "etf_cmd_idx";
 }
@@ -119,6 +124,7 @@ export async function recordBreadthDaily(
   const agg = new Map<string, { bull: number; bear: number }>();
   for (const s of snapshots) {
     const cls = breadthClass(s.sector);
+    if (cls === null) continue; // internacionais: fora da Maré
     const a = agg.get(cls) ?? { bull: 0, bear: 0 };
     if (s.trend === "bullish") a.bull++;
     else if (s.trend === "bearish") a.bear++; // "novo" fica fora da Maré
@@ -214,6 +220,8 @@ export async function readLatestSnapshots(): Promise<
       yahooSymbol: (r.yahoo_symbol as string) ?? null,
       rank: (r.rank as number) ?? null,
       categories: (r.categories as string[]) ?? null,
+      country: (r.country as string) ?? null,
+      currency: (r.currency as string) ?? null,
       trend: r.trend as AssetSnapshot["trend"],
       weeklyTrend: (r.weekly_trend as AssetSnapshot["weeklyTrend"]) ?? null,
       dailyTrend: (r.daily_trend as AssetSnapshot["dailyTrend"]) ?? null,

@@ -61,6 +61,8 @@ export interface AssetSnapshot {
   yahooSymbol: string | null;
   rank: number | null;
   categories: string[] | null;
+  country: string | null; // ISO-3166 (badge no terminal; null = sem badge)
+  currency: string | null; // moeda de cotação (EUR, GBp, JPY…); null = USD
   // "novo" = recém-listado, linha semanal ainda a aquecer (ATR precisa de ~11
   // velas) — visível no terminal sem sinal; converte-se sozinho quando aquecer.
   trend: "bullish" | "bearish" | "novo";

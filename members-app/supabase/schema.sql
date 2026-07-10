@@ -15,6 +15,8 @@ create table if not exists snapshots (
   yahoo_symbol text,
   rank integer,
   categories jsonb,
+  country text, -- ISO-3166 (internacionais; null = EUA/cripto)
+  currency text, -- moeda de cotação (EUR, GBp, JPY…); null = USD
   -- 'novo' = recém-listado, linha semanal a aquecer (visível sem sinal)
   trend text not null check (trend in ('bullish', 'bearish', 'novo')),
   weekly_trend text check (weekly_trend in ('bullish', 'bearish')),

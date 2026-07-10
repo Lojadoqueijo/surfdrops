@@ -64,6 +64,94 @@ const CURATED_STOCKS: UniverseAsset[] = [
     marketCap: null,
     source: "yahoo",
   },
+  // ---------------------------------------------------------------------
+  // Internacionais curadas (decisão 2026-07-10): ~50 blue chips de Nikkei/
+  // FTSE/DAX/CAC + exceções CH/NL/BE/ES. Regras:
+  //   · symbol = símbolo Yahoo SUFIXADO (chave única — "BA.L" ≠ "BA" Boeing);
+  //   · currency da bolsa (LSE cota em PENCE → "GBp", sem conversão);
+  //   · marketCap null (Yahoo devolve-o em moeda local — somá-lo ao pulso
+  //     em USD mentiria; mostra "—" e fica fora da soma);
+  //   · sector "Ações — Internacional" → tab Ações, MAS fora da Maré
+  //     (breadthClass null) para não deslocar o % por composição;
+  //   · rankHint 9999 → coluna # mostra "—" (ranking EUA não é comparável);
+  //   · dedup: empresas já cobertas por listagem EUA/ADR no top-3000 (Toyota,
+  //     HSBC, SAP, Novartis, ASML, TSMC…) ficam de fora — 1 empresa, 1 sinal.
+  //   · manutenção: rever a lista ~trimestralmente (rebalanceamentos).
+  ...(
+    [
+      // 🇯🇵 Japão (Nikkei 225)
+      ["6758.T", "TSE:6758", "Sony Group", "JP", "JPY", ["Japão", "Gaming"]],
+      ["7974.T", "TSE:7974", "Nintendo", "JP", "JPY", ["Japão", "Gaming"]],
+      ["6861.T", "TSE:6861", "Keyence", "JP", "JPY", ["Japão", "Semis"]],
+      ["8035.T", "TSE:8035", "Tokyo Electron", "JP", "JPY", ["Japão", "Semis"]],
+      ["9984.T", "TSE:9984", "SoftBank Group", "JP", "JPY", ["Japão", "IA"]],
+      ["9983.T", "TSE:9983", "Fast Retailing (Uniqlo)", "JP", "JPY", ["Japão"]],
+      ["6501.T", "TSE:6501", "Hitachi", "JP", "JPY", ["Japão", "IA"]],
+      ["6857.T", "TSE:6857", "Advantest", "JP", "JPY", ["Japão", "Semis"]],
+      ["4063.T", "TSE:4063", "Shin-Etsu Chemical", "JP", "JPY", ["Japão", "Semis"]],
+      ["8058.T", "TSE:8058", "Mitsubishi Corp", "JP", "JPY", ["Japão"]],
+      ["6098.T", "TSE:6098", "Recruit Holdings", "JP", "JPY", ["Japão"]],
+      ["4568.T", "TSE:4568", "Daiichi Sankyo", "JP", "JPY", ["Japão", "Farma"]],
+      // 🇬🇧 Reino Unido (FTSE 100) — preços em pence (GBp)
+      ["SHEL.L", "LSE:SHEL", "Shell", "GB", "GBp", ["Europa", "Energia"]],
+      ["ULVR.L", "LSE:ULVR", "Unilever", "GB", "GBp", ["Europa"]],
+      ["GSK.L", "LSE:GSK", "GSK", "GB", "GBp", ["Europa", "Farma"]],
+      ["RR.L", "LSE:RR", "Rolls-Royce", "GB", "GBp", ["Europa", "Defesa"]],
+      ["BA.L", "LSE:BA", "BAE Systems", "GB", "GBp", ["Europa", "Defesa"]],
+      ["LSEG.L", "LSE:LSEG", "London Stock Exchange Group", "GB", "GBp", ["Europa"]],
+      ["GLEN.L", "LSE:GLEN", "Glencore", "GB", "GBp", ["Europa", "Energia"]],
+      ["NG.L", "LSE:NG", "National Grid", "GB", "GBp", ["Europa", "Energia"]],
+      ["LLOY.L", "LSE:LLOY", "Lloyds Banking Group", "GB", "GBp", ["Europa", "Banca"]],
+      ["VOD.L", "LSE:VOD", "Vodafone", "GB", "GBp", ["Europa"]],
+      // 🇩🇪 Alemanha (DAX 40)
+      ["SIE.DE", "XETR:SIE", "Siemens", "DE", "EUR", ["Europa", "IA"]],
+      ["ALV.DE", "XETR:ALV", "Allianz", "DE", "EUR", ["Europa", "Banca"]],
+      ["MBG.DE", "XETR:MBG", "Mercedes-Benz", "DE", "EUR", ["Europa", "Automóvel"]],
+      ["BMW.DE", "XETR:BMW", "BMW", "DE", "EUR", ["Europa", "Automóvel"]],
+      ["VOW3.DE", "XETR:VOW3", "Volkswagen", "DE", "EUR", ["Europa", "Automóvel"]],
+      ["DTE.DE", "XETR:DTE", "Deutsche Telekom", "DE", "EUR", ["Europa"]],
+      ["ADS.DE", "XETR:ADS", "Adidas", "DE", "EUR", ["Europa"]],
+      ["IFX.DE", "XETR:IFX", "Infineon", "DE", "EUR", ["Europa", "Semis"]],
+      ["RHM.DE", "XETR:RHM", "Rheinmetall", "DE", "EUR", ["Europa", "Defesa"]],
+      ["BAS.DE", "XETR:BAS", "BASF", "DE", "EUR", ["Europa"]],
+      ["DWS.DE", "XETR:DWS", "DWS Group", "DE", "EUR", ["Europa", "Banca"]],
+      // 🇫🇷 França (CAC 40)
+      ["MC.PA", "EURONEXT:MC", "LVMH", "FR", "EUR", ["Europa", "Luxo"]],
+      ["RMS.PA", "EURONEXT:RMS", "Hermès", "FR", "EUR", ["Europa", "Luxo"]],
+      ["OR.PA", "EURONEXT:OR", "L'Oréal", "FR", "EUR", ["Europa", "Luxo"]],
+      ["AIR.PA", "EURONEXT:AIR", "Airbus", "FR", "EUR", ["Europa", "Defesa"]],
+      ["SU.PA", "EURONEXT:SU", "Schneider Electric", "FR", "EUR", ["Europa", "IA"]],
+      ["SAN.PA", "EURONEXT:SAN", "Sanofi", "FR", "EUR", ["Europa", "Farma"]],
+      ["SAF.PA", "EURONEXT:SAF", "Safran", "FR", "EUR", ["Europa", "Defesa"]],
+      ["AI.PA", "EURONEXT:AI", "Air Liquide", "FR", "EUR", ["Europa"]],
+      ["EL.PA", "EURONEXT:EL", "EssilorLuxottica", "FR", "EUR", ["Europa", "Luxo"]],
+      ["BNP.PA", "EURONEXT:BNP", "BNP Paribas", "FR", "EUR", ["Europa", "Banca"]],
+      ["HO.PA", "EURONEXT:HO", "Thales", "FR", "EUR", ["Europa", "Defesa"]],
+      // 🌍 Exceções: Suíça, Países Baixos, Bélgica, Espanha
+      ["NESN.SW", "SIX:NESN", "Nestlé", "CH", "CHF", ["Europa"]],
+      ["ROG.SW", "SIX:ROG", "Roche", "CH", "CHF", ["Europa", "Farma"]],
+      ["CFR.SW", "SIX:CFR", "Richemont (Cartier)", "CH", "CHF", ["Europa", "Luxo"]],
+      ["ABBN.SW", "SIX:ABBN", "ABB", "CH", "CHF", ["Europa", "IA"]],
+      ["SDZ.SW", "SIX:SDZ", "Sandoz Group", "CH", "CHF", ["Europa", "Farma"]],
+      ["ASM.AS", "EURONEXT:ASM", "ASM International", "NL", "EUR", ["Europa", "Semis"]],
+      ["ADYEN.AS", "EURONEXT:ADYEN", "Adyen", "NL", "EUR", ["Europa", "Fintech"]],
+      ["UCB.BR", "EURONEXT:UCB", "UCB", "BE", "EUR", ["Europa", "Farma"]],
+      ["ITX.MC", "BME:ITX", "Inditex (Zara)", "ES", "EUR", ["Europa", "Luxo"]],
+    ] as Array<[string, string, string, string, string, string[]]>
+  ).map(([yahoo, tv, name, country, currency, categories]) => ({
+    symbol: yahoo,
+    tvSymbol: tv,
+    yahooSymbol: yahoo,
+    name,
+    sector: "Ações — Internacional",
+    categories,
+    currency,
+    country,
+    logoUrl: `https://assets.parqet.com/logos/symbol/${encodeURIComponent(yahoo)}?format=png`,
+    rankHint: 9999,
+    marketCap: null,
+    source: "yahoo" as const,
+  })),
 ];
 
 export function staticStockUniverse(): UniverseAsset[] {

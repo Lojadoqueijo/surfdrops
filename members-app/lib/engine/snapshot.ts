@@ -32,6 +32,8 @@ export interface SnapshotMeta {
   rank?: number | null;
   categories?: string[] | null;
   marketCap?: number | null;
+  country?: string | null; // ISO-3166 (internacionais curadas)
+  currency?: string | null; // EUR, GBp, JPY… (null = USD)
 }
 
 export function buildAssetSnapshot(params: {
@@ -63,6 +65,8 @@ export function buildAssetSnapshot(params: {
       yahooSymbol: meta?.yahooSymbol ?? null,
       rank: meta?.rank ?? null,
       categories: meta?.categories ?? null,
+      country: meta?.country ?? null,
+      currency: meta?.currency ?? null,
       trend: "novo",
       weeklyTrend: null,
       dailyTrend: null,
@@ -135,6 +139,8 @@ export function buildAssetSnapshot(params: {
     yahooSymbol: meta?.yahooSymbol ?? null,
     rank: meta?.rank ?? null,
     categories: meta?.categories ?? null,
+    country: meta?.country ?? null,
+    currency: meta?.currency ?? null,
     trend: last.trend,
     weeklyTrend,
     dailyTrend,
