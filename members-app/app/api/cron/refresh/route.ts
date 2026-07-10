@@ -8,6 +8,8 @@ import {
   appendFlipEvents,
   isSupabaseConfigured,
   pruneOldSnapshots,
+  readLatestSnapshots,
+  recordBreadthDaily,
   upsertSnapshots,
 } from "@/lib/data/supabase";
 import { UNIVERSE } from "@/lib/data/universe";
@@ -129,6 +131,16 @@ export async function GET(request: Request) {
   const pruned =
     batchIndex === 0 && isSupabaseConfigured() ? await pruneOldSnapshots(14) : undefined;
 
+  // Maré (breadth): grava a contagem bull/bear por classe UMA vez/dia, no lote
+  // diário da cripto. Lê o universo COMPLETO da BD (não só o lote atual) — a
+  // cripto acabou de ser escrita; ações/ETFs são do fecho da véspera. Histórico
+  // append-only que nunca se poda.
+  let breadth: unknown;
+  if (batchIndex === 0 && isSupabaseConfigured()) {
+    const latest = await readLatestSnapshots();
+    breadth = latest?.rows?.length ? await recordBreadthDaily(latest.rows) : { ok: true, skipped: true };
+  }
+
   // Alertas Telegram dos flips recentes (no-op sem bot/Supabase).
   const alerts = await dispatchFlipAlerts(snapshots);
 
@@ -147,6 +159,7 @@ export async function GET(request: Request) {
     freshFlips: freshFlips.map((s) => ({ symbol: s.symbol, trend: s.trend })),
     persistence,
     pruned,
+    breadth,
     alerts,
     at: new Date().toISOString(),
   });

@@ -96,6 +96,72 @@ export async function upsertSnapshots(snapshots: AssetSnapshot[]): Promise<Persi
   return { ok: true, count: rows.length };
 }
 
+// Classe de amplitude (Maré). Mesma partição que /api/public/health.
+export function breadthClass(sector: string): "cripto" | "acoes" | "etf_cmd_idx" {
+  if (sector.startsWith("Cripto")) return "cripto";
+  if (sector.startsWith("Ações")) return "acoes";
+  return "etf_cmd_idx";
+}
+
+/**
+ * breadth_daily: 1 linha por (class, date) com a contagem bull/bear do universo
+ * FILTRADO por closed-candles (o "termómetro" da Maré). Append histórico que
+ * NUNCA se poda — cresce ~4 linhas/dia (~KBs/ano). Idempotente (upsert do dia).
+ */
+export async function recordBreadthDaily(
+  snapshots: Array<{ sector: string; trend: "bullish" | "bearish" }>,
+  date = todayIsoDate()
+): Promise<PersistResult> {
+  const supabase = getSupabase();
+  if (!supabase) return { ok: true, skipped: true };
+  if (snapshots.length === 0) return { ok: true, count: 0 };
+
+  const agg = new Map<string, { bull: number; bear: number }>();
+  for (const s of snapshots) {
+    const cls = breadthClass(s.sector);
+    const a = agg.get(cls) ?? { bull: 0, bear: 0 };
+    if (s.trend === "bullish") a.bull++;
+    else a.bear++;
+    agg.set(cls, a);
+  }
+  const rows = [...agg.entries()].map(([cls, a]) => ({
+    class: cls,
+    date,
+    bull: a.bull,
+    bear: a.bear,
+    total: a.bull + a.bear,
+    updated_at: new Date().toISOString(),
+  }));
+
+  const { error } = await supabase.from("breadth_daily").upsert(rows, { onConflict: "class,date" });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, count: rows.length };
+}
+
+/** Série da Maré para a UI: [{date, bull, bear, total, pct}] de uma classe. */
+export async function readBreadth(
+  cls: string,
+  days = 90
+): Promise<Array<{ date: string; bull: number; bear: number; total: number; pct: number }>> {
+  const supabase = getSupabase();
+  if (!supabase) return [];
+  const since = new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10);
+  const { data, error } = await supabase
+    .from("breadth_daily")
+    .select("date, bull, bear, total")
+    .eq("class", cls)
+    .gte("date", since)
+    .order("date", { ascending: true });
+  if (error || !data) return [];
+  return data.map((r) => ({
+    date: r.date as string,
+    bull: r.bull as number,
+    bear: r.bear as number,
+    total: r.total as number,
+    pct: r.total ? Math.round(((r.bull as number) / (r.total as number)) * 1000) / 10 : 0,
+  }));
+}
+
 /**
  * Últimos snapshots por ativo (para a página de membros LER da BD em vez de
  * recomputar ao vivo — com o universo expandido, o throttle do Twelve Data

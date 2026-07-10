@@ -117,6 +117,20 @@ create table if not exists leads (
   created_at timestamptz not null default now()
 );
 
+-- Maré do mercado (breadth histórico): 1 linha por (class, date) com a
+-- contagem bull/bear do universo por classe. Append-only, NUNCA se poda
+-- (~4 linhas/dia). Alimenta o gráfico "Maré" no Radar e a futura /mercado.
+create table if not exists breadth_daily (
+  class text not null,           -- cripto | acoes | etf_cmd_idx
+  date date not null,
+  bull int not null,
+  bear int not null,
+  total int not null,
+  updated_at timestamptz not null default now(),
+  primary key (class, date)
+);
+create index if not exists breadth_daily_date_idx on breadth_daily (date);
+
 -- ============================================================================
 -- ROW LEVEL SECURITY (fecha o aviso "rls_disabled_in_public" do Supabase).
 -- A app acede ao Supabase SÓ com a SERVICE_ROLE_KEY (server-side), que IGNORA
