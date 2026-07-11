@@ -78,6 +78,10 @@ export interface AssetSnapshot {
   price: number;
   updatedAt: string;
   // --- extensões UXUI v2 (§3.2) ---
+  // Distância ao máximo do histórico disponível (~300 velas semanais ≈ 6 anos):
+  // (preço/máximo − 1), tipicamente ≤ 0; > 0 = novo máximo em formação.
+  // NÃO é o all-time-high literal para históricos mais antigos que a janela.
+  athPct: number | null;
   marketCap: number | null; // null até termos fonte (cripto: CoinGecko; ações: fase 2)
   strength: number | null;
   warmup: boolean; // trend bearish + (momentum a aquecer OU dot de fundo OU divergência bullish)

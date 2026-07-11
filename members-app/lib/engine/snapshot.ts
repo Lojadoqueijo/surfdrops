@@ -79,6 +79,7 @@ export function buildAssetSnapshot(params: {
       sinceFlipPct: null,
       price: lastPrice,
       updatedAt: new Date().toISOString(),
+      athPct: null, // recém-listado: "máximo histórico" ainda não significa nada
       marketCap: meta?.marketCap ?? null,
       strength: null,
       warmup: false,
@@ -130,6 +131,11 @@ export function buildAssetSnapshot(params: {
     (dailyCandles.length > 0 ? dailyCandles[dailyCandles.length - 1].close : undefined) ??
     weeklyCandles[weeklyCandles.length - 1].close;
 
+  // Distância ao máximo do histórico disponível (~300 velas ≈ 6 anos).
+  let athHigh = 0;
+  for (const c of weeklyCandles) if (c.high > athHigh) athHigh = c.high;
+  const athPct = athHigh > 0 ? lastPrice / athHigh - 1 : null;
+
   return {
     symbol,
     sector,
@@ -153,6 +159,7 @@ export function buildAssetSnapshot(params: {
     sinceFlipPct: last.sinceFlipPct,
     price: lastPrice,
     updatedAt: new Date().toISOString(),
+    athPct,
     marketCap: meta?.marketCap ?? null, // cripto: CoinGecko (universo dinâmico); ações: fase 2
     strength: last.strength,
     warmup,

@@ -255,6 +255,7 @@ export default function Terminal({
   const [countryFilter, setCountryFilter] = useState<string>(""); // ISO ou "" = todos
   const [mcapFilter, setMcapFilter] = useState<string>(""); // mega/large/mid/small
   const [cheapOnly, setCheapOnly] = useState(false); // só zona barata (200W)
+  const [nearAthOnly, setNearAthOnly] = useState(false); // a ≤10% do máximo histórico
   // Ordenação por defeito: ranking de market cap (como o terminal do Ivan).
   const [sortKey, setSortKey] = useState<SortKey>("rank");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
@@ -365,6 +366,10 @@ export default function Terminal({
     if (cheapOnly) {
       out = out.filter((r) => r.cheapZone);
     }
+    if (nearAthOnly) {
+      // ≤10% do máximo do histórico (~300 semanas); >0 = novo máximo em formação
+      out = out.filter((r) => r.athPct != null && r.athPct >= -0.1);
+    }
 
     const dir = sortDir === "asc" ? 1 : -1;
     const val = (r: TerminalRow): number => {
@@ -392,6 +397,7 @@ export default function Terminal({
     countryFilter,
     mcapFilter,
     cheapOnly,
+    nearAthOnly,
     sortKey,
     sortDir,
   ]);
@@ -405,6 +411,7 @@ export default function Terminal({
     setCountryFilter("");
     setMcapFilter("");
     setCheapOnly(false);
+    setNearAthOnly(false);
     setPage(1);
   }, []);
 
@@ -415,7 +422,8 @@ export default function Terminal({
     (category ? 1 : 0) +
     (countryFilter ? 1 : 0) +
     (mcapFilter ? 1 : 0) +
-    (cheapOnly ? 1 : 0);
+    (cheapOnly ? 1 : 0) +
+    (nearAthOnly ? 1 : 0);
 
   // Stats sobre o conjunto FILTRADO (como no terminal do Ivan: com o filtro
   // bearish ativo, "BULLISH 0 (0%)").
@@ -852,6 +860,21 @@ export default function Terminal({
               <option value="top">Possível topo</option>
             </select>
 
+            <span className="filter-lbl">Proximidade</span>
+            <label
+              className="filter-check"
+              title="A 10% (ou menos) do máximo do histórico disponível (~6 anos) — líderes de momentum, em máximos ou quase."
+            >
+              <input
+                type="checkbox"
+                checked={nearAthOnly}
+                onChange={(e) => {
+                  setNearAthOnly(e.target.checked);
+                  setPage(1);
+                }}
+              />
+              Perto de máximos
+            </label>
             <label className="filter-check" title="Ativos em tendência bearish perto da média de 200 semanas — a zona historicamente barata do ciclo.">
               <input
                 type="checkbox"
@@ -861,7 +884,7 @@ export default function Terminal({
                   setPage(1);
                 }}
               />
-              Só zona barata (200W)
+              Zona barata (200W)
             </label>
           </div>
 
@@ -1093,6 +1116,12 @@ function FragmentRow({
                   <span className="lvl-k">Desde o flip</span>
                   <span className={`lvl-v ${(r.sinceFlipPct ?? 0) >= 0 ? "bull" : "bear"}`}>
                     {fmtPct(r.sinceFlipPct)}
+                  </span>
+                </div>
+                <div className="lvl" title="Distância ao máximo do histórico disponível (~6 anos)">
+                  <span className="lvl-k">Dist. máximo</span>
+                  <span className="lvl-v">
+                    {r.athPct != null ? fmtPct(r.athPct * 100) : "—"}
                   </span>
                 </div>
               </div>

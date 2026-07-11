@@ -28,6 +28,7 @@ create table if not exists snapshots (
   last_flip_date timestamptz,
   daily_flip_date timestamptz,
   since_flip_pct double precision,
+  ath_pct double precision, -- distância ao máximo do histórico (~300 semanas)
   price double precision not null,
   market_cap double precision,
   strength double precision,

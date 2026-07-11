@@ -37,6 +37,7 @@ export interface TerminalRow {
   lastFlipDate: string | null;
   sinceFlipPct: number | null;
   price: number;
+  athPct: number | null; // distância ao máximo do histórico (~300 semanas)
   marketCap: number | null;
   strength: number | null;
   warmup: boolean;
@@ -81,6 +82,7 @@ export function toTerminalRows(snapshots: AssetSnapshot[]): TerminalRow[] {
       lastFlipDate: s.lastFlipDate,
       sinceFlipPct: s.sinceFlipPct,
       price: s.price,
+      athPct: s.athPct,
       marketCap: s.marketCap,
       strength: s.strength,
       warmup: s.warmup,
