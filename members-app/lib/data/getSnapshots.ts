@@ -1,6 +1,6 @@
 import { buildAssetSnapshot } from "../engine/snapshot";
 import type { AssetSnapshot } from "../engine/types";
-import { marketKindOf, onlyClosedCandles } from "./closedCandles";
+import { isSplitSuspect, marketKindOf, onlyClosedCandles } from "./closedCandles";
 import { getCandlesForAsset, isThrottled } from "./provider";
 import { UNIVERSE, type UniverseAsset } from "./universe";
 
@@ -26,6 +26,15 @@ export async function snapshotForAsset(asset: UniverseAsset): Promise<AssetSnaps
   const kind = marketKindOf(asset);
   const weekly = onlyClosedCandles(weeklyRaw, "1week", kind);
   const daily = onlyClosedCandles(dailyRaw, "1day", kind);
+  // Guarda anti-split (caso ABTC): descontinuidade >3,5× entre semanas sem
+  // evento nos dados = histórico por ajustar. Salta a corrida — o snapshot da
+  // véspera fica de pé; autocorrige quando a fonte registar o split.
+  if (isSplitSuspect(weekly)) {
+    console.warn(
+      `[snapshots] ${asset.symbol}: salto >3,5x entre semanas — provável split não ajustado; corrida saltada`
+    );
+    return null;
+  }
   return buildAssetSnapshot({
     symbol: asset.symbol,
     sector: asset.sector,

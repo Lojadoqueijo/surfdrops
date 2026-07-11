@@ -64,9 +64,62 @@ function isCandleClosed(
   return kind === "24_7" ? now >= candle.time + 86_400_000 : now >= sameDayCutoffUtc(candle.time);
 }
 
+/** Âncora do período da vela: 2ª feira UTC (semanal) ou o próprio dia UTC (diário). */
+function anchorOf(ms: number, timeframe: Timeframe): number {
+  const d = new Date(ms);
+  if (timeframe === "1week") {
+    const dow = (d.getUTCDay() + 6) % 7; // 0 = 2ª feira
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - dow);
+  }
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+}
+
+/**
+ * Funde velas consecutivas do MESMO período numa só (bug RDDT, 2026-07-11):
+ * à 6ª feira o Yahoo pode servir a semana PARTIDA — um bar 2ª-5ª (âncora de
+ * 2ª feira) + um fragmento de 6ª datado à própria 6ª. Ambos passam o corte de
+ * fecho (a semana já fechou) e o motor via o fecho de 5ª como "fecho semanal"
+ * → flip falso (RDDT: flip a 200,10 = fecho de 5ª, quando a semana fechou a
+ * 195,34, abaixo da linha). Fundir por âncora reconstrói a vela verdadeira
+ * (O da primeira, H/L extremos, C da última) — como o TradingView faz.
+ */
+function mergeSameAnchor(candles: Candle[], timeframe: Timeframe): Candle[] {
+  const out: Candle[] = [];
+  for (const c of candles) {
+    const last = out[out.length - 1];
+    if (last && anchorOf(last.time, timeframe) === anchorOf(c.time, timeframe)) {
+      last.high = Math.max(last.high, c.high);
+      last.low = Math.min(last.low, c.low);
+      last.close = c.close;
+    } else {
+      out.push({ ...c });
+    }
+  }
+  return out;
+}
+
+/**
+ * Salto absurdo (>3,5× em qualquer direção) entre o fecho da penúltima vela
+ * semanal e a abertura da última = quase de certeza um split/reverse split que
+ * a fonte ainda não ajustou no histórico (caso ABTC, 2026-07-10: semana fecha
+ * a $0,56 e a seguinte abre a $8,01, sem evento de split nos dados — o motor
+ * viu "+970%" e flipou bullish num gráfico que na realidade está a afundar).
+ * O chamador deve SALTAR o ativo nessa corrida: o snapshot da véspera fica de
+ * pé e tudo autocorrige quando a fonte regista o evento (tipicamente 1-3 dias).
+ */
+export function isSplitSuspect(weekly: Candle[]): boolean {
+  const n = weekly.length;
+  if (n < 2) return false;
+  const prevClose = weekly[n - 2].close;
+  const lastOpen = weekly[n - 1].open;
+  if (!(prevClose > 0) || !(lastOpen > 0)) return false;
+  const r = lastOpen / prevClose;
+  return r > 3.5 || r < 1 / 3.5;
+}
+
 /**
  * Devolve a série SEM as velas finais que ainda não fecharam — corta em CADEIA,
- * não só a última.
+ * não só a última — e com fragmentos do mesmo período FUNDIDOS numa vela só.
  *
  * Porquê em cadeia (bug corrigido 2026-07-07): o Yahoo, além da vela da
  * semana/dia EM CURSO, ACRESCENTA ainda uma vela "ao vivo" datada ao instante
@@ -83,9 +136,10 @@ export function onlyClosedCandles(
   kind: MarketKind,
   now: number = Date.now()
 ): Candle[] {
-  let end = candles.length;
-  while (end > 0 && !isCandleClosed(candles[end - 1], timeframe, kind, now)) {
+  const merged = mergeSameAnchor(candles, timeframe);
+  let end = merged.length;
+  while (end > 0 && !isCandleClosed(merged[end - 1], timeframe, kind, now)) {
     end--;
   }
-  return end === candles.length ? candles : candles.slice(0, end);
+  return end === merged.length ? merged : merged.slice(0, end);
 }
