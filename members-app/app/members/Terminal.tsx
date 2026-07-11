@@ -1081,7 +1081,11 @@ function FragmentRow({
   onWatch: () => void;
   onToggle: () => void;
 }) {
-  const tvHref = `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(r.tvSymbol)}`;
+  // Abre o TradingView no MESMO timeframe que estás a ver no Radar (interval
+  // D = diário, W = semanal) — o gráfico casa com a leitura da tabela.
+  const tvHref = `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(
+    r.tvSymbol
+  )}&interval=${timeframe === "daily" ? "D" : "W"}`;
   const yfHref = r.yahooSymbol
     ? `https://finance.yahoo.com/quote/${encodeURIComponent(r.yahooSymbol)}`
     : null;
