@@ -150,9 +150,9 @@ function warningsFor(r: TerminalRow): Warning[] {
   const w: Warning[] = [];
   if (r.cheapZone)
     w.push({
-      label: "Zona barata (200W)",
+      label: "Zona de 200WMA",
       tone: "good",
-      tip: "Preço abaixo da média de 200 semanas — historicamente zona de fundo (‘very cheap’).",
+      tip: "Preço abaixo da média de 200 semanas — historicamente a zona de acumulação do ciclo.",
     });
   if (r.dotBottom)
     w.push({
@@ -830,22 +830,6 @@ export default function Terminal({
               </>
             )}
 
-            <span className="filter-lbl">Market cap</span>
-            <select
-              className="filter-sel"
-              value={mcapFilter}
-              onChange={(e) => {
-                setMcapFilter(e.target.value);
-                setPage(1);
-              }}
-            >
-              <option value="">Qualquer tamanho</option>
-              <option value="mega">Mega (&gt; 200 mil M$)</option>
-              <option value="large">Grande (10–200 mil M$)</option>
-              <option value="mid">Média (2–10 mil M$)</option>
-              <option value="small">Pequena (&lt; 2 mil M$)</option>
-            </select>
-
             <span className="filter-lbl">Sinais</span>
             <select
               className="filter-sel"
@@ -873,9 +857,12 @@ export default function Terminal({
                   setPage(1);
                 }}
               />
-              Perto de máximos
+              Zona de ATH
             </label>
-            <label className="filter-check" title="Ativos em tendência bearish perto da média de 200 semanas — a zona historicamente barata do ciclo.">
+            <label
+              className="filter-check"
+              title="Ativos em tendência bearish perto da média de 200 semanas — historicamente a zona de acumulação do ciclo."
+            >
               <input
                 type="checkbox"
                 checked={cheapOnly}
@@ -884,8 +871,24 @@ export default function Terminal({
                   setPage(1);
                 }}
               />
-              Zona barata (200W)
+              Zona de 200WMA
             </label>
+
+            <span className="filter-lbl">Market cap</span>
+            <select
+              className="filter-sel"
+              value={mcapFilter}
+              onChange={(e) => {
+                setMcapFilter(e.target.value);
+                setPage(1);
+              }}
+            >
+              <option value="">Qualquer tamanho</option>
+              <option value="mega">Mega (&gt; 200 mil M$)</option>
+              <option value="large">Grande (10–200 mil M$)</option>
+              <option value="mid">Média (2–10 mil M$)</option>
+              <option value="small">Pequena (&lt; 2 mil M$)</option>
+            </select>
           </div>
 
           {activeClass === "Watchlist" && (
