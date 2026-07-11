@@ -79,7 +79,10 @@ export async function upsertSnapshots(snapshots: AssetSnapshot[]): Promise<Persi
     daily_flip_date: s.dailyFlipDate,
     since_flip_pct: s.sinceFlipPct,
     price: s.price,
-    ath_pct: s.athPct,
+    // ath_pct: RE-ATIVAR após a migração `alter table snapshots add column
+    // ath_pct` (dashboard Supabase em baixo em 2026-07-11). Sem a coluna, o
+    // upsert inteiro falharia (PGRST204) e nenhum snapshot persistiria.
+    // ath_pct: s.athPct,
     market_cap: s.marketCap,
     strength: s.strength,
     warmup: s.warmup,
