@@ -103,17 +103,39 @@ a:hover { text-decoration: underline; }
 .tab:hover { color: var(--text); }
 .tab.active { color: #fff; background: var(--purple); }
 
-.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 14px 0 16px; }
+/* Pesquisa no topo (estilo Bullmania) — os filtros vivem no painel à direita. */
+.controls-top { display: flex; align-items: center; margin: 14px 0 16px; }
 .search {
-  flex: 0 1 240px; min-width: 180px; padding: 9px 13px; border-radius: 10px;
+  width: 100%; max-width: 420px; padding: 11px 15px; border-radius: 10px;
   border: 1px solid var(--border); background: var(--panel); color: var(--text);
   font-family: inherit; font-size: 13px;
 }
 .search:focus { outline: none; border-color: var(--purple); }
-.controls select {
-  padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border);
-  background: var(--panel); color: var(--text); font-family: inherit; font-size: 12px;
+
+/* Painel de filtros (topo do aside, acima dos referrals). */
+.filter-panel { display: flex; flex-direction: column; gap: 7px; }
+.filter-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+.filter-head h3 { margin: 0; }
+.filter-clear {
+  border: 1px solid var(--border); background: transparent; color: var(--muted);
+  font-family: inherit; font-size: 11px; font-weight: 700; padding: 3px 9px;
+  border-radius: 999px; cursor: pointer;
 }
+.filter-clear:hover { color: var(--purple); border-color: var(--purple); }
+.filter-lbl {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--muted); margin-top: 6px;
+}
+.filter-sel {
+  padding: 9px 11px; border-radius: 9px; border: 1px solid var(--border);
+  background: var(--bg-2); color: var(--text); font-family: inherit; font-size: 12px; width: 100%;
+}
+.filter-sel:focus { outline: none; border-color: var(--purple); }
+.filter-check {
+  display: flex; align-items: center; gap: 8px; margin-top: 10px; cursor: pointer;
+  font-size: 12px; font-weight: 600; color: var(--text);
+}
+.filter-check input { accent-color: var(--purple); width: 15px; height: 15px; cursor: pointer; }
 .trend-chips { display: flex; gap: 6px; }
 .tchip {
   border: 1px solid var(--border); border-radius: 999px; padding: 7px 14px;
@@ -299,10 +321,10 @@ a:hover { text-decoration: underline; }
 }
 .alerts-note { margin-bottom: 0; }
 
+/* Chips de tendência preenchem a largura do painel de filtros. */
+.filter-panel .trend-chips .tchip { flex: 1; text-align: center; padding: 8px 6px; }
+
 /* ---- Elementos com comportamento mobile (base = desktop) ---- */
-/* Botão "Filtros": só aparece no mobile; no desktop os selects fluem inline. */
-.filters-toggle { display: none; }
-.filters-extra { display: contents; }
 /* Links TV/Yahoo dentro do accordion (acessíveis quando saem da linha no mobile). */
 .detail-links { display: flex; gap: 10px; margin-top: 2px; flex-wrap: wrap; }
 .detail-link {
@@ -331,6 +353,8 @@ a:hover { text-decoration: underline; }
   .term-body { flex-direction: column; }
   .side { width: 100%; flex-direction: row; flex-wrap: wrap; }
   .side .panel, .side .panel-details { flex: 1; min-width: 200px; }
+  /* Painel de filtros a toda a largura no mobile e no topo do aside. */
+  .filter-panel { flex-basis: 100%; order: -1; }
   .upd-note { margin-left: 0; text-align: left; width: 100%; }
   .topbar { flex-wrap: wrap; }
   .pulse { gap: 16px 20px; }
@@ -355,19 +379,8 @@ a:hover { text-decoration: underline; }
   .stat-v { font-size: 18px; }
   .upd-note { order: 99; }
 
-  /* Filtros: pesquisa a toda a largura + Bullish/Bearish + botão "Filtros"; os
-     selects secundários ficam numa gaveta que abre por baixo. */
-  .controls { gap: 8px; }
-  .search { flex: 1 1 100%; margin-left: 0; order: -1; }
-  .trend-chips { flex: 1; }
-  .filters-toggle {
-    display: inline-block; border: 1px solid var(--border); border-radius: 10px;
-    background: var(--panel); color: var(--text); font-family: inherit;
-    font-size: 12px; font-weight: 700; padding: 9px 14px; cursor: pointer;
-  }
-  .filters-extra { display: none; flex-basis: 100%; flex-direction: column; gap: 8px; }
-  .filters-extra.open { display: flex; }
-  .filters-extra select { width: 100%; }
+  /* Pesquisa a toda a largura. */
+  .search { max-width: none; }
 
   /* Cada linha vira um cartão de 2 planos:
        [♥] [logo Nome/Ticker] .......... [TREND]

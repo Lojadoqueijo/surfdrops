@@ -128,6 +128,18 @@ const COUNTRY_NAMES: Record<string, string> = {
   EU: "Zona Euro",
 };
 
+// Janela "tempo desde o flip" em SEMANAS de calendário (âncora 2ª feira UTC —
+// ver nota na filtragem sobre a "zona morta" dos flips semanais).
+const WEEKS_BACK: Record<string, number> = { week: 1, month: 5, q: 13, semester: 26, year: 52 };
+
+// Baldes de market cap (USD). Internacionais têm mcap null → fora quando ativo.
+const MCAP_BUCKETS: Record<string, [number, number]> = {
+  mega: [200e9, Infinity],
+  large: [10e9, 200e9],
+  mid: [2e9, 10e9],
+  small: [0, 2e9],
+};
+
 interface Warning {
   label: string;
   tone: "good" | "bad" | "warn";
@@ -240,12 +252,14 @@ export default function Terminal({
   const [category, setCategory] = useState<string>("");
   const [timeFilter, setTimeFilter] = useState<string>("any");
   const [signalFilter, setSignalFilter] = useState<string>("any");
+  const [countryFilter, setCountryFilter] = useState<string>(""); // ISO ou "" = todos
+  const [mcapFilter, setMcapFilter] = useState<string>(""); // mega/large/mid/small
+  const [cheapOnly, setCheapOnly] = useState(false); // só zona barata (200W)
   // Ordenação por defeito: ranking de market cap (como o terminal do Ivan).
   const [sortKey, setSortKey] = useState<SortKey>("rank");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [filtersOpen, setFiltersOpen] = useState(false); // gaveta de filtros (mobile)
   const tabsRef = useRef<HTMLElement | null>(null);
 
   // Watchlist pessoal. Fonte da verdade = servidor (tabela alert_subs), com o
@@ -293,6 +307,18 @@ export default function Terminal({
     return [...set].sort();
   }, [classRows]);
 
+  // Países presentes nesta classe (para o dropdown). US primeiro por ser o
+  // maior; o resto por nome. Só aparece o filtro quando há >1 país.
+  const countriesInClass = useMemo(() => {
+    const set = new Set<string>();
+    classRows.forEach((r) => {
+      if (r.country) set.add(r.country);
+    });
+    return [...set].sort((a, b) =>
+      a === "US" ? -1 : b === "US" ? 1 : (COUNTRY_NAMES[a] ?? a).localeCompare(COUNTRY_NAMES[b] ?? b)
+    );
+  }, [classRows]);
+
   const filtered = useMemo(() => {
     let out = classRows;
     if (search.trim()) {
@@ -318,7 +344,7 @@ export default function Terminal({
       const thisMonday =
         Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) -
         dowFromMon * 86_400_000;
-      const weeksBack = timeFilter === "week" ? 1 : 5; // "este mês" ≈ 5 semanas
+      const weeksBack = WEEKS_BACK[timeFilter] ?? 5;
       const cutoff = thisMonday - weeksBack * 7 * 86_400_000;
       out = out.filter(
         (r) => r.lastFlipDate != null && new Date(r.lastFlipDate).getTime() >= cutoff
@@ -328,6 +354,16 @@ export default function Terminal({
       out = out.filter((r) => r.dotBottom || r.bullDiv);
     } else if (signalFilter === "top") {
       out = out.filter((r) => r.dotTop || r.bearDiv);
+    }
+    if (countryFilter) {
+      out = out.filter((r) => r.country === countryFilter);
+    }
+    if (mcapFilter && MCAP_BUCKETS[mcapFilter]) {
+      const [lo, hi] = MCAP_BUCKETS[mcapFilter];
+      out = out.filter((r) => r.marketCap != null && r.marketCap >= lo && r.marketCap < hi);
+    }
+    if (cheapOnly) {
+      out = out.filter((r) => r.cheapZone);
     }
 
     const dir = sortDir === "asc" ? 1 : -1;
@@ -346,7 +382,40 @@ export default function Terminal({
       }
     };
     return [...out].sort((a, b) => (val(a) - val(b)) * dir);
-  }, [classRows, search, trendFilter, category, timeFilter, signalFilter, sortKey, sortDir]);
+  }, [
+    classRows,
+    search,
+    trendFilter,
+    category,
+    timeFilter,
+    signalFilter,
+    countryFilter,
+    mcapFilter,
+    cheapOnly,
+    sortKey,
+    sortDir,
+  ]);
+
+  // Reset de todos os filtros (botão "Limpar" e ao trocar de classe).
+  const clearFilters = useCallback(() => {
+    setTrendFilter(new Set());
+    setCategory("");
+    setTimeFilter("any");
+    setSignalFilter("any");
+    setCountryFilter("");
+    setMcapFilter("");
+    setCheapOnly(false);
+    setPage(1);
+  }, []);
+
+  const activeFilterCount =
+    trendFilter.size +
+    (timeFilter !== "any" ? 1 : 0) +
+    (signalFilter !== "any" ? 1 : 0) +
+    (category ? 1 : 0) +
+    (countryFilter ? 1 : 0) +
+    (mcapFilter ? 1 : 0) +
+    (cheapOnly ? 1 : 0);
 
   // Stats sobre o conjunto FILTRADO (como no terminal do Ivan: com o filtro
   // bearish ativo, "BULLISH 0 (0%)").
@@ -515,7 +584,8 @@ export default function Terminal({
                 className={c === activeClass ? "tab active" : "tab"}
                 onClick={() => {
                   setActiveClass(c);
-                  setCategory("");
+                  setCategory(""); // categorias e países mudam por classe
+                  setCountryFilter("");
                   setExpanded(null);
                   setPage(1);
                   setSortKey("rank");
@@ -580,7 +650,7 @@ export default function Terminal({
         </div>
       </header>
 
-      <div className="controls">
+      <div className="controls-top">
         <input
           className="search"
           placeholder="Pesquisar nome ou símbolo…"
@@ -590,65 +660,6 @@ export default function Terminal({
             setPage(1);
           }}
         />
-        <div className="trend-chips">
-          {(["BULLISH", "BEARISH"] as TrendTag[]).map((t) => (
-            <button
-              key={t}
-              className={`tchip ${TREND_CLASS[t]} ${trendFilter.has(t) ? "on" : ""}`}
-              onClick={() => toggleTrend(t)}
-            >
-              {t === "BULLISH" ? "↑ Bullish" : "↓ Bearish"}
-            </button>
-          ))}
-        </div>
-        <button
-          className="filters-toggle"
-          onClick={() => setFiltersOpen((v) => !v)}
-          aria-expanded={filtersOpen}
-        >
-          {(() => {
-            const n = (timeFilter !== "any" ? 1 : 0) + (signalFilter !== "any" ? 1 : 0) + (category ? 1 : 0);
-            return `⚙ Filtros${n ? ` (${n})` : ""}`;
-          })()}
-        </button>
-        <div className={`filters-extra ${filtersOpen ? "open" : ""}`}>
-        <select
-          value={timeFilter}
-          onChange={(e) => {
-            setTimeFilter(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="any">Flip: qualquer altura</option>
-          <option value="week">Flip: esta semana</option>
-          <option value="month">Flip: este mês</option>
-        </select>
-        <select
-          value={signalFilter}
-          onChange={(e) => {
-            setSignalFilter(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="any">Sinais: todos</option>
-          <option value="bottom">Sinais: possível fundo</option>
-          <option value="top">Sinais: possível topo</option>
-        </select>
-        <select
-          value={category}
-          onChange={(e) => {
-            setCategory(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="">Todas as categorias</option>
-          {categories.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-        </div>
       </div>
 
       <div className="term-body">
@@ -729,6 +740,131 @@ export default function Terminal({
         </div>
 
         <aside className="side">
+          <div className="panel filter-panel">
+            <div className="filter-head">
+              <h3>Filtros{activeFilterCount ? ` · ${activeFilterCount}` : ""}</h3>
+              {activeFilterCount > 0 && (
+                <button className="filter-clear" onClick={clearFilters}>
+                  Limpar
+                </button>
+              )}
+            </div>
+
+            <span className="filter-lbl">Tendência</span>
+            <div className="trend-chips">
+              {(["BULLISH", "BEARISH"] as TrendTag[]).map((t) => (
+                <button
+                  key={t}
+                  className={`tchip ${TREND_CLASS[t]} ${trendFilter.has(t) ? "on" : ""}`}
+                  onClick={() => toggleTrend(t)}
+                >
+                  {t === "BULLISH" ? "↑ Bullish" : "↓ Bearish"}
+                </button>
+              ))}
+            </div>
+
+            <span className="filter-lbl">Tempo desde o flip</span>
+            <select
+              className="filter-sel"
+              value={timeFilter}
+              onChange={(e) => {
+                setTimeFilter(e.target.value);
+                setPage(1);
+              }}
+            >
+              <option value="any">Qualquer altura</option>
+              <option value="week">Esta semana</option>
+              <option value="month">Este mês</option>
+              <option value="q">Últimos 3 meses</option>
+              <option value="semester">Últimos 6 meses</option>
+              <option value="year">Último ano</option>
+            </select>
+
+            {countriesInClass.length > 1 && (
+              <>
+                <span className="filter-lbl">País</span>
+                <select
+                  className="filter-sel"
+                  value={countryFilter}
+                  onChange={(e) => {
+                    setCountryFilter(e.target.value);
+                    setPage(1);
+                  }}
+                >
+                  <option value="">Todos os países</option>
+                  {countriesInClass.map((c) => (
+                    <option key={c} value={c}>
+                      {COUNTRY_NAMES[c] ?? c}
+                    </option>
+                  ))}
+                </select>
+              </>
+            )}
+
+            {categories.length > 0 && (
+              <>
+                <span className="filter-lbl">Categorias</span>
+                <select
+                  className="filter-sel"
+                  value={category}
+                  onChange={(e) => {
+                    setCategory(e.target.value);
+                    setPage(1);
+                  }}
+                >
+                  <option value="">Todas as categorias</option>
+                  {categories.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </>
+            )}
+
+            <span className="filter-lbl">Market cap</span>
+            <select
+              className="filter-sel"
+              value={mcapFilter}
+              onChange={(e) => {
+                setMcapFilter(e.target.value);
+                setPage(1);
+              }}
+            >
+              <option value="">Qualquer tamanho</option>
+              <option value="mega">Mega (&gt; 200 mil M$)</option>
+              <option value="large">Grande (10–200 mil M$)</option>
+              <option value="mid">Média (2–10 mil M$)</option>
+              <option value="small">Pequena (&lt; 2 mil M$)</option>
+            </select>
+
+            <span className="filter-lbl">Sinais</span>
+            <select
+              className="filter-sel"
+              value={signalFilter}
+              onChange={(e) => {
+                setSignalFilter(e.target.value);
+                setPage(1);
+              }}
+            >
+              <option value="any">Todos</option>
+              <option value="bottom">Possível fundo</option>
+              <option value="top">Possível topo</option>
+            </select>
+
+            <label className="filter-check" title="Ativos em tendência bearish perto da média de 200 semanas — a zona historicamente barata do ciclo.">
+              <input
+                type="checkbox"
+                checked={cheapOnly}
+                onChange={(e) => {
+                  setCheapOnly(e.target.checked);
+                  setPage(1);
+                }}
+              />
+              Só zona barata (200W)
+            </label>
+          </div>
+
           {activeClass === "Watchlist" && (
             <div className="panel alerts-panel">
               <h3>Alertas · Telegram</h3>
