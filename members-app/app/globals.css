@@ -323,6 +323,8 @@ a:hover { text-decoration: underline; }
 
 /* Chips de tendência preenchem a largura do painel de filtros. */
 .filter-panel .trend-chips .tchip { flex: 1; text-align: center; padding: 8px 6px; }
+/* Toggle de timeframe (Diário/Semanal): estado ativo em roxo, não verde/vermelho. */
+.tf-chips .tf-chip.on { border-color: var(--purple); color: var(--purple); background: rgba(139,92,246,0.14); }
 
 /* ---- Elementos com comportamento mobile (base = desktop) ---- */
 /* Links TV/Yahoo dentro do accordion (acessíveis quando saem da linha no mobile). */

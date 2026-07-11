@@ -91,6 +91,7 @@ export async function upsertSnapshots(snapshots: AssetSnapshot[]): Promise<Persi
     bull_div: s.bullDiv,
     cheap_zone: s.cheapZone,
     tp: s.tp,
+    daily: s.daily ?? null,
     updated_at: new Date().toISOString(),
   }));
 
@@ -247,6 +248,7 @@ export async function readLatestSnapshots(): Promise<
       bullDiv: Boolean(r.bull_div),
       cheapZone: Boolean(r.cheap_zone),
       tp: (r.tp as AssetSnapshot["tp"]) ?? null,
+      daily: (r.daily as AssetSnapshot["daily"]) ?? null,
     });
   }
   return { rows, updatedAt };

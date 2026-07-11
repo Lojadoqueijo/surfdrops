@@ -29,6 +29,10 @@ create table if not exists snapshots (
   daily_flip_date timestamptz,
   since_flip_pct double precision,
   ath_pct double precision, -- distância ao máximo do histórico (~300 semanas)
+  -- Bundle da leitura DIÁRIA da Linha {trend, nextFlip, lastFlip, lastFlipClose,
+  -- lastFlipDate, sinceFlipPct, strength} — toggle Semanal/Diário do terminal.
+  -- A RPC latest_snapshots é `returns setof snapshots` → inclui-a automaticamente.
+  daily jsonb,
   price double precision not null,
   market_cap double precision,
   strength double precision,

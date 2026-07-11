@@ -49,6 +49,7 @@ export interface TerminalRow {
   bullDiv: boolean;
   cheapZone: boolean;
   tp: AssetSnapshot["tp"];
+  daily: AssetSnapshot["daily"];
 }
 
 function metaFor(symbol: string): UniverseAsset | undefined {
@@ -94,6 +95,7 @@ export function toTerminalRows(snapshots: AssetSnapshot[]): TerminalRow[] {
       bullDiv: s.bullDiv,
       cheapZone: s.cheapZone,
       tp: s.tp,
+      daily: s.daily ?? null,
     };
   });
 }

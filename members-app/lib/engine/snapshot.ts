@@ -1,8 +1,31 @@
 import { computeSwellLine, trendDirectionSeries } from "./swellline";
-import type { AssetSnapshot, Candle, Estado, TrendDir } from "./types";
+import type { AssetSnapshot, Candle, DailyBundle, Estado, TrendDir } from "./types";
 
 function toIsoDate(ms: number): string {
   return new Date(ms).toISOString();
+}
+
+/**
+ * Leitura DIÁRIA: a MESMA Linha do Swell sobre as velas 1d (que já são
+ * buscadas — zero pedidos extra). null quando a linha diária ainda é NaN
+ * (velas insuficientes p/ o ATR) — o toggle "Diário" exclui o ativo, tal
+ * como o guard semanal. Os alertas continuam a usar SÓ o semanal.
+ */
+function dailyBundleOf(dailyCandles: Candle[]): DailyBundle | null {
+  if (dailyCandles.length === 0) return null;
+  const states = computeSwellLine(dailyCandles);
+  const dLast = states[states.length - 1];
+  if (!Number.isFinite(dLast.swellLevel)) return null;
+  return {
+    trend: dLast.trend,
+    nextFlip: dLast.swellLevel,
+    lastFlip: dLast.lastFlipPrice,
+    lastFlipClose: dLast.lastFlipClose,
+    lastFlipDate:
+      dLast.lastFlipIndex !== null ? toIsoDate(dailyCandles[dLast.lastFlipIndex].time) : null,
+    sinceFlipPct: dLast.sinceFlipPct,
+    strength: dLast.strength,
+  };
 }
 
 /** Índice do último bar onde a série de trend mudou de valor (para "flip date"). */
@@ -91,6 +114,9 @@ export function buildAssetSnapshot(params: {
       bullDiv: false,
       cheapZone: false,
       tp: null,
+      // a linha diária aquece muito antes da semanal (~11 dias vs ~11 semanas)
+      // — um recém-listado pode já ter leitura diária real no toggle "Diário"
+      daily: dailyBundleOf(dailyCandles),
     };
   }
 
@@ -171,5 +197,6 @@ export function buildAssetSnapshot(params: {
     bullDiv: last.bullDiv,
     cheapZone: last.cheapZone,
     tp: last.tp,
+    daily: dailyBundleOf(dailyCandles),
   };
 }

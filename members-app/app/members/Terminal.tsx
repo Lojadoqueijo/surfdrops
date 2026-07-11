@@ -61,6 +61,21 @@ function flipCloseMs(lastFlipDate: string | null, assetClass: AssetClass): numbe
   return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + daysToFri, 21, 5, 0);
 }
 
+/** Fecho da vela DIÁRIA do flip: cripto = dia seguinte 00:00 UTC; mercado = 21:05 do próprio dia. */
+function dailyFlipCloseMs(lastFlipDate: string | null, assetClass: AssetClass): number | null {
+  if (!lastFlipDate) return null;
+  const t = new Date(lastFlipDate).getTime();
+  if (assetClass === "Cripto") return t + 86_400_000;
+  const d = new Date(t);
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 21, 5, 0);
+}
+
+/** Dias corridos desde uma data ISO (Infinity quando null) — janela do modo diário. */
+function daysSinceIso(iso: string | null): number {
+  if (!iso) return Infinity;
+  return (Date.now() - new Date(iso).getTime()) / 86_400_000;
+}
+
 /** Idade legível a partir de um instante (ms) — ex.: "1sem 2d", "4d". */
 function fmtSince(ms: number | null): string {
   if (ms === null) return "—";
@@ -254,6 +269,9 @@ export default function Terminal({
   const [signalFilter, setSignalFilter] = useState<string>("any");
   const [countryFilter, setCountryFilter] = useState<string>(""); // ISO ou "" = todos
   const [mcapFilter, setMcapFilter] = useState<string>(""); // mega/large/mid/small
+  // Timeframe da leitura da Linha: semanal (default, a base dos alertas) ou
+  // diário (vista de exploração — os alertas ficam SEMPRE no semanal).
+  const [timeframe, setTimeframe] = useState<"weekly" | "daily">("weekly");
   const [cheapOnly, setCheapOnly] = useState(false); // só zona barata (200W)
   const [nearAthOnly, setNearAthOnly] = useState(false); // a ≤10% do máximo histórico
   // Ordenação por defeito: ranking de market cap (como o terminal do Ivan).
@@ -321,7 +339,26 @@ export default function Terminal({
   }, [classRows]);
 
   const filtered = useMemo(() => {
-    let out = classRows;
+    // Vista DIÁRIA: troca os campos de flip (trend/next/desde/data) pelo bundle
+    // diário. Ativos sem leitura diária válida (linha ainda NaN) são excluídos,
+    // tal como o guard semanal. A vista semanal usa os campos originais.
+    let out: TerminalRow[] =
+      timeframe === "daily"
+        ? classRows.flatMap((r) =>
+            r.daily && r.daily.trend
+              ? [
+                  {
+                    ...r,
+                    trend: r.daily.trend as "bullish" | "bearish",
+                    sinceFlipPct: r.daily.sinceFlipPct,
+                    lastFlipDate: r.daily.lastFlipDate,
+                    nextFlip: r.daily.nextFlip,
+                    lastFlip: r.daily.lastFlip,
+                  },
+                ]
+              : []
+          )
+        : classRows;
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       out = out.filter(
@@ -335,21 +372,29 @@ export default function Terminal({
       out = out.filter((r) => r.categories.includes(category));
     }
     if (timeFilter !== "any") {
-      // Os flips SEMANAIS são datados pela ÂNCORA da vela (2ª feira) e só se
-      // confirmam no FECHO (~7 dias depois). Uma janela em dias corridos criava
-      // uma "zona morta" no início da semana: o flip do último fecho já com >7
-      // dias e a vela atual ainda por fechar → 0 resultados (mesma razão do
-      // RECENT_DAYS=12 dos alertas). Ancoramos por SEMANAS de calendário (UTC).
-      const now = new Date();
-      const dowFromMon = (now.getUTCDay() + 6) % 7; // 0 = 2ª feira
-      const thisMonday =
-        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) -
-        dowFromMon * 86_400_000;
-      const weeksBack = WEEKS_BACK[timeFilter] ?? 5;
-      const cutoff = thisMonday - weeksBack * 7 * 86_400_000;
-      out = out.filter(
-        (r) => r.lastFlipDate != null && new Date(r.lastFlipDate).getTime() >= cutoff
-      );
+      if (timeframe === "daily") {
+        // Diário: o flip é datado ao DIA do fecho (não a uma âncora semanal),
+        // por isso a janela em dias corridos é correta e "hoje" faz sentido.
+        const maxDays =
+          timeFilter === "today" ? 1.5 : (WEEKS_BACK[timeFilter] ?? 5) * 7 + 3;
+        out = out.filter((r) => daysSinceIso(r.lastFlipDate) <= maxDays);
+      } else {
+        // Semanal: os flips são datados pela ÂNCORA da vela (2ª feira) e só se
+        // confirmam no FECHO (~7 dias depois). Uma janela em dias corridos criava
+        // uma "zona morta" no início da semana: o flip do último fecho já com >7
+        // dias e a vela atual ainda por fechar → 0 resultados (mesma razão do
+        // RECENT_DAYS=12 dos alertas). Ancoramos por SEMANAS de calendário (UTC).
+        const now = new Date();
+        const dowFromMon = (now.getUTCDay() + 6) % 7; // 0 = 2ª feira
+        const thisMonday =
+          Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) -
+          dowFromMon * 86_400_000;
+        const weeksBack = WEEKS_BACK[timeFilter] ?? 5;
+        const cutoff = thisMonday - weeksBack * 7 * 86_400_000;
+        out = out.filter(
+          (r) => r.lastFlipDate != null && new Date(r.lastFlipDate).getTime() >= cutoff
+        );
+      }
     }
     if (signalFilter === "bottom") {
       out = out.filter((r) => r.dotBottom || r.bullDiv);
@@ -379,7 +424,12 @@ export default function Terminal({
         case "sinceFlipPct":
           return r.sinceFlipPct ?? -Infinity;
         case "since":
-          return flipCloseMs(r.lastFlipDate, r.assetClass) ?? -Infinity; // fecho mais recente primeiro (desc)
+          // fecho mais recente primeiro (desc); no diário o fecho é do próprio dia
+          return (
+            (timeframe === "daily"
+              ? dailyFlipCloseMs(r.lastFlipDate, r.assetClass)
+              : flipCloseMs(r.lastFlipDate, r.assetClass)) ?? -Infinity
+          );
         case "price":
           return r.price;
         case "marketCap":
@@ -398,6 +448,7 @@ export default function Terminal({
     mcapFilter,
     cheapOnly,
     nearAthOnly,
+    timeframe,
     sortKey,
     sortDir,
   ]);
@@ -699,11 +750,15 @@ export default function Terminal({
             <tbody>
               {paged.map((r, i) => {
                 const tag = trendTag(r);
-                // "FLIP RECENTE": idade desde o FECHO da vela (flipCloseMs — cripto
-                // 2ª+7d, mercado 6ª 21:05). Ligado no fecho (idade 0), visível 2
-                // semanas depois. (14 → 7 se quiseres 1 semana.)
-                const closeMs = flipCloseMs(r.lastFlipDate, r.assetClass);
-                const fresh = closeMs !== null && Date.now() - closeMs <= 14 * 86_400_000;
+                // "FLIP RECENTE": idade desde o FECHO da vela. Semanal: fecho
+                // cripto 2ª+7d / mercado 6ª 21:05, janela 14 dias. Diário: fecho
+                // do próprio dia, janela 2 dias (senão tudo era "recente").
+                const closeMs =
+                  timeframe === "daily"
+                    ? dailyFlipCloseMs(r.lastFlipDate, r.assetClass)
+                    : flipCloseMs(r.lastFlipDate, r.assetClass);
+                const freshWindow = (timeframe === "daily" ? 2 : 14) * 86_400_000;
+                const fresh = closeMs !== null && Date.now() - closeMs <= freshWindow;
                 const isOpen = expanded === r.symbol;
                 const warns = warningsFor(r);
                 return (
@@ -713,6 +768,8 @@ export default function Terminal({
                     i={(safePage - 1) * PAGE_SIZE + i}
                     tag={tag}
                     fresh={fresh}
+                    closeMs={closeMs}
+                    timeframe={timeframe}
                     isOpen={isOpen}
                     warns={warns}
                     watched={watchlist.has(r.symbol)}
@@ -781,12 +838,36 @@ export default function Terminal({
               }}
             >
               <option value="any">Qualquer altura</option>
+              {timeframe === "daily" && <option value="today">Hoje</option>}
               <option value="week">Esta semana</option>
               <option value="month">Este mês</option>
               <option value="q">Últimos 3 meses</option>
               <option value="semester">Últimos 6 meses</option>
               <option value="year">Último ano</option>
             </select>
+
+            <span className="filter-lbl">Timeframe</span>
+            <div className="trend-chips tf-chips">
+              {(["daily", "weekly"] as const).map((tf) => (
+                <button
+                  key={tf}
+                  className={`tchip tf-chip ${timeframe === tf ? "on" : ""}`}
+                  title={
+                    tf === "weekly"
+                      ? "Flips da Linha semanal — a leitura base do método e dos alertas."
+                      : "Flips da Linha diária — vista de exploração; os alertas continuam semanais."
+                  }
+                  onClick={() => {
+                    setTimeframe(tf);
+                    setPage(1);
+                    setExpanded(null);
+                    if (tf === "weekly" && timeFilter === "today") setTimeFilter("week");
+                  }}
+                >
+                  {tf === "weekly" ? "Semanal" : "Diário"}
+                </button>
+              ))}
+            </div>
 
             {countriesInClass.length > 1 && (
               <>
@@ -980,6 +1061,8 @@ function FragmentRow({
   i,
   tag,
   fresh,
+  closeMs,
+  timeframe,
   isOpen,
   warns,
   watched,
@@ -990,6 +1073,8 @@ function FragmentRow({
   i: number;
   tag: TrendTag;
   fresh: boolean;
+  closeMs: number | null; // fecho da vela do flip, já consciente do timeframe
+  timeframe: "weekly" | "daily";
   isOpen: boolean;
   warns: Warning[];
   watched: boolean;
@@ -1048,7 +1133,7 @@ function FragmentRow({
         <td className={`num col-delta ${(r.sinceFlipPct ?? 0) >= 0 ? "bull" : "bear"}`}>
           {fmtPct(r.sinceFlipPct)}
         </td>
-        <td className="num muted col-tempo">{fmtSince(flipCloseMs(r.lastFlipDate, r.assetClass))}</td>
+        <td className="num muted col-tempo">{fmtSince(closeMs)}</td>
         <td className="num col-price">{fmtPrice(r.price, r.currency)}</td>
         <td className="num muted col-mcap">{fmtMarketCap(r.marketCap)}</td>
         <td className="col-links" onClick={(e) => e.stopPropagation()}>
@@ -1084,6 +1169,13 @@ function FragmentRow({
         <tr className="detail-row">
           <td colSpan={9}>
             <div className="detail">
+              {timeframe === "daily" && (
+                <p className="muted" style={{ margin: "0 0 10px", fontSize: 11 }}>
+                  Vista <b>diária</b>: o <i>Next Flip</i>, o “desde o flip” e as datas são da Linha
+                  diária. O estado, os avisos e as referências ATR abaixo continuam da leitura{" "}
+                  <b>semanal</b> — e os alertas Telegram também.
+                </p>
+              )}
               <div className="detail-levels">
                 <div className="lvl">
                   <span className="lvl-k">Estado (Weekly/Daily)</span>
@@ -1107,10 +1199,10 @@ function FragmentRow({
                   <span className="lvl-k">Last Flip</span>
                   <span className="lvl-v">
                     {r.lastFlip !== null ? fmtPrice(r.lastFlip, r.currency) : "—"}
-                    {r.lastFlipDate && (
+                    {r.lastFlipDate && closeMs !== null && (
                       <span className="muted">
                         {" "}
-                        · {new Date(flipCloseMs(r.lastFlipDate, r.assetClass)!).toLocaleDateString("pt-PT")}
+                        · {new Date(closeMs).toLocaleDateString("pt-PT")}
                       </span>
                     )}
                   </span>
