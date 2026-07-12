@@ -475,6 +475,19 @@
     .author-links, .yt-card { justify-content: center; }
     .hero-stats { gap: 24px; }
   }
+/* ---- Estado FECHADO: carimbo "Vagas Esgotadas" + porta dos fundos (lista) ---- */
+#soldout { margin: 2px 0 26px; text-align: center; }
+.soldout-stamp {
+  display: inline-block; transform: rotate(-3.5deg);
+  font-family: 'JetBrains Mono', monospace; font-weight: 800;
+  font-size: clamp(28px, 6.5vw, 56px); letter-spacing: 5px; text-transform: uppercase;
+  color: #ff5a5a; padding: 12px 30px; border: 4px solid #ff5a5a; border-radius: 12px;
+  box-shadow: inset 0 0 0 2px rgba(255,90,90,.30); text-shadow: 0 1px 0 rgba(0,0,0,.28);
+  opacity: .93;
+}
+.soldout-sub { display: block; margin-top: 16px; color: var(--text-faint); font-size: 14.5px; }
+.lista-hint { margin-top: 14px; color: var(--text-faint); font-size: 13.5px; }
+.lista-hint b { color: var(--text); }
 </style>
 </head>
 <body>
@@ -528,6 +541,11 @@
   </nav>
 
   <header class="hero">
+    <!-- Carimbo só do estado FECHADO (mostrado por JS quando a janela fecha ou ?fechada=1). -->
+    <div id="soldout" hidden>
+      <span class="soldout-stamp">Vagas Esgotadas</span>
+      <span class="soldout-sub">A janela desta edição fechou. A próxima abre sem aviso — fica atento nas lives.</span>
+    </div>
     <span class="hero-tag">A primeira e maior comunidade de DeFi em Portugal · desde 2023</span>
     <h1>Aprende a gerar rendimento em DeFi que <span>aguenta as quedas</span>.</h1>
     <p class="hero-sub">
@@ -716,7 +734,7 @@
   <section id="precos">
     <div class="sec-head">
       <h2>Escolhe como <span>entras na água</span></h2>
-      <p>O Radar está sempre aberto. A comunidade completa abre em janelas, com vagas limitadas — e a janela está <b style="color:var(--up)">aberta agora, com 20% de desconto</b>.</p>
+      <p id="precos-sub">O Radar está sempre aberto. A comunidade completa abre em janelas, com vagas limitadas — e a janela está <b style="color:var(--up)">aberta agora, com 20% de desconto</b>.</p>
     </div>
     <!-- Ordem deliberada: o vitalício PRIMEIRO (âncora alta — os outros parecem
          degraus para chegar lá; no mobile é o primeiro card que se vê). -->
@@ -840,20 +858,17 @@
     <a class="btn btn-primary" href="https://t.me/surfistacrypto" target="_blank" rel="noopener">🌊 Garantir a minha vaga</a>
   </section>
 
-  <!-- ===================== LISTA DE ESPERA (captura de lead) ===================== -->
+  <!-- ===================== LISTA DE ESPERA (porta dos fundos → Telegram) =====================
+       Só visível no estado FECHADO (o JS mostra/esconde). Publicamente é "lista de
+       espera"; na prática cai no Telegram do Surfista, que decide caso a caso. -->
   <section id="lista">
     <div class="sec-head">
-      <h2>Não entras <span>nesta janela</span>?</h2>
-      <p>Deixa o email e és o primeiro a saber quando a próxima abrir.</p>
+      <h2>As portas <span>fecharam</span></h2>
+      <p>A comunidade abre por janelas, com vagas limitadas — e esta edição esgotou. Entra na lista de espera e és o primeiro a saber quando a próxima abrir.</p>
     </div>
     <div class="lista-wrap">
-      <form class="lead-form" id="lead-form">
-        <input type="text" name="web" class="lead-hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
-        <input type="email" id="lead-email" required placeholder="o-teu@email.com" autocomplete="email" aria-label="O teu email" />
-        <button type="submit" id="lead-btn">Avisa-me</button>
-      </form>
-      <p class="lead-ok" id="lead-ok">✓ Estás na lista. Falamos quando a janela abrir.</p>
-      <p class="lead-note">Só para avisar da próxima janela de entrada. Sem spam, sem partilha com terceiros.</p>
+      <a class="btn btn-primary" href="https://t.me/surfistacrypto" target="_blank" rel="noopener">🌊 Entrar na lista de espera</a>
+      <p class="lista-hint">Escreve-me só <b>Lista</b> no Telegram e ficas na fila para a próxima janela.</p>
     </div>
   </section>
 
@@ -934,10 +949,14 @@
     var f = $('cd-float'); if (!f || !floatOpen) return;
     if (window.scrollY > 300) f.classList.add('show'); else f.classList.remove('show');
   }
+  // ?fechada=1 (ou ?closed=1) força o estado fechado — para preview e para o
+  // Surfista mostrar a página "esgotada" nas lives sem esperar pela meia-noite.
+  var FORCE_CLOSED = /[?&](fechada|closed)=1/i.test(location.search);
   function render() {
     var left = DEADLINE - Date.now();
+    var closed = FORCE_CLOSED || left <= 0;
     var a = $('announce');
-    if (left > 0) {
+    if (!closed) {
       var c = $('countdown'); if (c) c.textContent = fmtLeft(left);
       if (a) { if (left <= DAY) a.classList.add('urgent'); else a.classList.remove('urgent'); }
       // Janela ABERTA: a lista de espera fica escondida — é uma alternativa de
@@ -947,22 +966,31 @@
       return;
     }
     if (a) a.classList.remove('urgent');
-    // Janela FECHADA: lista de espera visível (recebe os CTAs); prazo do hero sai.
+    // Janela FECHADA: carimbo "Vagas Esgotadas" + lista de espera (porta dos fundos).
+    var so = $('soldout'); if (so) so.hidden = false;
     var liClosed = $('lista'); if (liClosed) liClosed.style.display = '';
     var hw = $('hero-window'); if (hw) hw.style.display = 'none';
     var t = $('announce-text');
-    if (t) t.innerHTML = 'Inscrições fechadas — entra na <b>lista de espera</b> para a próxima janela.';
-    // Fechado: os CTAs deixam de morrer num DM e passam a CAPTURAR o lead (#lista).
+    if (t) t.innerHTML = '🔒 Vagas esgotadas — entra na <b>lista de espera</b> para a próxima janela.';
+    // Os CTAs da COMUNIDADE passam a apontar para a lista (#lista → Telegram "Lista").
+    // Os planos de Radar (mensal/anual) ficam INTOCADOS: o Radar está sempre aberto.
     var cta = $('announce-cta');
     if (cta) { cta.textContent = 'Lista de espera →'; cta.href = '#lista'; cta.removeAttribute('target'); }
+    var heroBtn = document.querySelector('.hero-ctas .btn-primary');
+    if (heroBtn) { heroBtn.textContent = '🌊 Entrar na lista de espera'; heroBtn.href = '#lista'; heroBtn.removeAttribute('target'); }
     var fin = document.querySelector('.final .btn-primary');
     if (fin) { fin.textContent = '📩 Entrar na lista de espera'; fin.href = '#lista'; fin.removeAttribute('target'); }
     var mc = document.querySelector('.cd-cta');
     if (mc) { mc.textContent = 'Entrar na lista →'; mc.href = '#lista'; mc.removeAttribute('target'); mc.onclick = function () { closeClock(); }; }
-    var b = $('plan-badge'); if (b) b.textContent = 'Vagas limitadas';
+    var vagaBtn = document.querySelector('.plan.best .plan-btn');
+    if (vagaBtn) { vagaBtn.textContent = 'Entrar na lista de espera'; vagaBtn.href = '#lista'; vagaBtn.removeAttribute('target'); }
+    var b = $('plan-badge'); if (b) b.textContent = 'Esgotado';
     var p = $('plan-price'); if (p) p.textContent = '993,84€';
     var n = $('plan-note'); if (n) n.textContent = 'pagamento único · próxima janela por anunciar';
-    updateModal(left); updateFloat(left);
+    var ps = $('precos-sub');
+    if (ps) ps.innerHTML = 'O Radar está sempre aberto. A comunidade completa abre por janelas — esta edição está <b style="color:var(--hot)">esgotada</b>; entra na lista para a próxima.';
+    // Preview forçado (left ainda > 0): força o relógio a renderizar "fechado".
+    updateModal(-1); updateFloat(-1);
   }
 
   // Abrir/fechar o pop-up do relógio.
@@ -997,36 +1025,6 @@
   render();
   syncFloat();
   setInterval(render, 1000);
-})();
-
-// Lista de espera: grava o email via endpoint público do Radar (honeypot
-// anti-bot no campo escondido "web"; o endpoint valida e deduplica).
-(function () {
-  var form = document.getElementById('lead-form');
-  if (!form) return;
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var btn = document.getElementById('lead-btn');
-    var email = document.getElementById('lead-email').value;
-    var hp = form.querySelector('input[name="web"]').value;
-    btn.disabled = true; btn.textContent = 'A guardar…';
-    fetch('https://app.defisurfers.xyz/api/public/lead', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email, source: 'hub', web: hp })
-    }).then(function (r) { return r.json(); }).then(function (d) {
-      if (d && d.ok) {
-        form.style.display = 'none';
-        document.getElementById('lead-ok').style.display = 'block';
-      } else {
-        btn.disabled = false; btn.textContent = 'Avisa-me';
-        alert('Email inválido — confirma e tenta de novo.');
-      }
-    }).catch(function () {
-      btn.disabled = false; btn.textContent = 'Avisa-me';
-      alert('A ligação falhou — tenta outra vez.');
-    });
-  });
 })();
 
 // Números e tabela ao vivo — mesmo endpoint público do teaser do Surf Drops.
