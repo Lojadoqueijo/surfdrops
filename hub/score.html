@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>DeFi Surfer Score — o teu dinheiro está a surfar o mercado?</title>
-<meta name="description" content="Em 2 minutos, o DeFi Surfer Score mostra quanto rendimento estás a deixar na mesa e o que te está a travar. Sem julgamentos — o retrato honesto do teu dinheiro em cripto.">
-<meta property="og:title" content="DeFi Surfer Score">
+<title>Surf Score — o teu dinheiro está a surfar o mercado?</title>
+<meta name="description" content="Em 2 minutos, o Surf Score mostra quanto rendimento estás a deixar na mesa e o que te está a travar. Sem julgamentos — o retrato honesto do teu dinheiro em cripto.">
+<meta property="og:title" content="Surf Score">
 <meta property="og:description" content="O teu dinheiro está a surfar o mercado — ou a afogar-se nas quedas? Descobre o teu Score em 2 minutos.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏄%3C/text%3E%3C/svg%3E">
@@ -117,7 +117,7 @@
 </style>
 </head>
 <body>
-  <div class="top"><span class="wave">🏄</span> DeFi<b>Surfers</b> · Score</div>
+  <div class="top"><span class="wave">🏄</span> DeFi<b>Surfers</b> · Surf Score</div>
 
   <div class="stage">
     <div class="card" id="card"><!-- render aqui --></div>
@@ -230,7 +230,7 @@
     card.innerHTML =
       '<div class="lead center">'+
         '<h1>O teu dinheiro está a <span>surfar</span> o mercado — ou a afogar-se nas quedas?</h1>'+
-        '<p>Em 2 minutos, o DeFi Surfer Score mostra quanto rendimento estás a deixar na mesa e o que te está a travar. Sem julgamentos — só o retrato honesto.</p>'+
+        '<p>Em 2 minutos, o Surf Score mostra quanto rendimento estás a deixar na mesa e o que te está a travar. Sem julgamentos — só o retrato honesto.</p>'+
         '<div class="meta"><span><i>●</i> 2 minutos</span><span><i>●</i> 11 perguntas</span><span><i>●</i> resultado imediato</span></div>'+
         '<button class="cta" id="start">Descobrir o meu Score →</button>'+
       '</div>';
@@ -279,10 +279,10 @@
   function renderResult(){
     prog.hidden = true; disc.hidden = false;
     var r = computeArch(); var A = ARCH[r.key];
-    var pass = 'Score — ' + A.name;
+    var pass = 'Surf Score — ' + A.name;
     card.innerHTML =
       '<div class="rcard">'+
-        '<div class="score-ring">O teu DeFi Surfer Score</div>'+
+        '<div class="score-ring">O teu Surf Score</div>'+
         '<div class="score-num">'+r.score+'</div>'+
         '<div class="arch"><em>'+A.name+'</em></div>'+
         '<p class="rbody">'+A.body+'</p>'+
