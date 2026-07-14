@@ -39,6 +39,8 @@
   }
   .top .wave{font-size:22px}
   .top b{color:var(--brand)}
+  .top a{color:inherit; text-decoration:none; display:inline-flex; align-items:center; gap:10px}
+  .top a:hover b{color:var(--brand-2)}
   .stage{
     flex:1; display:flex; align-items:center; justify-content:center;
     padding:20px 18px 90px;
@@ -117,7 +119,7 @@
 </style>
 </head>
 <body>
-  <div class="top"><span class="wave">🏄</span> DeFi<b>Surfers</b> · Surf Score</div>
+  <div class="top"><a href="/" title="Ir para a comunidade DeFi Surfers"><span class="wave">🏄</span> DeFi<b>Surfers</b></a> · Surf Score</div>
 
   <div class="stage">
     <div class="card" id="card"><!-- render aqui --></div>
