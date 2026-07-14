@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DeFi Surfer Score — o teu dinheiro está a surfar o mercado?</title>
+<meta name="description" content="Em 2 minutos, o DeFi Surfer Score mostra quanto rendimento estás a deixar na mesa e o que te está a travar. Sem julgamentos — o retrato honesto do teu dinheiro em cripto.">
+<meta property="og:title" content="DeFi Surfer Score">
+<meta property="og:description" content="O teu dinheiro está a surfar o mercado — ou a afogar-se nas quedas? Descobre o teu Score em 2 minutos.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏄%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#eef3fb; --card:#ffffff; --ink:#0f1b3d; --muted:#5b6b8c;
+    --line:#e2e9f4;
+    --ocean:#2f7cf6; --ocean-2:#1e5fd0;      /* botões: azul convidativo, calmo */
+    --aqua:#22c9e0;
+    --brand:#8b5cf6; --brand-2:#7c3aed;        /* roxo: só o resultado/CTA */
+    --go:#22c55e;                              /* progresso: verde = avanço */
+    --hot:#ff5a5a;
+    --shadow:0 8px 30px rgba(20,40,90,.10);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0d1326; --card:#141d38; --ink:#eaf0ff; --muted:#9fb0d0; --line:#243357; --shadow:0 10px 34px rgba(0,0,0,.4); }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.5;
+    -webkit-font-smoothing:antialiased; min-height:100dvh;
+    display:flex; flex-direction:column;
+  }
+  a{color:inherit}
+  .top{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    padding:16px; font-weight:800; letter-spacing:.2px; font-size:16px;
+    color:var(--ink);
+  }
+  .top .wave{font-size:22px}
+  .top b{color:var(--brand)}
+  .stage{
+    flex:1; display:flex; align-items:center; justify-content:center;
+    padding:20px 18px 90px;
+  }
+  .card{
+    width:100%; max-width:620px; background:transparent;
+    animation:pop .35s cubic-bezier(.2,.7,.3,1);
+  }
+  @keyframes pop{from{opacity:0; transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  /* Landing */
+  .lead h1{font-size:clamp(28px,7vw,42px); line-height:1.12; margin:0 0 14px; letter-spacing:-.5px}
+  .lead h1 span{color:var(--brand)}
+  .lead p{font-size:clamp(15px,4vw,18px); color:var(--muted); margin:0 0 26px}
+  .lead .meta{display:flex; gap:18px; flex-wrap:wrap; justify-content:center; margin:0 0 26px; color:var(--muted); font-size:13px; font-weight:600}
+  .lead .meta i{font-style:normal; color:var(--go)}
+  .center{text-align:center}
+
+  .cta{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; max-width:420px; padding:17px 24px; border:0; border-radius:15px;
+    font:inherit; font-size:17px; font-weight:800; cursor:pointer;
+    background:linear-gradient(135deg,var(--brand),var(--brand-2)); color:#fff;
+    box-shadow:0 10px 26px rgba(124,58,237,.32); transition:transform .12s, box-shadow .12s;
+  }
+  .cta:hover{transform:translateY(-1px); box-shadow:0 14px 30px rgba(124,58,237,.4); text-decoration:none}
+  .cta.tg{background:linear-gradient(135deg,#2AABEE,#1c8fd0); box-shadow:0 10px 26px rgba(42,171,238,.35)}
+  .cta.tg:hover{box-shadow:0 14px 30px rgba(42,171,238,.45)}
+
+  /* Question */
+  .qhead{display:flex; align-items:center; gap:10px; margin-bottom:16px; min-height:24px}
+  .back{background:none;border:0;color:var(--muted);font:inherit;font-weight:700;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:6px 8px;border-radius:8px}
+  .back:hover{color:var(--brand)}
+  .q{font-size:clamp(21px,5.4vw,28px); font-weight:800; letter-spacing:-.3px; margin:0 0 22px; line-height:1.22}
+  .opts{display:grid; gap:12px}
+  .opt{
+    text-align:left; width:100%; padding:17px 18px; border-radius:14px;
+    border:2px solid transparent; background:var(--card); color:var(--ink);
+    font:inherit; font-size:15.5px; font-weight:600; cursor:pointer;
+    box-shadow:var(--shadow); transition:transform .1s, border-color .1s, background .1s;
+    display:flex; align-items:center; gap:12px;
+  }
+  .opt:hover{border-color:var(--ocean); transform:translateY(-1px)}
+  .opt .dot{flex:0 0 20px; width:20px; height:20px; border-radius:50%; border:2px solid var(--line); transition:.1s}
+  .opt.sel{background:var(--ocean); color:#fff; border-color:var(--ocean-2)}
+  .opt.sel .dot{border-color:#fff; background:#fff}
+  @media (min-width:560px){ .opts.two{grid-template-columns:1fr 1fr} }
+
+  /* Progress */
+  .prog{position:fixed; left:0; right:0; bottom:0; padding:14px 18px calc(14px + env(safe-area-inset-bottom)); background:linear-gradient(0deg,var(--bg),transparent); }
+  .prog .track{height:9px; border-radius:99px; background:var(--line); overflow:hidden; max-width:620px; margin:0 auto}
+  .prog .fill{height:100%; width:0; border-radius:99px; background:linear-gradient(90deg,var(--go),#4ade80); transition:width .4s cubic-bezier(.2,.7,.3,1)}
+  .prog .lbl{max-width:620px; margin:8px auto 0; font-size:12px; font-weight:700; color:var(--muted); text-align:center}
+  .prog .lbl b{color:var(--go)}
+
+  /* Result */
+  .rcard{background:var(--card); border-radius:20px; padding:28px 24px; box-shadow:var(--shadow); text-align:center; border:1px solid var(--line)}
+  .score-ring{font-size:14px; font-weight:800; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase}
+  .score-num{font-size:clamp(48px,14vw,72px); font-weight:900; line-height:1; margin:6px 0 2px; background:linear-gradient(135deg,var(--brand),var(--aqua)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
+  .arch{font-size:clamp(22px,6vw,30px); font-weight:900; margin:10px 0 16px; letter-spacing:-.3px}
+  .arch em{font-style:normal; color:var(--brand)}
+  .rbody{font-size:15.5px; color:var(--ink); text-align:left; margin:0 auto 18px; max-width:520px}
+  .rbody b{color:var(--brand-2)}
+  .firststep{background:rgba(139,92,246,.08); border:1px solid rgba(139,92,246,.2); border-radius:12px; padding:13px 15px; font-size:14.5px; text-align:left; margin:0 auto 22px; max-width:520px}
+  .firststep b{color:var(--brand)}
+  .pass{font-family:'JetBrains Mono',ui-monospace,monospace; background:var(--bg); border:1px dashed var(--line); border-radius:10px; padding:10px 14px; font-weight:700; font-size:15px; display:inline-block; margin:4px 0 2px}
+  .pass span{color:var(--brand)}
+  .rnote{font-size:13px; color:var(--muted); margin:14px 0 0}
+  .email-row{display:flex; gap:8px; max-width:520px; margin:20px auto 0; flex-wrap:wrap}
+  .email-row input{flex:1 1 200px; min-width:0; padding:13px 15px; border-radius:12px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font:inherit; font-size:15px}
+  .email-row input:focus{outline:0; border-color:var(--brand)}
+  .email-row button{padding:13px 18px; border-radius:12px; border:0; background:var(--ink); color:var(--bg); font:inherit; font-weight:800; font-size:14px; cursor:pointer}
+  .email-ok{color:var(--go); font-weight:700; font-size:14px; margin:12px 0 0; display:none}
+  .hp{position:absolute; left:-9999px; opacity:0; height:0; width:0}
+  .disc{max-width:620px; margin:22px auto 0; padding:0 18px; font-size:11px; color:var(--muted); text-align:center; line-height:1.6}
+</style>
+</head>
+<body>
+  <div class="top"><span class="wave">🏄</span> DeFi<b>Surfers</b> · Score</div>
+
+  <div class="stage">
+    <div class="card" id="card"><!-- render aqui --></div>
+  </div>
+
+  <div class="prog" id="prog" hidden>
+    <div class="track"><div class="fill" id="fill"></div></div>
+    <div class="lbl"><b id="ppct">0%</b> · continua, falta pouco</div>
+  </div>
+
+  <p class="disc" id="disc" hidden>
+    Material educativo e informativo. Nada aqui é recomendação de compra ou venda nem aconselhamento
+    financeiro. Cripto e DeFi têm risco real de perda total. As decisões, e o risco, são sempre teus.
+  </p>
+
+<script>
+(function(){
+  var TG = "https://t.me/surfistacrypto";
+  var LEAD_API = "https://app.defisurfers.xyz/api/public/lead";
+
+  // score: P=Parado, R=Refém, S=Surfista. tag: guarda em tags (não pontua arquétipo).
+  var QUESTIONS = [
+    { q:"O teu dinheiro em cripto, neste momento, está…", o:[
+      ["Parado numa carteira/exchange, à espera que suba","P"],
+      ["A render algo, mas não sei bem quanto nem como","P"],
+      ["A trabalhar em várias estratégias DeFi","S"],
+      ["Só faço trading — entro e saio","R"] ] },
+    { q:"As tuas stablecoins (ou o capital à espera de oportunidade) rendem quanto por ano?", o:[
+      ["0% — estão paradas","P"],
+      ["O que o banco dá (~1–2%)","P"],
+      ["Mais do que o banco, mas não sei se é o máximo","S"],
+      ["Rendem de forma consistente e sei porquê","S"] ] },
+    { q:"Se o mercado andar de lado ou cair durante 12 meses, o teu capital…", o:[
+      ["Não ganha nada — só ganho se subir","R"],
+      ["Perde, e eu entro em pânico","P"],
+      ["Continua a gerar algum rendimento","S"],
+      ["Aproveito para acumular com método","S"] ] },
+    { q:"Sabes de onde vem — e onde está o risco — do rendimento que (não) usas?", o:[
+      ["Não uso nada / não faço ideia","P"],
+      ["Uso, mas sigo outros sem perceber a fundo","R"],
+      ["Percebo o básico, mas não o risco todo","R"],
+      ["Sei explicar o modelo e os riscos (ex.: impermanent loss)","S"] ] },
+    { q:"O teu capital compõe-se sozinho, ou paras/tiras a meio?", o:[
+      ["Está parado, não compõe nada","P"],
+      ["Ganho aqui e ali, sem sistema","R"],
+      ["Parte compõe, mas podia ser muito mais","S"],
+      ["Tenho juros compostos a andar de propósito","S"] ] },
+    { q:"Quando entras numa posição, sabes onde vais proteger o capital?", o:[
+      ["Não faço trading","P"],
+      ["Não — decido no momento, às vezes tarde demais","R"],
+      ["Tenho uma ideia, mas sem regra clara","R"],
+      ["Sim, tenho o nível definido antes de entrar","S"] ] },
+    { q:"No último grande crash, o que fizeste REALMENTE?", o:[
+      ["Vendi perto do fundo e arrependi-me","R"],
+      ["Aguentei, mas não dormi e vi o gráfico o dia todo","R"],
+      ["Não tinha nada a render — só vi o número cair","P"],
+      ["O meu capital continuou a gerar e acumulei","S"] ] },
+    { q:"Sê honesto: o que mais te está a custar rendimento hoje?", o:[
+      ["Capital parado a perder para a inflação","P"],
+      ["Não perceber DeFi para o pôr a trabalhar","P"],
+      ["Só ganhar quando o mercado sobe","R"],
+      ["Não ter um sistema para entrar e proteger","R"],
+      ["Não tomar lucro / não compor","R"] ] },
+    { q:"Para calibrar o teu caminho: quanto tens em cripto ou pronto a pôr a trabalhar?", tag:"capital", o:[
+      ["Menos de €1.000","<1k"],
+      ["€1.000 – €10.000","1-10k"],
+      ["€10.000 – €50.000","10-50k"],
+      ["Mais de €50.000",">50k"] ] },
+    { q:"Quão sério estás em mudar isto nos próximos 3–6 meses?", tag:"intencao", o:[
+      ["Muito — quero um método e alguém que já o faz","serio"],
+      ["Interessado, mas cauteloso sobre em quem confiar","cauteloso"],
+      ["Só curioso pelo meu resultado","curioso"] ] },
+    { q:"O que te faria mais diferença agora?", tag:"porta", o:[
+      ["Pôr as stables a render acima do banco, com segurança","stables"],
+      ["Perceber as estratégias DeFi de A a Z","educacao"],
+      ["Ter um sistema para o trading (proteger e entrar)","sistema"],
+      ["Acompanhamento próximo para não estar sozinho nisto","comunidade"] ] }
+  ];
+
+  var ARCH = {
+    P:{ name:"O Poupador Parado", band:[30,46],
+        body:"O teu instinto de proteger o capital está certo — mas ele está a <b>perder para a inflação, parado</b>. Enquanto isso, quem percebe DeFi tem as mesmas stables a render bem acima do banco, sem apostar na direção do mercado. Não te falta cautela. Falta-te o <b>como</b> — e é a parte mais fácil de aprender.",
+        step:"pôr o capital parado a trabalhar, com risco controlado." },
+    R:{ name:"O Refém da Direção", band:[50,70],
+        body:"Ganhas quando sobe e sofres quando cai — estás <b>refém de uma coisa que não controlas</b>: a direção do mercado. Duas peças mudam isto: rendimento que <b>não depende do preço subir</b>, e um <b>sistema</b> que te diz quando proteger e quando entrar (a Linha e o Radar do Swell). Estás mais perto do que pensas — falta estrutura, não esforço.",
+        step:"deixar de depender só da subida." },
+    S:{ name:"O Surfista", band:[76,92],
+        body:"Já pões o capital a trabalhar e pensas em risco — jogas mais como a <b>infraestrutura</b> do que como apostador. Falta-te o último 20%: <b>compor de forma sistemática</b> e afinar o timing com o sistema certo. É aí que a comunidade acelera quem já percebeu o jogo.",
+        step:"transformar método em sistema." }
+  };
+
+  var idx = -1;               // -1 = landing
+  var answers = [];           // score letters P/R/S por pergunta pontuável
+  var tags = {};
+  var card = document.getElementById('card');
+  var prog = document.getElementById('prog');
+  var disc = document.getElementById('disc');
+  var fill = document.getElementById('fill');
+  var ppct = document.getElementById('ppct');
+
+  function setProgress(){
+    var total = QUESTIONS.length;
+    var pct = idx < 0 ? 0 : Math.round(idx/total*100);
+    fill.style.width = pct + '%';
+    ppct.textContent = pct + '%';
+  }
+
+  function renderLanding(){
+    prog.hidden = true; disc.hidden = false;
+    card.innerHTML =
+      '<div class="lead center">'+
+        '<h1>O teu dinheiro está a <span>surfar</span> o mercado — ou a afogar-se nas quedas?</h1>'+
+        '<p>Em 2 minutos, o DeFi Surfer Score mostra quanto rendimento estás a deixar na mesa e o que te está a travar. Sem julgamentos — só o retrato honesto.</p>'+
+        '<div class="meta"><span><i>●</i> 2 minutos</span><span><i>●</i> 11 perguntas</span><span><i>●</i> resultado imediato</span></div>'+
+        '<button class="cta" id="start">Descobrir o meu Score →</button>'+
+      '</div>';
+    document.getElementById('start').onclick = function(){ idx = 0; renderQuestion(); };
+  }
+
+  function renderQuestion(){
+    prog.hidden = false; disc.hidden = true; setProgress();
+    var Q = QUESTIONS[idx];
+    var two = Q.o.length === 4 ? ' two' : '';
+    var opts = Q.o.map(function(o,i){
+      return '<button class="opt" data-i="'+i+'"><span class="dot"></span><span>'+o[0]+'</span></button>';
+    }).join('');
+    card.innerHTML =
+      '<div class="qhead">'+ (idx>0 ? '<button class="back" id="back">← Voltar</button>' : '') +'</div>'+
+      '<h2 class="q">'+Q.q+'</h2>'+
+      '<div class="opts'+two+'">'+opts+'</div>';
+    if(idx>0){ document.getElementById('back').onclick = function(){ idx--; answers.length=idx; renderQuestion(); }; }
+    Array.prototype.forEach.call(card.querySelectorAll('.opt'), function(btn){
+      btn.onclick = function(){
+        card.querySelectorAll('.opt').forEach(function(b){ b.classList.remove('sel'); });
+        btn.classList.add('sel');
+        var val = Q.o[+btn.dataset.i][1];
+        if(Q.tag){ tags[Q.tag] = val; } else { answers[idx] = val; }
+        setTimeout(next, 240); // flash de seleção + avanço (momentum)
+      };
+    });
+  }
+
+  function next(){
+    if(idx < QUESTIONS.length-1){ idx++; renderQuestion(); }
+    else { fill.style.width='100%'; ppct.textContent='100%'; renderResult(); }
+  }
+
+  function computeArch(){
+    var c={P:0,R:0,S:0};
+    answers.forEach(function(a){ if(c[a]!=null) c[a]++; });
+    var key = (c.S>=c.R && c.S>=c.P) ? 'S' : (c.R>=c.P ? 'R' : 'P'); // empate sobe
+    var scored = c.P+c.R+c.S || 1;
+    var raw = (c.S*1 + c.R*0.5)/scored;          // 0..1 honesto
+    var band = ARCH[key].band;
+    var score = Math.round(band[0] + raw*(band[1]-band[0]));
+    return { key:key, score:score };
+  }
+
+  function renderResult(){
+    prog.hidden = true; disc.hidden = false;
+    var r = computeArch(); var A = ARCH[r.key];
+    var pass = 'Score — ' + A.name;
+    card.innerHTML =
+      '<div class="rcard">'+
+        '<div class="score-ring">O teu DeFi Surfer Score</div>'+
+        '<div class="score-num">'+r.score+'</div>'+
+        '<div class="arch"><em>'+A.name+'</em></div>'+
+        '<p class="rbody">'+A.body+'</p>'+
+        '<div class="firststep">👉 <b>O teu primeiro passo:</b> '+A.step+'</div>'+
+        '<a class="cta tg" id="tg" href="'+TG+'" target="_blank" rel="noopener">🌊 Falar comigo no Telegram →</a>'+
+        '<p class="rnote">Escreve-me <span class="pass"><span>'+pass+'</span></span><br>Vejo o teu perfil e digo-te o caminho — e se fizer sentido, se há forma de entrares.</p>'+
+        '<div class="email-row">'+
+          '<input type="text" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" id="hp">'+
+          '<input type="email" id="email" placeholder="Recebe também o resumo por email" autocomplete="email" aria-label="Email">'+
+          '<button id="esend">Enviar</button>'+
+        '</div>'+
+        '<p class="email-ok" id="eok">✓ Feito. Falamos em breve.</p>'+
+      '</div>';
+
+    document.getElementById('esend').onclick = function(){
+      var email = document.getElementById('email').value.trim();
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ alert('Confirma o email e tenta de novo.'); return; }
+      this.disabled = true; this.textContent='…';
+      saveLead(email, function(ok){
+        if(ok){ document.querySelector('.email-row').style.display='none'; document.getElementById('eok').style.display='block'; }
+        else { document.getElementById('esend').disabled=false; document.getElementById('esend').textContent='Enviar'; alert('A ligação falhou — tenta outra vez.'); }
+      });
+    };
+  }
+
+  // Regista o email real + as tags do quiz na source (arquétipo:capital:intenção:porta)
+  // — assim o lead na BD já vem segmentado. Honeypot "web" anti-bot.
+  function saveLead(email, cb){
+    var r = computeArch();
+    var src = 'quiz-score:'+ARCH[r.key].name.replace(/^O /,'')+':'+(tags.capital||'?')+':'+(tags.intencao||'?')+':'+(tags.porta||'?');
+    try{
+      fetch(LEAD_API, { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email: email, source: src, web: (document.getElementById('hp')||{}).value || '' }) })
+        .then(function(x){return x.json();}).then(function(d){ if(cb) cb(!!(d&&d.ok)); })
+        .catch(function(){ if(cb) cb(false); });
+    }catch(e){ if(cb) cb(false); }
+  }
+
+  renderLanding();
+})();
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
