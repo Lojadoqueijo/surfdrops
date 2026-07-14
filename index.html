@@ -276,6 +276,15 @@
     color: #000; font-weight: 800; font-size: 18px;
     box-shadow: 0 0 24px rgba(0,255,157,0.3);
   }
+  /* "by DeFi Surfers ↗" — caminho de volta à LP (mesmo padrão do Radar/Score). */
+  .logo-txt { display: flex; flex-direction: column; line-height: 1.05; }
+  .logo-sub {
+    font-family: system-ui, -apple-system, sans-serif;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    font-size: 9px; font-weight: 700; color: var(--text-dim);
+    margin-top: 3px; transition: color 0.12s;
+  }
+  .logo-sub:hover { color: var(--accent); }
 
   .nav-links {
     display: flex; gap: 24px; align-items: center;
@@ -2245,7 +2254,10 @@
     <div class="topbar">
       <div class="logo">
         <div class="logo-mark">🏄</div>
-        <span>SURF&nbsp;DROPS</span>
+        <div class="logo-txt">
+          <span>SURF&nbsp;DROPS</span>
+          <a class="logo-sub" href="https://defisurfers.xyz" target="_blank" rel="noopener" title="Ir para a comunidade DeFi Surfers">by DeFi Surfers ↗</a>
+        </div>
       </div>
       <nav class="nav-links">
         <a href="#airdrops">Airdrops</a>
