@@ -633,7 +633,15 @@ export default function Terminal({
         <div className="topbar">
           <div className="brand">
             <h1>📡 Radar do Swell</h1>
-            <span className="tag brand-sub">by DeFi Surfers</span>
+            <a
+              className="tag brand-sub brand-link"
+              href="https://defisurfers.xyz"
+              target="_blank"
+              rel="noopener"
+              title="Ir para a comunidade DeFi Surfers"
+            >
+              by DeFi Surfers ↗
+            </a>
           </div>
           <nav className="tabs" ref={tabsRef}>
             {TABS.map((c) => (
