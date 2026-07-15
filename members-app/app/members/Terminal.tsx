@@ -1024,7 +1024,7 @@ export default function Terminal({
               rel="noopener noreferrer"
             >
               <span className="alpha-stamp">O Alpha</span>
-              <span className="tb-tag">🔥 NOVO</span>
+              <span className="tb-tag">NOVO</span>
               <span className="tb-main">TxFlow — Perp DEX ↗</span>
               <span className="tb-sub">Order book on-chain · 100% comunidade · airdrop ativo</span>
             </a>
