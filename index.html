@@ -1527,6 +1527,32 @@
     transform: none !important;
   }
 
+  /* TxFlow em destaque — variante teal/azul (distinta do dourado do EtherFi) + selo,
+     para captar o clique no card mais quente da lista. */
+  .card-featured-wrap.wrap-txflow {
+    background: conic-gradient(
+      from var(--angle),
+      transparent 0deg,
+      #0aa2ff 40deg,
+      #22d3ee 80deg,
+      #9df9e6 120deg,
+      #22d3ee 160deg,
+      #0aa2ff 200deg,
+      transparent 250deg
+    );
+    box-shadow: 0 0 32px rgba(34,211,238,0.26), 0 0 64px rgba(10,162,255,0.14);
+  }
+  .card-featured-wrap.wrap-txflow .card {
+    background: linear-gradient(180deg, #0c1c28 0%, rgba(12,26,38,1) 100%);
+  }
+  .wrap-txflow .hot-ribbon {
+    position: absolute; top: -10px; left: 16px; z-index: 4;
+    font-size: 10px; font-weight: 900; letter-spacing: 0.7px; text-transform: uppercase;
+    color: #04121a; background: linear-gradient(135deg, #22d3ee, #0aa2ff);
+    padding: 3px 11px; border-radius: 999px;
+    box-shadow: 0 5px 16px -4px rgba(10,162,255,0.75);
+  }
+
   /* ================================================== */
 
 
@@ -2349,7 +2375,9 @@
 
   <div class="grid" id="grid">
 
-    <!-- 0. TxFlow — perp DEX no seu proprio L1, 100% comunidade -->
+    <!-- 0. TxFlow — perp DEX (card em DESTAQUE: wrap teal + selo) -->
+    <div class="card-featured-wrap wrap-txflow">
+    <span class="hot-ribbon">🔥 Em destaque</span>
     <div class="card" data-chain="txflow" data-status="hot new perp">
       <div class="card-head">
         <div class="protocol-logo">
@@ -2381,6 +2409,7 @@
         </a>
       </div>
     </div>
+    </div><!-- /wrap-txflow -->
 
     <!-- 1. xStocks -->
     <div class="card" data-chain="solana" data-status="hot live">
