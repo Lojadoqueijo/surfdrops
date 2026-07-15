@@ -166,6 +166,19 @@ a:hover { text-decoration: underline; }
 .trade-btn:hover { background: #7c4ce6; text-decoration: none; }
 .trade-btn-bybit { background: #f7a600; color: #0a0714; }
 .trade-btn-bybit:hover { background: #e09600; }
+/* TxFlow — corretora em destaque (perp DEX): gradiente + glow para captar o clique */
+.trade-btn-txflow {
+  background: linear-gradient(135deg, #00e5b3, #0aa2ff); color: #04121a;
+  padding: 12px 12px 11px;
+  box-shadow: 0 0 0 1px rgba(0,229,179,0.4), 0 6px 22px -6px rgba(10,162,255,0.6);
+}
+.trade-btn-txflow:hover { background: linear-gradient(135deg, #12f0c0, #2bb0ff); }
+.trade-btn-txflow .tb-tag {
+  display: inline-block; font-size: 9px; font-weight: 900; letter-spacing: 0.8px;
+  background: rgba(4,18,26,0.16); padding: 2px 7px; border-radius: 999px; margin-bottom: 4px;
+}
+.trade-btn-txflow .tb-main { display: block; font-size: 13px; font-weight: 900; }
+.trade-btn-txflow .tb-sub { display: block; font-size: 10px; font-weight: 700; opacity: 0.82; margin-top: 3px; line-height: 1.3; }
 .trade-slot {
   margin-top: 8px; padding: 10px 12px; border-radius: 10px; border: 1px dashed var(--border);
   color: var(--muted); font-size: 12px; text-align: center;

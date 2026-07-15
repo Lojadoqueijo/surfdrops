@@ -1018,6 +1018,16 @@ export default function Terminal({
               Abre conta com os links da comunidade e garante as vantagens de referral.
             </p>
             <a
+              className="trade-btn trade-btn-txflow"
+              href="https://app.txflow.com/r/TXSURFISTA"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span className="tb-tag">🔥 NOVO</span>
+              <span className="tb-main">TxFlow — Perp DEX ↗</span>
+              <span className="tb-sub">Order book on-chain · 100% comunidade · airdrop ativo</span>
+            </a>
+            <a
               className="trade-btn"
               href="https://my.okx.com/en-eu/welcome-rewards?channelID=94234435"
               target="_blank"
