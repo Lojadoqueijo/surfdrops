@@ -1530,26 +1530,6 @@
   /* ================================================== */
 
 
-  /* === SELETOR DE LÍNGUA === */
-  .lang-switcher {
-    display: flex; align-items: center; gap: 2px; margin-left: 10px;
-  }
-  .lang-btn {
-    background: none; border: 1px solid transparent;
-    color: var(--text-dim); font-size: 10px;
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 1.5px; padding: 3px 7px;
-    border-radius: 4px; cursor: pointer;
-    transition: all 0.15s; text-transform: uppercase;
-    font-weight: 700;
-  }
-  .lang-btn:hover { color: var(--accent); border-color: var(--border-bright); }
-  .lang-btn.active {
-    color: var(--accent);
-    border-color: rgba(0,255,157,0.4);
-    background: rgba(0,255,157,0.06);
-  }
-  /* === FIM SELETOR LÍNGUA === */
   /* === BANNER LEDGER === */
   @property --ledger-angle {
     syntax: '<angle>';
@@ -2273,11 +2253,6 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           DeFi Surfers
         </a>
-        <div class="lang-switcher" role="group" aria-label="Idioma">
-          <button class="lang-btn active" data-lang="pt" aria-pressed="true">PT</button>
-          <button class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
-          <button class="lang-btn" data-lang="es" aria-pressed="false">ES</button>
-        </div>
       </nav>
     </div>
 
@@ -3928,9 +3903,7 @@
     overlay.addEventListener('click', function(e){ if (e.target === overlay) closeModal(); });
     document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && overlay.classList.contains('is-open')) closeModal(); });
     var MSG = {
-      pt: 'Olá Surfista! 🏄 Quero entrar nos DeFi Surfers no pré-lançamento (-20% · pass vitalício). Quais são os próximos passos?',
-      en: 'Hi Surfista! 🏄 I want to join DeFi Surfers in the pre-launch (-20% · lifetime pass). What are the next steps?',
-      es: '¡Hola Surfista! 🏄 Quiero entrar en DeFi Surfers en el pre-lanzamiento (-20% · pase vitalicio). ¿Cuáles son los próximos pasos?'
+      pt: 'Olá Surfista! 🏄 Quero entrar nos DeFi Surfers no pré-lançamento (-20% · pass vitalício). Quais são os próximos passos?'
     };
     function copyText(t){
       try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t); return; } } catch(e){}
@@ -3938,8 +3911,7 @@
     }
     var cta = document.getElementById('dsCta');
     if (cta) cta.addEventListener('click', function(){
-      var lang = localStorage.getItem('surf_lang') || 'pt';
-      copyText(MSG[lang] || MSG.pt); // mensagem fica na área de transferência → colar e enviar
+      copyText(MSG.pt); // mensagem fica na área de transferência → colar e enviar
       var lbl = cta.querySelector('span');
       if (lbl) { var orig = lbl.textContent; lbl.textContent = '✓ Copiado — cola no Telegram'; setTimeout(function(){ lbl.textContent = orig; }, 2500); }
       setTimeout(closeModal, 400);
@@ -4224,248 +4196,12 @@
         'ds.bar.cta': 'Garantir vaga',
       },
 
-      en: {
-        'nav.airdrops': 'Airdrops',
-        'nav.community': 'Community',
-        'nav.risk': 'Risk',
-        'filter.all': 'All',
-        'filter.cards': 'Cards',
-        'stats.protocols': 'Active Protocols',
-        'stats.chains': 'Chains Covered',
-        'ticker.1': 'DeFi has real risk · you can lose everything',
-        'ticker.2': 'Not financial advice · do your own research (DYOR)',
-        'ticker.3': 'Smart contracts can fail or be hacked',
-        'ticker.4': 'Airdrops don\'t always materialise',
-        'ticker.5': 'Never risk more than you can afford to lose',
-        'risk.banner.title': 'Warning · Read before proceeding',
-        'risk.banner.body': 'DeFi has <strong>real risk of total loss</strong>. Smart contract bugs, exit scams, impermanent loss and airdrops that never materialise are real possibilities. This list reflects <strong>my personal choices</strong>, not financial advice.',
-        'hero.subtitle': 'Curated list of DeFi protocols and airdrops where I hold active positions. <strong>Use the links below to get a points boost</strong> — farm more with the same capital. Not financial advice — this is what I personally do with my own capital.',
-        'tw.1': 'what I\'m', 'tw.2': 'currently ', 'tw.3': 'farming', 'tw.4': ' right now.',
-        'card.btn': 'Enter with boost',
-        'ledger.badge': 'Active offer',
-        'ledger.title': 'Ledger — Your <span>cold wallet</span>',
-        'ledger.sub': 'Official page · Leading hardware wallet',
-        'final.title': 'The Surfista <span>stack</span>',
-        'final.sub': "You read to the end — you know the risks and you've seen the protocols. These are the two tools I recommend to anyone serious about farming.",
-        'final.ledger.tag': 'Self-custody',
-        'final.ledger.title': 'Ledger — protect what you farm',
-        'final.ledger.desc': "The airdrop is only yours once it's in a hardware wallet. $80 in BTC bonus.",
-        'final.ledger.cta': 'Buy with bonus →',
-        'final.okx.tag': 'On-ramp',
-        'final.okx.title': 'OKX — get in, buy, get out',
-        'final.okx.desc': 'Up to €400 in welcome rewards. Buy, send to self-custody, and go surf. Not your keys, not your coins.',
-        'final.okx.cta': 'Create account with bonus →',
-        'ledger.bonus': '$80 Bonus',
-        'ledger.cta': 'Buy Ledger',
-        'radar.tag': 'New · Members only',
-        'radar.title': '📡 Swell Radar — <span>3,600+ assets</span>, one radar',
-        'radar.lead': 'The same engine as the <strong>Swell Line</strong>, scanning crypto, US stocks, ETFs, commodities and global indices — bullish/bearish flips confirmed at every candle close. <strong>The Line tells you when. The Radar tells you where.</strong>',
-        'radar.stats.total': 'assets on radar',
-        'radar.th.asset': 'Asset',
-        'radar.th.delta': 'Since flip',
-        'radar.lock': '3,600+ assets, personal watchlist and alerts — in the full Radar',
-        'radar.live': 'Real data · updated daily at candle close',
-        'radar.plan1.name': 'Radar · Monthly',
-        'radar.plan1.note': 'no lock-in',
-        'radar.plan1.f': '<li>Full access to 3,600+ assets</li><li>Personal watchlist + Telegram alerts</li><li>Builds Surfer Credit towards the community</li>',
-        'radar.plan2.badge': 'Save 32%',
-        'radar.plan2.name': 'Radar · Annual',
-        'radar.plan2.note': '≈ €40/month · 12 months for the price of 8',
-        'radar.plan2.f': '<li>Everything in monthly</li><li>Personal watchlist + Telegram alerts</li><li>Builds Surfer Credit towards the community</li>',
-        'radar.plan3.badge': 'Best value',
-        'radar.plan3.name': 'DeFi Surfers · Lifetime',
-        'radar.plan3.note': 'one-time payment · members never pay for the Radar. Ever.',
-        'radar.plan3.f': '<li><strong>Lifetime Swell Radar</strong></li><li>Swell Line (TradingView indicator)</li><li>+30h of hands-on DeFi content</li><li>Private Telegram + Discord · weekly calls</li><li>Opens only in windows — limited spots</li>',
-        'radar.cta': 'Talk to the team',
-        'radar.cta3': 'I want to be a DeFi Surfer',
-        'radar.paynote': 'Payment in USDC/USDT · access closed directly with the team on Telegram',
-        'community.tag': 'Membership · DeFi Surfers',
-        'community.title': 'Airdrops <span>arrive earlier</span> for DeFi Surfers.',
-        'community.lead': 'This page is the <strong>public showcase</strong>. <strong>DeFi Surfers</strong> — the largest and best DeFi and airdrops community in Portugal — receive airdrops <strong>before they appear here</strong>, with time to enter at the right moment, when points are worth more and competition is lower.',
-        'community.perks': '<li><strong>Early access</strong> — airdrop alerts before public sharing</li><li><strong>Airdrop legos</strong> — point stacking strategies across protocols for capital optimisation</li><li><strong>Analysis & debriefs</strong> — why I entered, how much I allocated, when I exit</li><li><strong>Direct access to me</strong> — ask questions, validate setups, share plays</li>',
-        'community.cta.label': 'Membership · Approval-based access',
-        'community.cta.title': 'I want to be a DeFi Surfer',
-        'community.cta.desc': 'It\'s a paid and closed community. Send a message and I\'ll tell you about pricing, conditions and next steps.',
-        'risk.section.title': 'Know the <span>risks</span> before you jump',
-        'footer.brand.desc': 'DeFi protocol and airdrop curation by Surfista. Part of the <strong style="color: var(--accent);">DeFi Surfers</strong> ecosystem — the largest and best DeFi and airdrops community in Portugal.',
-        'footer.community': 'Community',
-        'footer.resources': 'Resources',
-        'footer.tips': '⚡ Tips · Lightning',
-        'footer.community.link': 'DeFi Surfers Community',
-        'footer.risk.link': 'Risk Disclaimer',
-        'tip.title': 'Like what we do here?',
-        'tip.body1': 'Everything on this site is free and always will be. No ads, no tracking, no BS.',
-        'tip.body2': 'If I saved you time or helped you catch an airdrop, send some sats via <strong>Lightning ⚡</strong> Instant, peer-to-peer, and the most cypherpunk way to say thanks.',
-        'tip.copy': 'Copy',
-        'toast.title': 'Enjoying Surf Drops?',
-        'toast.body': 'No ads, no trackers. If this helps you, support with some sats.',
-        'toast.cta': '⚡ Support via Lightning',
-        'okx.logo.sub': '€400 in rewards',
-        'okx.headline': 'Centralised exchanges<br>are like <span>public bathrooms.</span>',
-        'okx.sub': 'Do what you have to do — and leave.',
-        'okx.ate': 'up to €400 welcome bonus',
-        'okx.cta': 'Register and claim bonus',
-        'card.xstocks.chain': 'Solana · RWA',
-        'card.poolparty.chain': 'Base & Arbitrum · LP',
-        'card.etherfi.chain': 'Ethereum · DeFi Visa Card',
-        'card.titan.chain': 'Solana · Meta DEX',
-        'card.piggybank.chain': 'Solana · Yield Vaults',
-        'card.loopscale.chain': 'Solana · Lending',
-        'card.onre.chain': 'Solana · RWA Reinsurance',
-        'card.yieldseeker.chain': 'Base · AI Agent',
-        'card.kast.chain': 'Multichain · Stablecoin Card',
-        'card.saturn.chain': 'Ethereum · Yield Stablecoin',
-        'card.txflow.chain': 'Own L1 · Perp DEX',
-        'card.txflow.desc': 'Perp DEX on its own L1, with a fully on-chain order book — the Hyperliquid DNA. And the detail that matters: <b>zero VCs, 100% community</b> from day one. Fresh mainnet and an active airdrop program for early users.',
-        'card.xstocks.desc': 'Tokenised stocks on-chain (Tesla, Apple, Nvidia...) on Solana. Real exposure to TradFi assets without a broker. Active points system — every interaction counts.',
-        'card.poolparty.desc': 'Simplified concentrated liquidity. Automated managed strategies — no need to think about ranges. DeFi Surfers POC base.',
-        'card.etherfi.desc': 'Non-custodial Visa card linked to your ETH/BTC/stablecoins vault. Spend crypto in the real world without selling, earn up to 15% cashback in wETH on selected categories (3% base on everything). Loyalty points system with tiers and referral boost. Protocol with $ETHFI token launched — active position in the ecosystem.',
-        'card.titan.desc': 'Meta DEX on Solana with aggregated liquidity from Jupiter, Raydium and others. Trading up to 100x leverage. Zero slippage on limit orders. Active points system.',
-        'card.piggybank.desc': 'Automatic yield vaults on Solana with delta-neutral strategies. 10-20% APYs on stablecoins without active management. Points multiplied by volume.',
-        'card.loopscale.desc': 'Fixed-rate lending with order book instead of pools. One-click loops up to 4x leverage. $1B+ cumulative volume. Stack OnRe points simultaneously.',
-        'card.onre.desc': 'Real-world reinsurance yield (uncorrelated with crypto). ONyc token yields 9-15% base APY. Points for holding and deployment with up to 4x multipliers.',
-        'card.yieldseeker.desc': 'AI agent that automatically farms yield on stablecoins. 7-15% average APY in USDC, custody via Coinbase TEE. Active points system.',
-        'card.kast.desc': 'Global Visa card powered by stablecoins. Earn vaults up to 10% APY (via Gauntlet) + cashback. Accepted at 150M+ merchants in 170+ countries. Team ex-Circle, Phantom, Revolut.',
-        'card.saturn.desc': 'Native yield stablecoin on Ethereum with RWA exposure. Automatic allocation to T-bills and private credit. $STRN token with emissions for LPs.',
-        'ds.badge': 'Pre-launch · Limited spots',
-        'ds.title': 'DeFi Surfers',
-        'ds.tagline': 'Get in with exclusive pre-launch terms.',
-        'ds.b1': '<b>Lifetime pass</b> — pay once, access forever.',
-        'ds.b2': '<b>-20%</b> during this pre-launch window only.',
-        'ds.b3': '<b>Limited spots</b> and exclusive terms in this window.',
-        'ds.priceOld': '€993.84',
-        'ds.priceNew': '€795.07',
-        'ds.priceSave': '-20% · save €198.77',
-        'ds.cta': 'Secure my spot',
-        'ds.note': 'The message is copied — just paste & send. You talk to me, no bots.',
-        'ds.dismiss': 'Not now',
-        'ds.bar.txt': '<b>DeFi Surfers pre-launch</b> · -20% · closes Sunday at midnight',
-        'ds.bar.cta': 'Get my spot',
-      },
-
-      es: {
-        'nav.airdrops': 'Airdrops',
-        'nav.community': 'Comunidad',
-        'nav.risk': 'Riesgo',
-        'filter.all': 'Todos',
-        'filter.cards': 'Tarjetas',
-        'stats.protocols': 'Protocolos Activos',
-        'stats.chains': 'Chains Cubiertas',
-        'ticker.1': 'DeFi tiene riesgo real · puedes perderlo todo',
-        'ticker.2': 'No es asesoramiento financiero · haz tu DYOR',
-        'ticker.3': 'Los smart contracts pueden fallar o ser hackeados',
-        'ticker.4': 'Los airdrops no siempre se materializan',
-        'ticker.5': 'Nunca arriesgues más de lo que estés dispuesto a perder',
-        'risk.banner.title': 'Atención · Lee antes de continuar',
-        'risk.banner.body': 'DeFi tiene <strong>riesgo real de pérdida total</strong>. Bugs en smart contracts, exit scams, pérdidas impermanentes y airdrops que no se materializan son posibilidades reales. Esta lista refleja <strong>mis elecciones personales</strong>, no es consejo financiero.',
-        'hero.subtitle': 'Lista curada de protocolos DeFi y airdrops donde tengo posiciones activas. <strong>Entra por los links de abajo para recibir boost de puntos</strong> — farmeas más con el mismo capital. No es consejo financiero, es lo que yo mismo hago con mi propio capital.',
-        'tw.1': 'lo que estoy', 'tw.2': 'actualmente ', 'tw.3': 'farmeando', 'tw.4': ' ahora.',
-        'card.btn': 'Entrar con boost',
-        'ledger.badge': 'Oferta activa',
-        'ledger.title': 'Ledger — Tu <span>cold wallet</span>',
-        'ledger.sub': 'Página oficial · Hardware wallet líder del mercado',
-        'final.title': 'El <span>stack</span> del Surfista',
-        'final.sub': 'Leíste hasta el final — ya conoces los riesgos y viste los protocolos. Estas son las dos herramientas que recomiendo a quien se toma el farming en serio.',
-        'final.ledger.tag': 'Self-custody',
-        'final.ledger.title': 'Ledger — protege lo que farmeas',
-        'final.ledger.desc': 'El airdrop solo es tuyo cuando está en una hardware wallet. $80 en BTC de bono.',
-        'final.ledger.cta': 'Comprar con bono →',
-        'final.okx.tag': 'Rampa de entrada',
-        'final.okx.title': 'OKX — entra, compra, sal',
-        'final.okx.desc': 'Hasta 400€ en recompensas de bienvenida. Compra, envía a self-custody, y vete a surfear. Not your keys, not your coins.',
-        'final.okx.cta': 'Crear cuenta con bono →',
-        'ledger.bonus': 'Bono $80',
-        'ledger.cta': 'Comprar Ledger',
-        'radar.tag': 'Nuevo · Solo miembros',
-        'radar.title': '📡 Radar del Swell — <span>3.600+ activos</span>, un solo radar',
-        'radar.lead': 'El mismo motor de la <strong>Línea del Swell</strong>, escaneando cripto, acciones de EE.UU., ETFs, materias primas e índices globales — flips bullish/bearish confirmados al cierre de cada vela. <strong>La Línea te dice cuándo. El Radar te dice dónde.</strong>',
-        'radar.stats.total': 'activos en el radar',
-        'radar.th.asset': 'Activo',
-        'radar.th.delta': 'Desde el flip',
-        'radar.lock': '3.600+ activos, watchlist personal y alertas — en el Radar completo',
-        'radar.live': 'Datos reales · actualización diaria al cierre de las velas',
-        'radar.plan1.name': 'Radar · Mensual',
-        'radar.plan1.note': 'sin permanencia',
-        'radar.plan1.f': '<li>Acceso completo a los 3.600+ activos</li><li>Watchlist personal + alertas Telegram</li><li>Acumula Crédito Surfer para la comunidad</li>',
-        'radar.plan2.badge': 'Ahorra 32%',
-        'radar.plan2.name': 'Radar · Anual',
-        'radar.plan2.note': '≈ 40€/mes · 12 meses por el precio de 8',
-        'radar.plan2.f': '<li>Todo lo del plan mensual</li><li>Watchlist personal + alertas Telegram</li><li>Acumula Crédito Surfer para la comunidad</li>',
-        'radar.plan3.badge': 'Mejor valor',
-        'radar.plan3.name': 'DeFi Surfers · Vitalicio',
-        'radar.plan3.note': 'pago único · los miembros no pagan el Radar. Nunca.',
-        'radar.plan3.f': '<li><strong>Radar del Swell vitalicio</strong></li><li>Línea del Swell (indicador TradingView)</li><li>+30h de contenido práctico DeFi</li><li>Telegram + Discord privados · calls semanales</li><li>Abre solo en ventanas — plazas limitadas</li>',
-        'radar.cta': 'Hablar con el equipo',
-        'radar.cta3': 'Quiero ser DeFi Surfer',
-        'radar.paynote': 'Pago en USDC/USDT · acceso cerrado directamente con el equipo en Telegram',
-        'community.tag': 'Membresía · DeFi Surfers',
-        'community.title': 'Los airdrops <span>llegan antes</span> a los DeFi Surfers.',
-        'community.lead': 'Esta página es el <strong>escaparate público</strong>. Los <strong>DeFi Surfers</strong> — la comunidad de DeFi y airdrops más grande y mejor de Portugal — reciben los airdrops <strong>antes de aparecer aquí</strong>, con tiempo para entrar en el momento adecuado, cuando los puntos valen más y la competencia es menor.',
-        'community.perks': '<li><strong>Early access</strong> — alertas de airdrops antes de la difusión pública</li><li><strong>Airdrop legos</strong> — estrategias de acumulación de puntos entre protocolos para optimización de capital</li><li><strong>Análisis y debriefs</strong> — por qué entré, cuánto asigné, cuándo salgo</li><li><strong>Acceso directo a mí</strong> — resuelve dudas, valida setups, comparte jugadas</li>',
-        'community.cta.label': 'Membresía · Acceso por aprobación',
-        'community.cta.title': 'Quiero ser DeFi Surfer',
-        'community.cta.desc': 'Es una comunidad de pago y cerrada. Manda un mensaje y te digo precios, condiciones y próximos pasos.',
-        'risk.section.title': 'Conoce el <span>riesgo</span> antes de saltar',
-        'footer.brand.desc': 'Curación de airdrops y protocolos DeFi por Surfista. Parte del ecosistema <strong style="color: var(--accent);">DeFi Surfers</strong> — la comunidad de DeFi y airdrops más grande y mejor de Portugal.',
-        'footer.community': 'Comunidad',
-        'footer.resources': 'Recursos',
-        'footer.tips': '⚡ Tips · Lightning',
-        'footer.community.link': 'Comunidad DeFi Surfers',
-        'footer.risk.link': 'Aviso de Riesgo',
-        'tip.title': '¿Te gusta lo que hacemos aquí?',
-        'tip.body1': 'Todo en este sitio es gratis y siempre lo será. Sin anuncios, sin tracking, sin BS.',
-        'tip.body2': 'Si te ahorré tiempo o te ayudé a conseguir un airdrop, manda unos sats por <strong>Lightning ⚡</strong> Es instantáneo, peer-to-peer, y la forma más cypherpunk de decir gracias.',
-        'tip.copy': 'Copiar',
-        'toast.title': '¿Te gusta Surf Drops?',
-        'toast.body': 'Sin anuncios, sin trackers. Si esto te ayuda, apoya con unos sats.',
-        'toast.cta': '⚡ Apoyar vía Lightning',
-        'okx.logo.sub': '400€ en recompensas',
-        'okx.headline': 'Los exchanges centralizados<br><span>son como baños públicos.</span>',
-        'okx.sub': 'Haz lo que tengas que hacer — y vete.',
-        'okx.ate': 'hasta 400€ en bono de bienvenida',
-        'okx.cta': 'Registrarse y recibir bono',
-        'card.xstocks.chain': 'Solana · RWA',
-        'card.poolparty.chain': 'Base & Arbitrum · LP',
-        'card.etherfi.chain': 'Ethereum · Tarjeta Visa DeFi',
-        'card.titan.chain': 'Solana · Meta DEX',
-        'card.piggybank.chain': 'Solana · Yield Vaults',
-        'card.loopscale.chain': 'Solana · Lending',
-        'card.onre.chain': 'Solana · RWA Reinsurance',
-        'card.yieldseeker.chain': 'Base · AI Agent',
-        'card.kast.chain': 'Multichain · Tarjeta Stablecoin',
-        'card.saturn.chain': 'Ethereum · Yield Stablecoin',
-        'card.txflow.chain': 'L1 propia · Perp DEX',
-        'card.txflow.desc': 'Perp DEX en su propia L1, con order book totalmente on-chain — el ADN de Hyperliquid. Y el detalle que cuenta: <b>cero VCs, 100% comunidad</b> desde el día uno. Mainnet reciente y programa de airdrop activo para quien llega temprano.',
-        'card.xstocks.desc': 'Acciones tokenizadas on-chain (Tesla, Apple, Nvidia...) en Solana. Exposición real a activos TradFi sin necesidad de broker. Sistema de puntos activo — cada interacción cuenta.',
-        'card.poolparty.desc': 'Liquidez concentrada simplificada. Estrategias automáticas gestionadas — sin necesidad de pensar en rangos. Base del POC de DeFi Surfers.',
-        'card.etherfi.desc': 'Tarjeta Visa no-custodial vinculada a tu vault de ETH/BTC/stablecoins. Gasta crypto en el mundo real sin vender, gana hasta 15% de cashback en wETH en categorías seleccionadas (3% base en todo). Sistema de loyalty points con tiers y referral boost. Protocolo con token $ETHFI lanzado — posición activa en el ecosistema.',
-        'card.titan.desc': 'Meta DEX en Solana con liquidez agregada de Jupiter, Raydium y otros. Trading hasta 100x apalancamiento. Cero slippage en órdenes límite. Sistema de puntos activo.',
-        'card.piggybank.desc': 'Yield vaults automáticos en Solana con estrategias delta-neutral. APYs 10-20% en stablecoins sin gestión activa. Puntos multiplicados por volumen.',
-        'card.loopscale.desc': 'Lending a tipo fijo con order book en vez de pools. Loops one-click hasta 4x apalancamiento. +$1B volumen acumulado. Acumula puntos OnRe simultáneamente.',
-        'card.onre.desc': 'Yield de reaseguro real-world (no correlacionado con cripto). Token ONyc rinde 9-15% APY base. Puntos por holding y deployment con multiplicadores hasta 4x.',
-        'card.yieldseeker.desc': 'Agente AI que hace farming de yield en stablecoins automáticamente. 7-15% APY promedio en USDC, custodia vía Coinbase TEE. Sistema de puntos activo.',
-        'card.kast.desc': 'Tarjeta Visa global con stablecoins. Earn vaults hasta 10% APY (vía Gauntlet) + cashback. Aceptada en 150M+ comercios en 170+ países. Equipo ex-Circle, Phantom, Revolut.',
-        'card.saturn.desc': 'Yield stablecoin nativo en Ethereum con exposición a RWA. Asignación automática a T-bills y crédito privado. Token $STRN con emisiones para LPs.',
-        'ds.badge': 'Pre-lanzamiento · Plazas limitadas',
-        'ds.title': 'DeFi Surfers',
-        'ds.tagline': 'Entra con condiciones exclusivas de pre-lanzamiento.',
-        'ds.b1': '<b>Pase vitalicio</b> — pagas una vez, acceso para siempre.',
-        'ds.b2': '<b>-20%</b> solo en esta ventana de pre-lanzamiento.',
-        'ds.b3': '<b>Plazas limitadas</b> y condiciones exclusivas en esta ventana.',
-        'ds.priceOld': '993,84 €',
-        'ds.priceNew': '795,07 €',
-        'ds.priceSave': '-20% · ahorras 198,77 €',
-        'ds.cta': 'Conseguir mi plaza',
-        'ds.note': 'El mensaje ya va copiado — solo pega y envía. Hablas conmigo, sin bots.',
-        'ds.dismiss': 'Ahora no',
-        'ds.bar.txt': '<b>Pre-lanzamiento DeFi Surfers</b> · -20% · cierra el domingo a medianoche',
-        'ds.bar.cta': 'Conseguir plaza',
-      }
     };
 
     // Mapa das chaves do typewriter por língua
     const twKeys = ['tw.1', 'tw.2', 'tw.3', 'tw.4'];
-    let currentLang = localStorage.getItem('surf_lang') || 'pt';
+    let currentLang = 'pt'; // site PT-only — sem outros idiomas
+    try { localStorage.removeItem('surf_lang'); } catch (e) {} // limpar idioma guardado de visitas antigas
     let typingRestartFn = null; // referência para reiniciar o typewriter
 
     function applyLang(lang) {
@@ -4517,13 +4253,8 @@
     window._langApply = applyLang;
     window._langRegisterRestart = function(fn) { typingRestartFn = fn; };
 
-    // Eventos dos botões
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-      btn.addEventListener('click', () => applyLang(btn.dataset.lang));
-    });
-
-    // Aplicar língua guardada
-    if (currentLang !== 'pt') applyLang(currentLang);
+    // Site PT-only: sem switcher de idioma, sem restauro de língua guardada.
+    // O HTML inline já é a fonte de verdade em português.
   })();
   // === FIM SISTEMA DE LÍNGUAS ===
 
