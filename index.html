@@ -859,6 +859,7 @@
   .chain-base { background: #0052FF; }
   .chain-l2 { background: linear-gradient(135deg, #FF5E5E, #FFB547); }
   .chain-multichain { background: linear-gradient(135deg, #00ff9d, #00d4ff); }
+  .chain-txflow { background: linear-gradient(135deg, #00e5b3, #0aa2ff); }
 
   .card-desc { color: var(--text-dim); font-size: 13px; line-height: 1.6; margin-bottom: 16px; flex-grow: 1; }
 
@@ -2311,7 +2312,7 @@
         <div class="hero-stats">
           <div class="stat-card">
             <div class="stat-label" data-i18n="stats.protocols">Protocolos Activos</div>
-            <div class="stat-value" id="totalCount">10</div>
+            <div class="stat-value" id="totalCount">11</div>
           </div>
           <div class="stat-card">
             <div class="stat-label" data-i18n="stats.chains">Chains Cobertas</div>
@@ -2366,11 +2367,45 @@
     <button class="filter-btn active" data-filter="all" data-i18n="filter.all">Todos</button>
     <button class="filter-btn" data-filter="solana">Solana</button>
     <button class="filter-btn" data-filter="evm">EVM</button>
+    <button class="filter-btn" data-filter="perp">Perp DEX</button>
     <button class="filter-btn" data-filter="cartoes" data-i18n="filter.cards">Cartões</button>
-    
+
   </div>
 
   <div class="grid" id="grid">
+
+    <!-- 0. TxFlow — perp DEX no seu proprio L1, 100% comunidade -->
+    <div class="card" data-chain="txflow" data-status="hot new perp">
+      <div class="card-head">
+        <div class="protocol-logo">
+          <img src="https://www.google.com/s2/favicons?domain=txflow.com&sz=128" alt="TxFlow" loading="lazy" decoding="async" onload="this.classList.add('loaded');" onerror="this.remove();">
+          <span class="fallback">TX</span>
+        </div>
+        <div class="card-meta-top">
+          <span class="card-id">#000</span>
+          <span class="badge badge-hot"><span class="dot"></span>Hot</span>
+        </div>
+      </div>
+      <h3 class="card-name">TxFlow</h3>
+      <div class="card-chain"><span class="chain-dot chain-txflow"></span><span data-i18n="card.txflow.chain">L1 próprio · Perp DEX</span></div>
+      <p class="card-desc" data-i18n-html="card.txflow.desc">
+        Perp DEX no seu próprio L1, com order book 100% on-chain — o ADN da Hyperliquid. E o detalhe que conta: <b>zero VCs, 100% comunidade</b> desde o dia 1. Mainnet fresca e programa de airdrop activo para quem chega cedo.
+      </p>
+      <div class="card-meta">
+        <div class="meta-item"><div class="meta-label">Potencial</div><div class="meta-value potential-high">Muito alto</div></div>
+        <div class="meta-item"><div class="meta-label">Esforço</div><div class="meta-value">Médio</div></div>
+      </div>
+      <div class="ref-tag">via: <span class="ref-code">TXSURFISTA</span></div>
+      <div class="card-actions">
+        <a href="https://app.txflow.com/r/TXSURFISTA" target="_blank" rel="noopener" class="btn-primary-card">
+          <span data-i18n="card.btn">Entrar com boost</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+        </a>
+        <a href="https://x.com/TxFlow_L1" target="_blank" rel="noopener" class="btn-twitter" title="Twitter oficial TxFlow">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+      </div>
+    </div>
 
     <!-- 1. xStocks -->
     <div class="card" data-chain="solana" data-status="hot live">
@@ -4161,6 +4196,8 @@
         'card.yieldseeker.chain': 'Base · AI Agent',
         'card.kast.chain': 'Multichain · Stablecoin Card',
         'card.saturn.chain': 'Ethereum · Yield Stablecoin',
+        'card.txflow.chain': 'L1 próprio · Perp DEX',
+        'card.txflow.desc': 'Perp DEX no seu próprio L1, com order book 100% on-chain — o ADN da Hyperliquid. E o detalhe que conta: <b>zero VCs, 100% comunidade</b> desde o dia 1. Mainnet fresca e programa de airdrop activo para quem chega cedo.',
         'card.xstocks.desc': 'Acções tokenizadas on-chain (Tesla, Apple, Nvidia...) em Solana. Exposição real a activos TradFi sem precisar de corretora. Sistema de pontos activo — cada interacção conta.',
         'card.poolparty.desc': 'Liquidez concentrada simplificada. Estratégias automáticas geridas, sem precisares de pensar em ranges. Base do POC do DeFi Surfers.',
         'card.etherfi.desc': 'Cartão Visa não-custodial ligado ao teu vault de ETH/BTC/stablecoins. Gastas crypto no mundo real sem vender, ganhas até 15% de cashback em wETH em categorias seleccionadas (3% base em tudo). Sistema de loyalty points com tiers e referral boost. Protocolo com token $ETHFI lançado — posição activa no ecossistema.',
@@ -4278,6 +4315,8 @@
         'card.yieldseeker.chain': 'Base · AI Agent',
         'card.kast.chain': 'Multichain · Stablecoin Card',
         'card.saturn.chain': 'Ethereum · Yield Stablecoin',
+        'card.txflow.chain': 'Own L1 · Perp DEX',
+        'card.txflow.desc': 'Perp DEX on its own L1, with a fully on-chain order book — the Hyperliquid DNA. And the detail that matters: <b>zero VCs, 100% community</b> from day one. Fresh mainnet and an active airdrop program for early users.',
         'card.xstocks.desc': 'Tokenised stocks on-chain (Tesla, Apple, Nvidia...) on Solana. Real exposure to TradFi assets without a broker. Active points system — every interaction counts.',
         'card.poolparty.desc': 'Simplified concentrated liquidity. Automated managed strategies — no need to think about ranges. DeFi Surfers POC base.',
         'card.etherfi.desc': 'Non-custodial Visa card linked to your ETH/BTC/stablecoins vault. Spend crypto in the real world without selling, earn up to 15% cashback in wETH on selected categories (3% base on everything). Loyalty points system with tiers and referral boost. Protocol with $ETHFI token launched — active position in the ecosystem.',
@@ -4395,6 +4434,8 @@
         'card.yieldseeker.chain': 'Base · AI Agent',
         'card.kast.chain': 'Multichain · Tarjeta Stablecoin',
         'card.saturn.chain': 'Ethereum · Yield Stablecoin',
+        'card.txflow.chain': 'L1 propia · Perp DEX',
+        'card.txflow.desc': 'Perp DEX en su propia L1, con order book totalmente on-chain — el ADN de Hyperliquid. Y el detalle que cuenta: <b>cero VCs, 100% comunidad</b> desde el día uno. Mainnet reciente y programa de airdrop activo para quien llega temprano.',
         'card.xstocks.desc': 'Acciones tokenizadas on-chain (Tesla, Apple, Nvidia...) en Solana. Exposición real a activos TradFi sin necesidad de broker. Sistema de puntos activo — cada interacción cuenta.',
         'card.poolparty.desc': 'Liquidez concentrada simplificada. Estrategias automáticas gestionadas — sin necesidad de pensar en rangos. Base del POC de DeFi Surfers.',
         'card.etherfi.desc': 'Tarjeta Visa no-custodial vinculada a tu vault de ETH/BTC/stablecoins. Gasta crypto en el mundo real sin vender, gana hasta 15% de cashback en wETH en categorías seleccionadas (3% base en todo). Sistema de loyalty points con tiers y referral boost. Protocolo con token $ETHFI lanzado — posición activa en el ecosistema.',
