@@ -1552,6 +1552,15 @@
     padding: 3px 11px; border-radius: 999px;
     box-shadow: 0 5px 16px -4px rgba(10,162,255,0.75);
   }
+  .wrap-txflow .alpha-stamp {
+    position: absolute; top: -11px; right: 14px; z-index: 5;
+    font-family: 'Orbitron', sans-serif; font-weight: 900;
+    font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+    color: #7ef9e0; background: rgba(4,18,26,0.92);
+    border: 1.5px solid #22d3ee; border-radius: 5px; padding: 2px 7px;
+    transform: rotate(6deg);
+    box-shadow: 0 0 14px rgba(34,211,238,0.5);
+  }
 
   /* ================================================== */
 
@@ -2378,6 +2387,7 @@
     <!-- 0. TxFlow — perp DEX (card em DESTAQUE: wrap teal + selo) -->
     <div class="card-featured-wrap wrap-txflow">
     <span class="hot-ribbon">🔥 Em destaque</span>
+    <span class="alpha-stamp">α&nbsp;Alpha</span>
     <div class="card" data-chain="txflow" data-status="hot new perp">
       <div class="card-head">
         <div class="protocol-logo">
@@ -2448,7 +2458,7 @@
     <div class="card" data-chain="base arbitrum" data-status="live">
       <div class="card-head">
         <div class="protocol-logo">
-          <img src="https://www.google.com/s2/favicons?domain=pool-party.xyz&sz=128" alt="Pool Party" loading="lazy" decoding="async" onload="this.classList.add('loaded');" onerror="this.remove();">
+          <img src="https://icons.duckduckgo.com/ip3/pool-party.xyz.ico" alt="Pool Party" loading="lazy" decoding="async" onload="this.classList.add('loaded');" onerror="this.remove();">
           <span class="fallback">PP</span>
         </div>
         <div class="card-meta-top">
