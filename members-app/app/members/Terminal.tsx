@@ -1023,6 +1023,7 @@ export default function Terminal({
               target="_blank"
               rel="noopener noreferrer"
             >
+              <span className="alpha-stamp">α Alpha</span>
               <span className="tb-tag">🔥 NOVO</span>
               <span className="tb-main">TxFlow — Perp DEX ↗</span>
               <span className="tb-sub">Order book on-chain · 100% comunidade · airdrop ativo</span>

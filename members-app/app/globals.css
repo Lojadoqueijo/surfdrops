@@ -168,9 +168,18 @@ a:hover { text-decoration: underline; }
 .trade-btn-bybit:hover { background: #e09600; }
 /* TxFlow — corretora em destaque (perp DEX): gradiente + glow para captar o clique */
 .trade-btn-txflow {
+  position: relative;
   background: linear-gradient(135deg, #00e5b3, #0aa2ff); color: #04121a;
   padding: 12px 12px 11px;
   box-shadow: 0 0 0 1px rgba(0,229,179,0.4), 0 6px 22px -6px rgba(10,162,255,0.6);
+}
+.trade-btn-txflow .alpha-stamp {
+  position: absolute; top: -8px; right: 8px;
+  font-size: 9px; font-weight: 900; letter-spacing: 0.8px; text-transform: uppercase;
+  color: #7ef9e0; background: #04121a;
+  border: 1.5px solid #22d3ee; border-radius: 5px; padding: 1px 6px;
+  transform: rotate(6deg);
+  box-shadow: 0 0 12px rgba(34,211,238,0.55);
 }
 .trade-btn-txflow:hover { background: linear-gradient(135deg, #12f0c0, #2bb0ff); }
 .trade-btn-txflow .tb-tag {
