@@ -8,6 +8,20 @@
 <meta name="robots" content="noindex, nofollow">
 <title>DeFi Surfers — A primeira e maior comunidade de DeFi em Portugal</title>
 <meta name="description" content="A primeira e maior comunidade de DeFi em Portugal. Há 3 anos a desmistificar DeFi no país: conteúdos educativos do zero ao avançado, Telegram e Discord privados, e as ferramentas que usamos todos os dias (Linha do Swell e Radar do Swell, 3.600+ ativos).">
+<!-- OG/social — paridade com a LP principal (og:url muda para / se esta página for promovida) -->
+<meta property="og:title" content="DeFi Surfers — A primeira e maior comunidade de DeFi em Portugal">
+<meta property="og:description" content="Aprende a gerar rendimento real em DeFi, com uma comunidade que se posiciona cedo. Conteúdos educativos, ferramentas próprias e o modelo de DeFi que já foi ensinado nas universidades.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://defisurfers.xyz/lp-preview">
+<meta property="og:image" content="https://app.defisurfers.xyz/api/public/og?v=1">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://app.defisurfers.xyz/api/public/og?v=1">
+<!-- Só a mono (assinatura do radar/preços) — o resto fica em fontes de sistema pela rapidez -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&display=swap">
 <style>
 /* ============================================================
    LP DeFi Surfers — redesign in-place (candidata a substituta).
@@ -27,7 +41,7 @@
   --accent:#8b5cf6; --accent-dim:#7c4ce6; --accent-blue:#a78bfa;
   --warn:#ffb547; --up:#22c55e; --hot:#ef4444;
   --raise:#301a5c; /* superfície elevada: destaque por luz, não por glow */
-  --mono:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+  --mono:'JetBrains Mono',ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   --body:'Inter',system-ui,-apple-system,sans-serif;
   --edge:1px solid var(--border);
 }
@@ -60,6 +74,13 @@ h1,h2,h3{font-weight:800;letter-spacing:-.025em;line-height:1.08;text-wrap:balan
 .cd-pill{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.4);border-radius:999px;
   padding:2px 11px;cursor:pointer;font-variant-numeric:tabular-nums;transition:background .15s}
 .cd-pill:hover{background:rgba(255,255,255,.14)}
+/* mobile: texto curto para a barra caber numa linha (a longa fazia 3 linhas / ~97px) */
+.scar-short{display:none}
+@media(max-width:640px){
+  .scar-long{display:none}
+  .scar-short{display:inline}
+  .scar .in{padding:8px 12px;gap:8px;font-size:11.5px}
+}
 
 /* ---- nav ---- */
 header.nav{position:sticky;top:0;z-index:50;border-bottom:var(--edge);backdrop-filter:blur(12px);
@@ -321,7 +342,7 @@ footer{border-top:var(--edge);padding:30px 0 44px;margin-top:24px}
 
 <!-- barra de escassez -->
 <div class="scar" id="announce"><div class="in">
-  <span id="announce-text">Janela de entrada <b>aberta</b> · comunidade com <b>−20%</b> · fecha domingo à meia-noite
+  <span id="announce-text"><span class="scar-long">Janela de entrada <b>aberta</b> · comunidade com <b>−20%</b> · fecha domingo à meia-noite</span><span class="scar-short">Janela <b>aberta</b> · <b>−20%</b></span>
     <span class="cd-pill" id="cd-pill" role="button" tabindex="0" title="Abrir relógio em ecrã cheio">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
       <b id="countdown">…</b>
