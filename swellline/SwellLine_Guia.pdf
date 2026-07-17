@@ -1,0 +1,113 @@
+%PDF-1.4
+%âãÏÓ
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 7 0 R /F2 8 0 R >> >> /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 7 0 R /F2 8 0 R >> >> /Contents 6 0 R >>
+endobj
+5 0 obj
+<< /Length 3177 >>
+stream
+0.07 0.40 0.60 rg 0 761.89 595.28 80 re f
+1 1 1 RG 1.6 w 0 769.89 m 99 783.89 198 755.89 297 769.89 c 396 783.89 495 755.89 595 769.89 c S
+BT /F2 28 Tf 1 1 1 rg 56.00 795.89 Td (SwellLine) Tj ET
+BT /F1 11.5 Tf 0.88 0.95 0.98 rg 56.00 773.89 Td (Indicador de Tendência  -  Foco no Longo Prazo) Tj ET
+BT /F2 13 Tf 0.07 0.40 0.60 rg 56.00 719.89 Td (A ideia em poucas palavras) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 56.00 700.89 Td (A SwellLine mostra a direcção da tendência de fundo. O objetivo é simples: ficar do lado da) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 56.00 686.69 Td (tendência enquanto ela dura, e sair quando ela vira. Foi pensada para o longo prazo - brilha) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 56.00 672.49 Td (no gráfico semanal $1Weekly$1.) Tj ET
+BT /F2 13 Tf 0.07 0.40 0.60 rg 56.00 648.29 Td (Ler a linha $1o mais importante$1) Tj ET
+0.10 0.62 0.22 rg 58.00 630.29 6 6 re f
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 74.00 629.29 Td (Linha VERDE por baixo do preço = tendência de subida $1bull$1. Fase de comprar ou manter) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 74.00 615.09 Td (posição.) Tj ET
+0.82 0.16 0.16 rg 58.00 598.89 6 6 re f
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 74.00 597.89 Td (Linha VERMELHA por cima do preço = tendência de descida $1bear$1. Fase de vender ou ficar) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 74.00 583.69 Td (de fora.) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 56.00 566.49 Td (Quando a cor muda, surge a etiqueta 'bullish' ou 'bearish'. Esse é o sinal de viragem da) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 56.00 552.29 Td (tendência.) Tj ET
+BT /F2 13 Tf 0.07 0.40 0.60 rg 56.00 528.09 Td (O Flip Level) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 56.00 509.09 Td (É o preço exato onde a tendência vira. Em bull funciona como suporte; em bear como) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 56.00 494.89 Td (resistência. Serve também de stop natural: se o preço fechar do outro lado da linha, a) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 56.00 480.69 Td (tendência mudou.) Tj ET
+BT /F2 13 Tf 0.07 0.40 0.60 rg 56.00 456.49 Td (Confirmação - a tabela $1canto inferior esquerdo$1) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 56.00 437.49 Td (A tabela mostra a tendência no Weekly e no Daily ao mesmo tempo:) Tj ET
+0.10 0.62 0.22 rg 58.00 418.29 6 6 re f
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 74.00 417.29 Td (ALIGNED BULL - ambos a subir: sinal forte de compra.) Tj ET
+0.82 0.16 0.16 rg 58.00 401.09 6 6 re f
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 74.00 400.09 Td (ALIGNED BEAR - ambos a descer: ficar fora do mercado.) Tj ET
+0.92 0.66 0.10 rg 58.00 383.89 6 6 re f
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 74.00 382.89 Td (CONFLICT - discordam entre si: esperar, não agir.) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 56.00 365.69 Td (Regra de ouro: só agir quando estão ALIGNED. Evitar operar em CONFLICT.) Tj ET
+BT /F2 13 Tf 0.07 0.40 0.60 rg 56.00 341.49 Td (A faixa de força $1heatmap no fundo$1) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 56.00 322.49 Td (Mede o momentum $1a força do movimento$1. Verde = força compradora, vermelho = vendedora,) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 56.00 308.29 Td (amarelo = transição. Serve de aviso prévio quando a maré começa a virar.) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Length 3045 >>
+stream
+0.07 0.40 0.60 rg 0 795.89 595.28 46 re f
+BT /F2 16 Tf 1 1 1 rg 56.00 810.89 Td (SwellLine  -  Guia rápido) Tj ET
+BT /F2 13 Tf 0.07 0.40 0.60 rg 56.00 753.89 Td (Foco no longo prazo: em que timeframe usar) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 56.00 734.89 Td (Este é um indicador de tendência de longo prazo. É no Weekly que é mais fiável: dá poucos) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 56.00 720.69 Td (sinais por ano, mas cada um tem peso e capta os grandes movimentos, evitando o ruído do) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 56.00 706.49 Td (curto prazo.) Tj ET
+0.10 0.62 0.22 rg 58.00 687.29 6 6 re f
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 74.00 686.29 Td (Weekly $1semanal$1 - IDEAL. O sinal principal. Poucos sinais, muito fiáveis.) Tj ET
+0.45 0.72 0.30 rg 58.00 670.09 6 6 re f
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 74.00 669.09 Td (Daily $1diário$1 - bom para confirmação e timing de entrada e saída.) Tj ET
+0.92 0.66 0.10 rg 58.00 652.89 6 6 re f
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 74.00 651.89 Td (4h / 1h - ruidoso, muitos sinais falsos. Usar só como contexto.) Tj ET
+0.82 0.16 0.16 rg 58.00 635.69 6 6 re f
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 74.00 634.69 Td (15m ou menos - evitar. O ruído domina.) Tj ET
+BT /F2 13 Tf 0.07 0.40 0.60 rg 56.00 613.49 Td (Como usar - passo a passo) Tj ET
+BT /F2 10.5 Tf 0.07 0.40 0.60 rg 56.00 594.49 Td (1.) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 76.00 594.49 Td (Abre o gráfico no Weekly $1semanal$1.) Tj ET
+BT /F2 10.5 Tf 0.07 0.40 0.60 rg 56.00 577.29 Td (2.) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 76.00 577.29 Td (Espera por um flip - a linha muda de cor.) Tj ET
+BT /F2 10.5 Tf 0.07 0.40 0.60 rg 56.00 560.09 Td (3.) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 76.00 560.09 Td (Confirma na tabela: só entra se estiver ALIGNED.) Tj ET
+BT /F2 10.5 Tf 0.07 0.40 0.60 rg 56.00 542.89 Td (4.) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 76.00 542.89 Td (Entrada na direcção da linha $1verde = comprar$1.) Tj ET
+BT /F2 10.5 Tf 0.07 0.40 0.60 rg 56.00 525.69 Td (5.) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 76.00 525.69 Td (Stop no Flip Level $1se o preço fechar do outro lado, sais$1.) Tj ET
+BT /F2 10.5 Tf 0.07 0.40 0.60 rg 56.00 508.49 Td (6.) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 76.00 508.49 Td (Saída quando a linha vira de cor - ou nos alvos de ATR.) Tj ET
+BT /F2 13 Tf 0.07 0.40 0.60 rg 56.00 487.29 Td (Para ter sempre em mente) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 56.00 468.29 Td (A SwellLine segue a tendência, não a adivinha - reage a ela. Em mercado lateral $1sem) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 56.00 454.09 Td (tendência$1 dá mais sinais falsos. Paciência: no longo prazo, poucos sinais bons valem mais) Tj ET
+BT /F1 10.5 Tf 0.16 0.18 0.21 rg 56.00 439.89 Td (que muitos sinais apressados.) Tj ET
+0.45 0.45 0.45 RG 0.6 w 56.00 70 m 539.00 70 l S
+BT /F1 8.5 Tf 0.45 0.45 0.45 rg 56.00 58.00 Td (Material apenas educativo. Não constitui aconselhamento financeiro. Gere sempre o risco e usa stop.) Tj ET
+BT /F1 8.5 Tf 0.45 0.45 0.45 rg 56.00 46.00 Td (SwellLine - indicador de tendência.) Tj ET
+endstream
+endobj
+7 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+8 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000127 00000 n 
+0000000269 00000 n 
+0000000411 00000 n 
+0000003639 00000 n 
+0000006735 00000 n 
+0000006832 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R >>
+startxref
+6934
+%%EOF

@@ -1,0 +1,219 @@
+//@version=5
+indicator("🌊 SwellLine", overlay=true, shorttitle="🌊 SWELL", max_lines_count=60, max_labels_count=500)
+
+// ---------------- Inputs ----------------
+grpCore   = "Núcleo (ATR trailing stop)"
+atrLen    = input.int(10, "ATR Length", group=grpCore, minval=1)
+multLong  = input.float(3.0, "Multiplicador ATR — Long (suporte)",  group=grpCore, minval=0.1, step=0.1)
+multShort = input.float(3.0, "Multiplicador ATR — Short (resist.)", group=grpCore, minval=0.1, step=0.1)
+src       = input.source(hl2, "Source", group=grpCore)
+
+grpMTF    = "Confirmação Multi-Timeframe"
+useMTF    = input.bool(true, "Mostrar tabela Weekly/Daily", group=grpMTF)
+tfHigh    = input.timeframe("W", "Timeframe alto",  group=grpMTF)
+tfLow     = input.timeframe("D", "Timeframe baixo", group=grpMTF)
+
+grpTP     = "Alvos (Take-Profit em ATR)"
+showTP    = input.bool(false, "Mostrar alvos 1/2/3 ATR", group=grpTP)
+
+grpMA     = "Companheiros (médias)"
+showBand  = input.bool(false, "Bull Market Support Band (SMA20 + EMA21)", group=grpMA)
+showPack  = input.bool(false, "MA Pack 21 / 50 / 100 / 200", group=grpMA)
+
+grpMeter  = "Medidor de força (momentum)"
+showMeter = input.bool(true, "Mostrar faixa de força", group=grpMeter)
+momFast   = input.int(12, "EMA rápida (momentum)", group=grpMeter, minval=1)
+momSlow   = input.int(18, "EMA lenta (momentum)",  group=grpMeter, minval=1)
+meterSm   = input.int(3, "Suavização (EMA)", group=grpMeter, minval=1)
+meterMax  = input.float(1.0, "Escala (saturação da cor)", group=grpMeter, minval=0.1, step=0.1)
+
+grpRev    = "Topos & Fundos (avisos)"
+showDots  = input.bool(true, "Pontos de viragem (Daily contra Weekly)", group=grpRev)
+showDiv   = input.bool(true, "Divergências de momentum", group=grpRev)
+divLook   = input.int(2, "Sensibilidade das divergências (pivô)", group=grpRev, minval=1)
+showExt   = input.bool(true, "Aviso de exaustão (sobre-extensão)", group=grpRev)
+extThresh = input.float(4.0, "Exaustão: distância em ATR", group=grpRev, minval=1.0, step=0.5)
+show200   = input.bool(true, "200W MA + zona 'barata'", group=grpRev)
+
+grpView   = "Visual"
+showFill  = input.bool(true, "Preencher fundo", group=grpView)
+showSig   = input.bool(true, "Etiquetas de flip", group=grpView)
+colorBars = input.bool(false, "Colorir velas", group=grpView)
+
+// ---------------- ATR trailing stop com multiplicadores assimétricos ----------------
+atr = ta.atr(atrLen)
+upBasic = src - multLong  * atr
+dnBasic = src + multShort * atr
+
+var float up = upBasic
+var float dn = dnBasic
+up := close[1] > up[1] ? math.max(upBasic, up[1]) : upBasic
+dn := close[1] < dn[1] ? math.min(dnBasic, dn[1]) : dnBasic
+
+var int trend = 1
+trend := trend == -1 and close > dn[1] ? 1 : (trend == 1 and close < up[1] ? -1 : trend)
+
+isBull = trend == 1
+swell  = isBull ? up : dn
+
+// ---------------- Flips e estatísticas ----------------
+flipBull = isBull and not isBull[1]
+flipBear = not isBull and isBull[1]
+flipNow  = flipBull or flipBear
+
+var float lastFlipPrice = na
+var float atrAtFlip     = na
+if flipNow
+    lastFlipPrice := flipBear ? up[1] : dn[1]
+    atrAtFlip     := atr
+
+sinceFlipPct = na(lastFlipPrice) ? na : (close - lastFlipPrice) / lastFlipPrice * 100.0
+
+// ---------------- Confirmação Multi-Timeframe ----------------
+f_dir() =>
+    [_st, _d] = ta.supertrend(multShort, atrLen)
+    _d < 0 ? 1 : -1
+
+hiTrend = request.security(syminfo.tickerid, tfHigh, f_dir())
+loTrend = request.security(syminfo.tickerid, tfLow,  f_dir())
+
+aligned = hiTrend == loTrend
+alignTxt = not aligned ? "CONFLICT" : (hiTrend == 1 ? "ALIGNED BULL" : "ALIGNED BEAR")
+alignCol = not aligned ? color.orange : (hiTrend == 1 ? color.green : color.red)
+
+// ---------------- Plot da SwellLine ----------------
+lineColor = isBull ? color.new(color.lime, 0) : color.new(color.red, 0)
+swellPlot = plot(swell, "SwellLine", color=lineColor, linewidth=3, style=plot.style_stepline)
+
+priceP = plot(close, display=display.none, editable=false)
+fill(swellPlot, priceP, color=showFill ? color.new(isBull ? color.green : color.red, 90) : na)
+
+if showSig and flipBull
+    label.new(bar_index, low, "bullish", style=label.style_label_up, color=color.new(color.green, 0), textcolor=color.white, size=size.small, tooltip="FLIP BULLISH: fecho acima da linha. Confirma o Estado na tabela (ALIGNED) antes de entrar.")
+if showSig and flipBear
+    label.new(bar_index, high, "bearish", style=label.style_label_down, color=color.new(color.red, 0), textcolor=color.white, size=size.small, tooltip="FLIP BEARISH: fecho abaixo da linha. A tendência virou — sair / ficar de fora.")
+
+var line  flipLine = na
+var label flipLbl  = na
+if barstate.islast
+    line.delete(flipLine)
+    label.delete(flipLbl)
+    flipLine := line.new(bar_index - 50, swell, bar_index + 10, swell, color=color.new(color.gray, 20), style=line.style_dashed, width=1)
+    flipLbl  := label.new(bar_index + 10, swell, "Flip Level: " + str.tostring(swell, format.mintick), style=label.style_label_left, color=color.new(color.gray, 30), textcolor=color.white, size=size.small, tooltip="Preço exato onde a tendência vira. Funciona como suporte/resistência dinâmico e como stop.")
+
+// ---------------- Alvos TP em ATR ----------------
+var line  tp1L = na
+var line  tp2L = na
+var line  tp3L = na
+var label tp1B = na
+var label tp2B = na
+var label tp3B = na
+if showTP and flipNow
+    line.delete(tp1L)
+    line.delete(tp2L)
+    line.delete(tp3L)
+    label.delete(tp1B)
+    label.delete(tp2B)
+    label.delete(tp3B)
+    sgn = isBull ? 1 : -1
+    t1 = lastFlipPrice + sgn * 1 * atrAtFlip
+    t2 = lastFlipPrice + sgn * 2 * atrAtFlip
+    t3 = lastFlipPrice + sgn * 3 * atrAtFlip
+    tp1L := line.new(bar_index, t1, bar_index + 30, t1, color=color.new(color.aqua, 30), style=line.style_dotted)
+    tp2L := line.new(bar_index, t2, bar_index + 30, t2, color=color.new(color.aqua, 30), style=line.style_dotted)
+    tp3L := line.new(bar_index, t3, bar_index + 30, t3, color=color.new(color.aqua, 30), style=line.style_dotted)
+    tp1B := label.new(bar_index + 30, t1, "1 ATR", style=label.style_label_left, color=color.new(color.aqua, 60), textcolor=color.white, size=size.tiny)
+    tp2B := label.new(bar_index + 30, t2, "2 ATR", style=label.style_label_left, color=color.new(color.aqua, 60), textcolor=color.white, size=size.tiny)
+    tp3B := label.new(bar_index + 30, t3, "3 ATR", style=label.style_label_left, color=color.new(color.aqua, 60), textcolor=color.white, size=size.tiny)
+
+// ---------------- Companheiros (médias) ----------------
+sma20 = ta.sma(close, 20)
+ema21 = ta.ema(close, 21)
+b1 = plot(showBand ? sma20 : na, "BMSB SMA20", color=color.new(color.orange, 0), linewidth=1)
+b2 = plot(showBand ? ema21 : na, "BMSB EMA21", color=color.new(color.yellow, 0), linewidth=1)
+fill(b1, b2, color=showBand ? color.new(color.yellow, 80) : na)
+
+plot(showPack ? ta.ema(close, 21)  : na, "EMA21",  color=color.new(color.yellow, 0))
+plot(showPack ? ta.ema(close, 50)  : na, "EMA50",  color=color.new(color.aqua, 0))
+plot(showPack ? ta.ema(close, 100) : na, "EMA100", color=color.new(color.blue, 0))
+plot(showPack ? ta.ema(close, 200) : na, "EMA200", color=color.new(color.white, 0), linewidth=2)
+
+// ---------------- Velas coloridas ----------------
+barcolor(colorBars ? (isBull ? color.new(color.green, 50) : color.new(color.red, 50)) : na)
+
+// ---------------- Medidor de força (momentum, líder) ----------------
+mom = ta.ema(close, momFast) - ta.ema(close, momSlow)
+strength = ta.ema(mom / atr, meterSm)
+sClamp = math.max(-meterMax, math.min(meterMax, strength))
+meterCol = sClamp >= 0 ? color.from_gradient(sClamp, 0, meterMax, color.yellow, color.rgb(0, 200, 0)) : color.from_gradient(sClamp, -meterMax, 0, color.rgb(120, 0, 0), color.yellow)
+plotshape(showMeter, "Força", style=shape.square, location=location.bottom, color=meterCol, size=size.tiny)
+
+// ---------------- Topos & Fundos (avisos, sinais líderes) ----------------
+// 1) Pontos de viragem: o Daily vira CONTRA o Weekly (tooltip ao pairar o rato)
+dotBottom = showDots and hiTrend == -1 and loTrend ==  1 and loTrend[1] == -1
+dotTop    = showDots and hiTrend ==  1 and loTrend == -1 and loTrend[1] ==  1
+if dotBottom
+    label.new(bar_index, na, "●", yloc=yloc.belowbar, style=label.style_none, textcolor=color.new(color.lime, 0), size=size.tiny, tooltip="Possível FUNDO: o Daily virou bullish durante um Weekly bearish. Prepara-te — a entrada é só no flip com ALIGNED.")
+if dotTop
+    label.new(bar_index, na, "●", yloc=yloc.abovebar, style=label.style_none, textcolor=color.new(color.red, 0), size=size.tiny, tooltip="Possível TOPO: o Daily virou bearish durante um Weekly bullish. Considera realizar lucros — a saída oficial é o flip.")
+
+// 2) Divergências: preço faz extremo novo mas o momentum não acompanha
+ph = ta.pivothigh(strength, divLook, divLook)
+pl = ta.pivotlow(strength,  divLook, divLook)
+var float prevPH  = na
+var float prevPHp = na
+var float prevPL  = na
+var float prevPLp = na
+bearDiv = false
+bullDiv = false
+if not na(ph)
+    if not na(prevPH) and ph < prevPH and high[divLook] > prevPHp
+        bearDiv := true
+    prevPH  := ph
+    prevPHp := high[divLook]
+if not na(pl)
+    if not na(prevPL) and pl > prevPL and low[divLook] < prevPLp
+        bullDiv := true
+    prevPL  := pl
+    prevPLp := low[divLook]
+if showDiv and bearDiv
+    label.new(bar_index - divLook, high[divLook], "topo?", style=label.style_label_down, color=color.new(color.maroon, 10), textcolor=color.white, size=size.tiny, tooltip="Divergência de topo: o preço fez novo máximo mas o momentum não acompanhou. A força está a esgotar-se — considera realizar parciais.")
+if showDiv and bullDiv
+    label.new(bar_index - divLook, low[divLook], "fundo?", style=label.style_label_up, color=color.new(color.teal, 10), textcolor=color.white, size=size.tiny, tooltip="Divergência de fundo: o preço fez novo mínimo mas o momentum não acompanhou. Vendedores a cansar — prepara a watchlist.")
+
+// 3) Exaustão: preço demasiado esticado face à SwellLine (distância real no tooltip)
+ext = (close - swell) / atr
+if showExt and isBull and ext >= extThresh
+    label.new(bar_index, na, "◆", yloc=yloc.abovebar, style=label.style_none, textcolor=color.new(color.orange, 0), size=size.tiny, tooltip="Exaustão: preço a " + str.tostring(ext, "#.#") + " ATR acima da linha. Tendência esticada — zona de realizar lucros, não de entrar.")
+if showExt and not isBull and ext <= -extThresh
+    label.new(bar_index, na, "◆", yloc=yloc.belowbar, style=label.style_none, textcolor=color.new(color.orange, 0), size=size.tiny, tooltip="Exaustão: preço a " + str.tostring(-ext, "#.#") + " ATR abaixo da linha. Possível capitulação — aguarda os avisos de fundo.")
+
+// 4) 200W MA — zona de fundo histórico ("200W MA or lower = very cheap")
+ma200w = request.security(syminfo.tickerid, "W", ta.sma(close, 200))
+plot(show200 ? ma200w : na, "200W MA", color=color.new(color.white, 0), linewidth=2)
+bgcolor(show200 and close <= ma200w ? color.new(color.green, 85) : na)
+
+// ---------------- Tabela de estado (canto inferior esquerdo) ----------------
+var table t = table.new(position.bottom_left, 2, 7, border_width=1)
+
+f_row(_t, _i, _k, _v, _vc, _tip) =>
+    table.cell(_t, 0, _i, _k, text_color=color.white, text_size=size.small, bgcolor=color.new(color.black, 20), text_halign=text.align_left, tooltip=_tip)
+    table.cell(_t, 1, _i, _v, text_color=_vc, text_size=size.small, bgcolor=color.new(color.black, 20), text_halign=text.align_right, tooltip=_tip)
+
+if useMTF and barstate.islast
+    f_row(t, 0, "Trend",      isBull ? "BULLISH" : "BEARISH", isBull ? color.green : color.red, "Direção atual da SwellLine neste gráfico.")
+    f_row(t, 1, "Next Flip",  str.tostring(swell, format.mintick), color.silver, "Preço que faz a tendência virar (Flip Level = o teu stop).")
+    f_row(t, 2, "Last Flip",  na(lastFlipPrice) ? "—" : str.tostring(lastFlipPrice, format.mintick), color.silver, "Nível da linha onde ocorreu o último flip.")
+    f_row(t, 3, "Since Flip", na(sinceFlipPct) ? "—" : str.tostring(sinceFlipPct, "#.##") + "%", sinceFlipPct >= 0 ? color.green : color.red, "Variação do preço desde o último flip.")
+    f_row(t, 4, "Weekly",     hiTrend == 1 ? "BULLISH" : "BEARISH", hiTrend == 1 ? color.green : color.red, "Tendência no semanal — a tendência de fundo.")
+    f_row(t, 5, "Daily",      loTrend == 1 ? "BULLISH" : "BEARISH", loTrend == 1 ? color.green : color.red, "Tendência no diário — o timing.")
+    f_row(t, 6, "Estado",     alignTxt, alignCol, "ALIGNED = Weekly e Daily concordam: pode agir. CONFLICT = discordam: esperar.")
+
+// ---------------- Alertas ----------------
+alertcondition(flipBull, "SwellLine -> Bullish", "SwellLine virou BULLISH")
+alertcondition(flipBear, "SwellLine -> Bearish", "SwellLine virou BEARISH")
+alertcondition(flipBull and aligned and hiTrend ==  1, "SwellLine ALIGNED Bull", "🌊 SwellLine: FLIP BULLISH sem conflito (Weekly+Daily alinhados)")
+alertcondition(flipBear and aligned and hiTrend == -1, "SwellLine ALIGNED Bear", "🌊 SwellLine: FLIP BEARISH sem conflito (Weekly+Daily alinhados)")
+alertcondition((flipBull and aligned and hiTrend == 1) or (flipBear and aligned and hiTrend == -1), "SwellLine FLIP sem conflito", "🌊 SwellLine: FLIP sem conflito (Weekly+Daily alinhados)")
+alertcondition(dotBottom or bullDiv, "SwellLine aviso de FUNDO", "🌊 SwellLine: possível fundo a formar-se")
+alertcondition(dotTop or bearDiv,    "SwellLine aviso de TOPO",  "🌊 SwellLine: possível topo a formar-se")
