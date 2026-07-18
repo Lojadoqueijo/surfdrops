@@ -279,7 +279,25 @@ export default function Terminal({
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  // Mobile (≤820px): o painel de filtros vira bottom-sheet — no fluxo normal
+  // ficava DEPOIS da tabela inteira e ninguém o encontrava. No desktop este
+  // estado é inerte (o painel está sempre visível no aside).
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const tabsRef = useRef<HTMLElement | null>(null);
+
+  // Bottom-sheet dos filtros: Escape fecha; scroll do body bloqueado enquanto aberto.
+  useEffect(() => {
+    if (!filtersOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFiltersOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.classList.add("sheet-open");
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.classList.remove("sheet-open");
+    };
+  }, [filtersOpen]);
 
   // Watchlist pessoal. Fonte da verdade = servidor (tabela alert_subs), com o
   // localStorage como cache otimista para UX instantânea e fallback offline.
@@ -727,7 +745,18 @@ export default function Terminal({
             setPage(1);
           }}
         />
+        {/* Só mobile (CSS): abre o bottom-sheet dos filtros. */}
+        <button
+          className={`filters-toggle${activeFilterCount ? " has-active" : ""}`}
+          onClick={() => setFiltersOpen(true)}
+        >
+          Filtros{activeFilterCount ? ` · ${activeFilterCount}` : ""}
+        </button>
       </div>
+
+      {filtersOpen && (
+        <div className="filter-overlay" onClick={() => setFiltersOpen(false)} />
+      )}
 
       <div className="term-body">
         <div className="table-wrap">
@@ -813,7 +842,7 @@ export default function Terminal({
         </div>
 
         <aside className="side">
-          <div className="panel filter-panel">
+          <div className={`panel filter-panel${filtersOpen ? " open" : ""}`}>
             <div className="filter-head">
               <h3>Filtros{activeFilterCount ? ` · ${activeFilterCount}` : ""}</h3>
               {activeFilterCount > 0 && (
@@ -821,6 +850,14 @@ export default function Terminal({
                   Limpar
                 </button>
               )}
+              {/* Só mobile (CSS): fecha o bottom-sheet. */}
+              <button
+                className="filter-close"
+                aria-label="Fechar filtros"
+                onClick={() => setFiltersOpen(false)}
+              >
+                ✕
+              </button>
             </div>
 
             <span className="filter-lbl">Tendência</span>
@@ -978,6 +1015,11 @@ export default function Terminal({
               <option value="mid">Média (2–10 mil M$)</option>
               <option value="small">Pequena (&lt; 2 mil M$)</option>
             </select>
+
+            {/* Só mobile (CSS): fecha o sheet com o resultado à vista. */}
+            <button className="filter-apply" onClick={() => setFiltersOpen(false)}>
+              Ver {filtered.length} {filtered.length === 1 ? "ativo" : "ativos"}
+            </button>
           </div>
 
           {activeClass === "Watchlist" && (

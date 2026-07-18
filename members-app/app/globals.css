@@ -107,7 +107,9 @@ a:hover { text-decoration: underline; }
 .tab.active { color: #fff; background: var(--purple); }
 
 /* Pesquisa no topo (estilo Bullmania) — os filtros vivem no painel à direita. */
-.controls-top { display: flex; align-items: center; margin: 14px 0 16px; }
+.controls-top { display: flex; align-items: center; gap: 10px; margin: 14px 0 16px; }
+/* Peças do bottom-sheet de filtros — SÓ existem no mobile (ver media query ≤820px). */
+.filters-toggle, .filter-close, .filter-apply, .filter-overlay { display: none; }
 .search {
   width: 100%; max-width: 420px; padding: 11px 15px; border-radius: 10px;
   border: 1px solid var(--border); background: var(--panel); color: var(--text);
@@ -380,8 +382,55 @@ a:hover { text-decoration: underline; }
   .term-body { flex-direction: column; }
   .side { width: 100%; flex-direction: row; flex-wrap: wrap; }
   .side .panel, .side .panel-details { flex: 1; min-width: 200px; }
-  /* Painel de filtros a toda a largura no mobile e no topo do aside. */
-  .filter-panel { flex-basis: 100%; order: -1; }
+
+  /* ---- Filtros em BOTTOM-SHEET (2026-07-18) ----
+     No fluxo empilhado o painel caía DEPOIS da tabela inteira (invisível).
+     Passa a folha fixa em baixo, aberta pelo botão "Filtros" junto à pesquisa. */
+  .filters-toggle {
+    display: inline-flex; align-items: center; white-space: nowrap;
+    font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+    color: var(--text); background: var(--panel);
+    border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px;
+  }
+  .filters-toggle.has-active { border-color: var(--purple); color: var(--purple); }
+  .filter-overlay {
+    display: block; position: fixed; inset: 0; z-index: 35;
+    background: rgba(13, 6, 32, 0.62); backdrop-filter: blur(2px);
+  }
+  .side .filter-panel {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    max-height: 80vh; overflow-y: auto; overscroll-behavior: contain;
+    border-radius: 16px 16px 0 0; border-bottom: none;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+    transform: translateY(105%); transition: transform 0.25s ease;
+    box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.5);
+  }
+  .side .filter-panel.open { transform: translateY(0); }
+  /* pega visual da folha */
+  .side .filter-panel::before {
+    content: ""; display: block; width: 40px; height: 4px; border-radius: 999px;
+    background: var(--border); margin: 0 auto 4px;
+  }
+  .filter-close {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; margin-left: auto; cursor: pointer;
+    font-family: inherit; font-size: 13px; color: var(--muted);
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px;
+  }
+  /* Head com 3 elementos no mobile: título à esquerda, Limpar + ✕ à direita. */
+  .filter-panel .filter-head { justify-content: flex-start; gap: 10px; }
+  .filter-panel .filter-head h3 { margin-right: auto; }
+  @media (prefers-reduced-motion: reduce) {
+    .side .filter-panel { transition: none; }
+  }
+  .filter-apply {
+    display: block; position: sticky; bottom: 0; width: 100%; margin-top: 10px;
+    font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer;
+    color: #fff; background: var(--purple); border: none; border-radius: 10px;
+    padding: 13px 12px;
+  }
+  .filter-apply:hover { background: #7c4ce6; }
+  body.sheet-open { overflow: hidden; }
   .upd-note { margin-left: 0; text-align: left; width: 100%; }
   .topbar { flex-wrap: wrap; }
   .pulse { gap: 16px 20px; }
@@ -406,8 +455,13 @@ a:hover { text-decoration: underline; }
   .stat-v { font-size: 18px; }
   .upd-note { order: 99; }
 
-  /* Pesquisa a toda a largura. */
+  /* Pesquisa a toda a largura + barra sticky (aqui o thead da tabela já não
+     existe — vira cartões — por isso não há colisão de stickies). */
   .search { max-width: none; }
+  .controls-top {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--bg); padding: 10px 0; margin: 6px 0 10px;
+  }
 
   /* Cada linha vira um cartão de 2 planos:
        [♥] [logo Nome/Ticker] .......... [TREND]
