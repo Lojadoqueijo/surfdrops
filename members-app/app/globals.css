@@ -17,6 +17,11 @@
 
 * { box-sizing: border-box; }
 
+/* Cinto de segurança: nenhum overflow horizontal chega ao viewport (evita o
+   zoom-out do iOS quando algum conteúdo rebenta a largura). Os scrolls
+   horizontais legítimos são internos (.table-wrap, .tabs) e não são afetados. */
+html, body { overflow-x: clip; }
+
 body {
   margin: 0;
   background: radial-gradient(1200px 500px at 70% -10%, #2a1250 0%, var(--bg) 55%) fixed, var(--bg);
@@ -153,7 +158,7 @@ a:hover { text-decoration: underline; }
 
 .term-body { display: flex; gap: 18px; align-items: flex-start; }
 .table-wrap {
-  flex: 1; overflow-x: auto;
+  flex: 1; min-width: 0; overflow-x: auto;
   background: var(--bg-2); border: 1px solid var(--border); border-radius: 14px;
 }
 .side { width: 250px; flex-shrink: 0; display: flex; flex-direction: column; gap: 14px; }
@@ -305,7 +310,10 @@ a:hover { text-decoration: underline; }
 }
 .empty { text-align: center; color: var(--muted); padding: 28px 0; }
 
-.detail-row td { background: var(--panel-2) !important; padding: 0 12px 14px; }
+/* white-space:normal — o td herda o nowrap das células da tabela; sem isto, a
+   nota da vista diária (~200 chars) vira UMA linha de ~1400px, rebenta a
+   largura da página e o iOS faz zoom-out de tudo (bug mobile 2026-07-19). */
+.detail-row td { background: var(--panel-2) !important; padding: 0 12px 14px; white-space: normal; }
 .detail { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
 .detail-levels { display: flex; flex-wrap: wrap; gap: 26px; }
 .lvl { display: flex; flex-direction: column; gap: 2px; }
